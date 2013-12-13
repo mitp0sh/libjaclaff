@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.attributes.runtimevisibleparameterannotations.ParameterAnnotation;
+import com.mitp0sh.jaclaff.attributes.runtimeinvisibleparameterannotations.ParameterAnnotation;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 
 

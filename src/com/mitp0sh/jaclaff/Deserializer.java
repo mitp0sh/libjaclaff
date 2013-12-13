@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.VirtualClassFile;
 import com.mitp0sh.jaclaff.attributes.Attributes;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.fields.Fields;
