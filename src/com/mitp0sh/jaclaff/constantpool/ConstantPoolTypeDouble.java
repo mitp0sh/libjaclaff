@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
@@ -48,7 +49,7 @@ public class ConstantPoolTypeDouble extends AbstractConstantPoolType
 		return cptDouble;
 	}
 	
-	public static byte[] serialize(ConstantPoolTypeDouble elem) throws IOException
+	public static byte[] serialize(SerCtx ctx, ConstantPoolTypeDouble elem) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -71,5 +72,26 @@ public class ConstantPoolTypeDouble extends AbstractConstantPoolType
 		clone.setLowBytes(src.getLowBytes());
 		
 		return clone;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		ConstantPoolTypeDouble cptDouble = null;
+		try
+		{
+			cptDouble = (ConstantPoolTypeDouble)obj;
+		}
+		catch(ClassCastException e)
+		{
+			return false;
+		}
+		
+		if(cptDouble.highBytes != this.highBytes)
+		{
+			return false;
+		}
+		
+		return cptDouble.lowBytes == this.lowBytes;
 	}
 }

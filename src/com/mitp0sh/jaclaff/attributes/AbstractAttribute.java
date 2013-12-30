@@ -187,12 +187,12 @@ public abstract class AbstractAttribute
 	public static void decoupleFromIndices(AbstractAttribute attribute, ConstantPool constantPool)
 	{
 		attribute.setAttributeNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.getAttributeNameIndex()));
-		attribute.setAttributeNameIndex((short)0);
 	}
 	
 	public static byte[] serialize(AbstractAttribute attribute, ConstantPool constantPool) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
 		short   attributeNameIndex = attribute.getAttributeNameIndex();
 		String       attributeName = constantPool.getConstantTypeUtf8Bytes(attributeNameIndex);
 		
