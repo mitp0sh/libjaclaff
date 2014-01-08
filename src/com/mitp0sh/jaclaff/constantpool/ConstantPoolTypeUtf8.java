@@ -10,7 +10,6 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class ConstantPoolTypeUtf8 extends AbstractConstantPoolType
 {
-	private short  length = 0;
 	private String  bytes = "";
 	
 	public ConstantPoolTypeUtf8()
@@ -19,16 +18,11 @@ public class ConstantPoolTypeUtf8 extends AbstractConstantPoolType
 		super.setConstant_pool_tag(AbstractConstantPoolType.CONSTANT_POOL_TAG_UTF8);
 	}
 	
-	public short getLength() 
+	public int getLength() 
 	{
-		return length;
+		return bytes.length();
 	}
-	
-	public void setLength(short length) 
-	{
-		this.length = length;
-	}
-	
+
 	public String getBytes() 
 	{
 		return bytes;
@@ -43,10 +37,9 @@ public class ConstantPoolTypeUtf8 extends AbstractConstantPoolType
 	{
 		ConstantPoolTypeUtf8 cptUtf8 = new ConstantPoolTypeUtf8();		
 		
-		cptUtf8.setLength((short)dis.readUnsignedShort());
-		
-		byte[] bUtf8 = new byte[cptUtf8.getLength()];					
-		for(int y = 0; y < cptUtf8.getLength(); y++)
+		int length = dis.readUnsignedShort();
+		byte[] bUtf8 = new byte[length];					
+		for(int y = 0; y < length; y++)
 		{
 			bUtf8[y] = (byte)dis.readUnsignedByte();
 		}
@@ -66,16 +59,13 @@ public class ConstantPoolTypeUtf8 extends AbstractConstantPoolType
 		return baos.toByteArray();
 	}
 	
-	public static ConstantPoolTypeUtf8 clone(ConstantPoolTypeUtf8 src)
+	public ConstantPoolTypeUtf8 clone()
 	{
 		/* create new empty instance */
-		ConstantPoolTypeUtf8 clone = new ConstantPoolTypeUtf8();
+		ConstantPoolTypeUtf8 clone = (ConstantPoolTypeUtf8)super.clone();
 		
 		/* fill instance with original data */
-		clone.setBytes(src.getBytes());
-		clone.setConstant_pool_string_representation(src.getConstant_pool_string_representation());
-		clone.setLength(src.getLength());
-		clone.setConstant_pool_tag(src.getConstant_pool_tag());
+		clone.setBytes(this.getBytes());
 		
 		return clone;
 	}
@@ -83,6 +73,11 @@ public class ConstantPoolTypeUtf8 extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
+		if(obj == null)
+		{
+			return false;
+		}
+		
 		ConstantPoolTypeUtf8 cptUTF8 = null;
 		try
 		{

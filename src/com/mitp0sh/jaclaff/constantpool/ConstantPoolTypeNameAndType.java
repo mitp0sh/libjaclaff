@@ -10,8 +10,8 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 {
-	private short                      nameIndex = 0;	
-	private short                descriptorIndex = 0;	
+	private int                        nameIndex = 0;	
+	private int                  descriptorIndex = 0;	
 	private ConstantPoolTypeUtf8         cptName = null;
 	private ConstantPoolTypeUtf8   cptDescriptor = null;
 
@@ -21,22 +21,22 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		super.setConstant_pool_tag(AbstractConstantPoolType.CONSTANT_POOL_TAG_NAMEANDTYPE);
 	}
 	
-	public short getNameIndex()
+	public int getNameIndex()
 	{
 		return this.nameIndex;
 	}
 	
-	public void setNameIndex(short nameIndex) 
+	public void setNameIndex(int nameIndex) 
 	{
 		this.nameIndex = nameIndex;
 	}
 	
-	public short getDescriptorIndex() 
+	public int getDescriptorIndex() 
 	{
 		return this.descriptorIndex;
 	}
 	
-	public void setDescriptorIndex(short descriptorIndex)
+	public void setDescriptorIndex(int descriptorIndex)
 	{
 		this.descriptorIndex = descriptorIndex;
 	}
@@ -65,8 +65,8 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 	{
 		ConstantPoolTypeNameAndType cptNameAndType = new ConstantPoolTypeNameAndType();
 		
-		cptNameAndType.setNameIndex((short)dis.readUnsignedShort());
-		cptNameAndType.setDescriptorIndex((short)dis.readUnsignedShort());
+		cptNameAndType.setNameIndex(dis.readUnsignedShort());
+		cptNameAndType.setDescriptorIndex(dis.readUnsignedShort());
 		
 		return cptNameAndType;
 	}
@@ -82,16 +82,14 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		return baos.toByteArray();
 	}
 	
-	public static ConstantPoolTypeNameAndType clone(ConstantPoolTypeNameAndType src)
+	public ConstantPoolTypeNameAndType clone()
 	{
 		/* create new empty instance */
-		ConstantPoolTypeNameAndType clone = new ConstantPoolTypeNameAndType();
+		ConstantPoolTypeNameAndType clone = (ConstantPoolTypeNameAndType)super.clone();
 		
 		/* fill instance with original data */
-		clone.setConstant_pool_string_representation(src.getConstant_pool_string_representation());
-		clone.setConstant_pool_tag(src.getConstant_pool_tag());
-		clone.setCptName(src.getCptName());
-		clone.setCptDescriptor(src.getCptDescriptor());
+		clone.setCptName(this.getCptName());
+		clone.setCptDescriptor(this.getCptDescriptor());
 		
 		return clone;
 	}

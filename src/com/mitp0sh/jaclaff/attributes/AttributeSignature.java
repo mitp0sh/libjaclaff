@@ -6,20 +6,21 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class AttributeSignature extends AbstractAttribute
 {
-	private short                    signatureIndex = 0;
-	private ConstantPoolTypeUtf8    signatureObject = null;
+	private int                    signatureIndex = 0;
+	private ConstantPoolTypeUtf8  signatureObject = null;
 	
-	public short getSignatureIndex()
+	public int getSignatureIndex()
 	{
 		return signatureIndex;
 	}
 
-	public void setSignatureIndex(short signatureIndex)
+	public void setSignatureIndex(int signatureIndex)
 	{
 		this.signatureIndex = signatureIndex;
 	}
@@ -34,25 +35,33 @@ public class AttributeSignature extends AbstractAttribute
 		this.signatureObject = signatureObject;
 	}
 	
-	public static void decoupleFromIndices(AttributeSignature attribute, ConstantPool constantPool)
-	{
-		attribute.setSignatureObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.signatureIndex));
-		attribute.setSignatureIndex((short)0);
-	}
-	
 	public static AttributeSignature deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
     {		
 		AttributeSignature attribute = new AttributeSignature();
 		
-		attribute.setSignatureIndex((short)dis.readUnsignedShort());
+		attribute.setSignatureIndex(dis.readUnsignedShort());
 		
 		decoupleFromIndices(attribute, constantPool);
 		
 		return attribute;
     }
 	
-	public static byte[] serialize(AttributeSignature attribute) throws IOException
+	public static void decoupleFromIndices(AttributeSignature attribute, ConstantPool constantPool)
 	{
+		attribute.setSignatureObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.signatureIndex));
+		attribute.setSignatureIndex(0);
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, AttributeSignature attribute)
+	{
+		short signatureIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getSignatureObject());
+		attribute.setSignatureIndex(signatureIndex);
+	}
+	
+	public static byte[] serialize(SerCtx ctx, AttributeSignature attribute) throws IOException
+	{
+		coupleToIndices(ctx, attribute);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(attribute.getSignatureIndex(), Short.class));

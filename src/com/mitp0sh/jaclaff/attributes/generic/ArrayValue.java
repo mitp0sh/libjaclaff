@@ -5,23 +5,22 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class ArrayValue 
 {
-	private short              numValues = 0;
 	private ElementValue[] elementValues = new ElementValue[0];
 	
-	public ArrayValue(short numValues)
+	public ArrayValue(int numValues)
 	{
-		this.numValues     = numValues;
 		this.elementValues = new ElementValue[numValues];
 	}
 	
-	public short getNumValues()
+	public int getNumValues()
 	{
-		return numValues;
+		return elementValues.length;
 	}
 
 	public ElementValue[] getElementValues() 
@@ -36,7 +35,7 @@ public class ArrayValue
 	
 	public static ArrayValue deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
 	{
-		short numValues = (short)dis.readUnsignedShort();
+		int numValues = dis.readUnsignedShort();
 		ArrayValue arrayValue = new ArrayValue(numValues);
 		
 		for(int i = 0; i < numValues; i++)
@@ -47,7 +46,7 @@ public class ArrayValue
 		return arrayValue;
 	}
 	
-	public static byte[] serialize(ArrayValue arrayValue) throws IOException
+	public static byte[] serialize(SerCtx ctx, ArrayValue arrayValue) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -55,7 +54,7 @@ public class ArrayValue
 		
 		for(int i = 0; i < arrayValue.getNumValues(); i++)
 		{
-			baos.write(ElementValue.serialize(arrayValue.getElementValues()[i]));
+			baos.write(ElementValue.serialize(ctx, arrayValue.getElementValues()[i]));
 		}
 		
 		return baos.toByteArray();

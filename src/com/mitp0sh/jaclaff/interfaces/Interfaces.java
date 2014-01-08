@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
@@ -16,7 +17,7 @@ public class Interfaces
 	
 	public Interfaces(short interfacesCount)
 	{
-		this.interfaces = new short[interfacesCount];
+		this.interfaces = new short[interfacesCount & 0xFFFF];
 	}
 	
 	public short getInterfacesCount()
@@ -56,7 +57,7 @@ public class Interfaces
 	private static void decoupleInterfaceFromIndices(ConstantPool constantPool, Interfaces interfaces)
 	{
 		/* create */
-		interfaces.setCptInterfaces(new ConstantPoolTypeClass[interfaces.getInterfacesCount()]);
+		interfaces.setCptInterfaces(new ConstantPoolTypeClass[interfaces.getInterfacesCount() & 0xFFFF]);
 		
 		for(int i = 0;i < interfaces.getInterfacesCount(); i++)
 		{	
@@ -66,8 +67,21 @@ public class Interfaces
 		}
 	}
 	
-	public static byte[] serialize(Interfaces interfaces) throws IOException
+	private static void coupleInterfacesToIndices(SerCtx ctx, Interfaces interfaces)
 	{
+		for(int i = 0;i < interfaces.getInterfacesCount(); i++)
+		{			
+			ConstantPoolTypeClass ifaceClass = interfaces.getCptInterfaces()[i];
+			short iface = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), ifaceClass);
+			interfaces.getInterfaces()[i] = iface;
+		}
+	}
+	
+	public static byte[] serialize(SerCtx ctx, Interfaces interfaces) throws IOException
+	{
+		/* couple to indices */
+		coupleInterfacesToIndices(ctx, interfaces);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		for(int i = 0; i < interfaces.getInterfacesCount(); i++)

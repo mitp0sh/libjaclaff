@@ -6,34 +6,29 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class Annotation 
 {
-	private short                              typeIndex = 0;
-	private ConstantPoolTypeUtf8              typeObject = null;
-	private short               	numElementValuePairs = 0;
-	private ElementValuePairs      	   elementValuePairs = null;
+	private int                            typeIndex = 0;
+	private ConstantPoolTypeUtf8          typeObject = null;
+	private ElementValuePairs      elementValuePairs = null;
 	
-	public short getTypeIndex() 
+	public int getTypeIndex() 
 	{
 		return typeIndex;
 	}
 	
-	public void setTypeIndex(short typeIndex)
+	public void setTypeIndex(int typeIndex)
 	{
 		this.typeIndex = typeIndex;
 	}
 	
-	public short getNumElementValuePairs()
+	public int getNumElementValuePairs()
 	{
-		return numElementValuePairs;
-	}
-	
-	public void setNumElementValuePairs(short numElementValuePairs)
-	{
-		this.numElementValuePairs = numElementValuePairs;
+		return elementValuePairs.getNumElementValuePairs();
 	}
 	
 	public ElementValuePairs getElementValuePairs()
@@ -55,33 +50,42 @@ public class Annotation
 	{
 		this.typeObject = typeObject;
 	}
-	
-	public static void decoupleFromIndices(Annotation annotation, ConstantPool constantPool)
-	{
-		annotation.setTypeObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, annotation.typeIndex));
-		annotation.setTypeIndex((short)0);
-	}
 
 	public static Annotation deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
 	{
 		Annotation annotation = new Annotation();
 		
-		annotation.setTypeIndex((short)dis.readUnsignedShort());
-		annotation.setNumElementValuePairs((short)dis.readUnsignedShort());
-		annotation.setElementValuePairs(ElementValuePairs.deserialize(dis, annotation.getNumElementValuePairs(), constantPool));
+		annotation.setTypeIndex(dis.readUnsignedShort());
+		int numElementValuePairs = dis.readUnsignedShort();
+		annotation.setElementValuePairs(ElementValuePairs.deserialize(dis, numElementValuePairs, constantPool));
 		
 		decoupleFromIndices(annotation, constantPool);
 		
 		return annotation;
 	}
 	
-	public static byte[] serialize(Annotation annotation) throws IOException
+	public static void decoupleFromIndices(Annotation annotation, ConstantPool constantPool)
 	{
+		annotation.setTypeObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, annotation.typeIndex));
+		annotation.setTypeIndex(0);
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, Annotation annotation)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		short typeIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, annotation.getTypeObject());
+		annotation.setTypeIndex(typeIndex);
+	}
+	
+	public static byte[] serialize(SerCtx ctx, Annotation annotation) throws IOException
+	{
+		coupleToIndices(ctx, annotation);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(annotation.getTypeIndex(), Short.class));
 		baos.write(PNC.toByteArray(annotation.getNumElementValuePairs(), Short.class));
-		baos.write(ElementValuePairs.serialize(annotation.getElementValuePairs()));
+		baos.write(ElementValuePairs.serialize(ctx, annotation.getElementValuePairs()));
 		
 		return baos.toByteArray();
 	}

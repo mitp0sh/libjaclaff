@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.generic.ElementValue;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 
 public class AttributeAnnotationDefault extends AbstractAttribute 
@@ -31,11 +32,11 @@ public class AttributeAnnotationDefault extends AbstractAttribute
 		return attribute;
     }
 	
-	public static byte[] serialize(AttributeAnnotationDefault attribute) throws IOException
+	public static byte[] serialize(SerCtx ctx, AttributeAnnotationDefault attribute) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(ElementValue.serialize(attribute.getElementValue()));
+		baos.write(ElementValue.serialize(ctx, attribute.getElementValue()));
 		
 		return baos.toByteArray();
 	}

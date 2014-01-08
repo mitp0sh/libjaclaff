@@ -1,21 +1,22 @@
 package com.mitp0sh.jaclaff.attributes.linenumbertable;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
+
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 
 public class LineNumberTable
 {
 	private LineNumberTableEntry[] lineNumberTable = new LineNumberTableEntry[0];
 
-	public LineNumberTable(short lineNumberTableLength)
+	public LineNumberTable(int lineNumberTableLength)
 	{
 		lineNumberTable = new LineNumberTableEntry[lineNumberTableLength];
 	}
 	
-	public short getLineNumberTableLength()
+	public int getLineNumberTableLength()
 	{
-		return (short)lineNumberTable.length;
+		return lineNumberTable.length;
 	}
 	
 	public LineNumberTableEntry[] getLineNumberTable()
@@ -28,12 +29,12 @@ public class LineNumberTable
 		this.lineNumberTable = lineNumberTable;
 	}
 	
-	public static LineNumberTable deserialize(DataInputStream dis, short lineNumberTableLength) throws IOException
+	public static LineNumberTable deserialize(DesCtx ctx, int lineNumberTableLength) throws IOException
     {	
 		LineNumberTable lineNumberTable = new LineNumberTable(lineNumberTableLength);
 		for(int i = 0; i < lineNumberTableLength; i++)
 		{
-			lineNumberTable.getLineNumberTable()[i] = LineNumberTableEntry.deserialize(dis);
+			lineNumberTable.getLineNumberTable()[i] = LineNumberTableEntry.deserialize(ctx);
 		}
 		
 		return lineNumberTable;

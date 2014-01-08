@@ -7,45 +7,46 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class ClassEntry
-{
-	private short                     innerClassInfoIndex    = 0;
-	private ConstantPoolTypeClass       innerClassInfoObject = null;
-	private short                        outerClassInfoIndex = 0;
-	private ConstantPoolTypeClass       outerClassInfoObject = null;
-	private short                             innerNameIndex = 0;
-	private ConstantPoolTypeUtf8             innerNameObject = null;
-	private short                      innerClassAccessFlags = 0;
+{	
+	private int                     innerClassInfoIndex = 0;
+	private ConstantPoolTypeClass    innerClassInfoObject = null;
+	private int                     outerClassInfoIndex = 0;
+	private ConstantPoolTypeClass    outerClassInfoObject = null;
+	private int                          innerNameIndex = 0;
+	private ConstantPoolTypeUtf8          innerNameObject = null;
+	private short                   innerClassAccessFlags = 0;
 	
-	public short getInnerClassInfoIndex() 
+	public int getInnerClassInfoIndex() 
 	{
 		return innerClassInfoIndex;
 	}
 
-	public void setInnerClassInfoIndex(short innerClassInfoIndex)
+	public void setInnerClassInfoIndex(int innerClassInfoIndex)
 	{
 		this.innerClassInfoIndex = innerClassInfoIndex;
 	}
 	
-	public short getOuterClassInfoIndex()
+	public int getOuterClassInfoIndex()
 	{
 		return outerClassInfoIndex;
 	}
 	
-	public void setOuterClassInfoIndex(short outerClassInfoIndex)
+	public void setOuterClassInfoIndex(int outerClassInfoIndex)
 	{
 		this.outerClassInfoIndex = outerClassInfoIndex;
 	}
 	
-	public short getInnerNameIndex()
+	public int getInnerNameIndex()
 	{
 		return innerNameIndex;
 	}
 
-	public void setInnerNameIndex(short innerNameIndex)
+	public void setInnerNameIndex(int innerNameIndex)
 	{
 		this.innerNameIndex = innerNameIndex;
 	}
@@ -93,20 +94,20 @@ public class ClassEntry
 	public static void decoupleFromIndices(ClassEntry classEntry, ConstantPool constantPool)
 	{
 		classEntry.setInnerClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerClassInfoIndex));
-		classEntry.setInnerClassInfoIndex((short)0);
+		classEntry.setInnerClassInfoIndex(0);
 		classEntry.setOuterClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.outerClassInfoIndex));
-		classEntry.setOuterClassInfoIndex((short)0);		
+		classEntry.setOuterClassInfoIndex(0);		
 		classEntry.setInnerNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerNameIndex));
-		classEntry.setInnerNameIndex((short)0);
+		classEntry.setInnerNameIndex(0);
 	}
 
 	public static ClassEntry deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
 	{
 		ClassEntry attribute = new ClassEntry();
 		
-		attribute.setInnerClassInfoIndex((short)dis.readUnsignedShort());
-		attribute.setOuterClassInfoIndex((short)dis.readUnsignedShort());
-		attribute.setInnerNameIndex((short)dis.readUnsignedShort());
+		attribute.setInnerClassInfoIndex(dis.readUnsignedShort());
+		attribute.setOuterClassInfoIndex(dis.readUnsignedShort());
+		attribute.setInnerNameIndex(dis.readUnsignedShort());
 		attribute.setInnerClassAccessFlags((short)dis.readUnsignedShort());
 		
 		decoupleFromIndices(attribute, constantPool);
@@ -114,8 +115,31 @@ public class ClassEntry
 		return attribute;
     }
 	
-	public static byte[] serialize(ClassEntry classEntry) throws IOException
+	private static void coupleToIndices(SerCtx ctx, ClassEntry classEntry)
 	{
+		/* retrieve constant pool */
+		ConstantPool cp = ctx.getConstantPool();
+		
+		/* get objects */
+		ConstantPoolTypeClass innerClassInfoObject = classEntry.getInnerClassInfoObject();
+		ConstantPoolTypeClass outerClassInfoObject = classEntry.getOuterClassInfoObject();
+		ConstantPoolTypeUtf8  innerClassNameObject = classEntry.getInnerNameObject();
+		
+	    short innerClassInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, innerClassInfoObject);
+	    classEntry.setInnerClassInfoIndex(innerClassInfoIndex);
+	    
+	    short outerClassInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, outerClassInfoObject);
+	    classEntry.setOuterClassInfoIndex(outerClassInfoIndex);
+	    
+	    short innerClassNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, innerClassNameObject);
+	    classEntry.setInnerNameIndex(innerClassNameIndex);
+	}
+	
+	public static byte[] serialize(SerCtx ctx, ClassEntry classEntry) throws IOException
+	{
+		/* couple indices to constant pool indices */
+		coupleToIndices(ctx, classEntry);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(classEntry.getInnerClassInfoIndex(), Short.class));

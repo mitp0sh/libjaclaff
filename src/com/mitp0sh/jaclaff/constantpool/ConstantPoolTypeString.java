@@ -10,7 +10,7 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class ConstantPoolTypeString extends AbstractConstantPoolType
 {
-	private short                  	stringIndex = 0;
+	private int                  	stringIndex = 0;
 	private ConstantPoolTypeUtf8      cptString = null;
 
 	public ConstantPoolTypeString()
@@ -19,12 +19,12 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 		super.setConstant_pool_tag(AbstractConstantPoolType.CONSTANT_POOL_TAG_STRING);
 	}
 
-	public short getStringIndex()
+	public int getStringIndex()
 	{
 		return this.stringIndex;
 	}
 
-	public void setStringIndex(short stringIndex) 
+	public void setStringIndex(int stringIndex) 
 	{
 		this.stringIndex = stringIndex;
 	}
@@ -43,7 +43,7 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 	{
 		ConstantPoolTypeString cptString = new ConstantPoolTypeString();
 		
-		cptString.setStringIndex((short)dis.readUnsignedShort());
+		cptString.setStringIndex(dis.readUnsignedShort());
 		
 		return cptString;
 	}
@@ -58,15 +58,13 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 		return baos.toByteArray();
 	}
 	
-	public static ConstantPoolTypeString clone(ConstantPoolTypeString src)
+	public ConstantPoolTypeString clone()
 	{
-		/* create empty wrapper */
-		ConstantPoolTypeString clone = new ConstantPoolTypeString();
+		/* create new empty instance */
+		ConstantPoolTypeString clone = (ConstantPoolTypeString)super.clone();
 		
 		/* fill with data */		
-		clone.setConstant_pool_string_representation(src.getConstant_pool_string_representation());
-		clone.setConstant_pool_tag(src.getConstant_pool_tag());
-		clone.setCptString(ConstantPoolTypeUtf8.clone(src.cptString));
+		clone.setCptString(this.getCptString());
 		
 		return clone;
 	}

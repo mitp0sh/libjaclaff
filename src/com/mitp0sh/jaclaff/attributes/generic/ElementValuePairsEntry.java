@@ -6,21 +6,22 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class ElementValuePairsEntry 
 {
-	private short          				elementNameIndex = 0;
+	private int          				elementNameIndex = 0;
 	private ConstantPoolTypeUtf8	   elementNameObject = null;
 	private ElementValue       				elementValue = null;
 	
-	public short getElementNameIndex()
+	public int getElementNameIndex()
 	{
 		return elementNameIndex;
 	}
 	
-	public void setElementNameIndex(short elementNameIndex)
+	public void setElementNameIndex(int elementNameIndex)
 	{
 		this.elementNameIndex = elementNameIndex;
 	}
@@ -45,16 +46,10 @@ public class ElementValuePairsEntry
 		this.elementNameObject = elementNameObject;
 	}
 	
-	public static void decoupleFromIndices(ElementValuePairsEntry evpe, ConstantPool constantPool)
-	{
-		evpe.setElementNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, evpe.elementNameIndex));
-		evpe.setElementNameIndex((short)0);		
-	}
-	
 	public static ElementValuePairsEntry deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
 	{
 		ElementValuePairsEntry elementValuePairsEntry = new ElementValuePairsEntry();
-		elementValuePairsEntry.setElementNameIndex((short)dis.readUnsignedShort());
+		elementValuePairsEntry.setElementNameIndex(dis.readUnsignedShort());
 		elementValuePairsEntry.setElementValue(ElementValue.deserialize(dis, constantPool));
 		
 		decoupleFromIndices(elementValuePairsEntry, constantPool);
@@ -62,12 +57,27 @@ public class ElementValuePairsEntry
 		return elementValuePairsEntry;
 	}
 	
-	public static byte[] serialize(ElementValuePairsEntry elementValuePairsEntry) throws IOException
+	public static void decoupleFromIndices(ElementValuePairsEntry evpe, ConstantPool constantPool)
 	{
+		evpe.setElementNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, evpe.elementNameIndex));
+		evpe.setElementNameIndex(0);		
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, ElementValuePairsEntry elementValuePairsEntry)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		short elementNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, elementValuePairsEntry.getElementNameObject());
+		elementValuePairsEntry.setElementNameIndex(elementNameIndex);
+	}
+	
+	public static byte[] serialize(SerCtx ctx, ElementValuePairsEntry elementValuePairsEntry) throws IOException
+	{
+		coupleToIndices(ctx, elementValuePairsEntry);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(elementValuePairsEntry.getElementNameIndex(), Short.class));
-		baos.write(ElementValue.serialize(elementValuePairsEntry.getElementValue()));
+		baos.write(ElementValue.serialize(ctx, elementValuePairsEntry.getElementValue()));
 		
 		return baos.toByteArray();
 	}

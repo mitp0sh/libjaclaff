@@ -1,2 +1,9 @@
 eclipse.preferences.version=1
+encoding//src/com/mitp0sh/jaclaff/attributes/AttributeStackMapTable.java=UTF-8
+encoding//src/com/mitp0sh/jaclaff/attributes/stackmaptable/ObjectVariableInfo.java=UTF-8
+encoding//src/com/mitp0sh/jaclaff/attributes/stackmaptable/StackMapFrame.java=UTF-8
+encoding//src/com/mitp0sh/jaclaff/attributes/stackmaptable/UninitializedVariableInfo.java=UTF-8
+encoding//src/com/mitp0sh/jaclaff/constantpool/ConstantPool.java=UTF-8
+encoding//src/com/mitp0sh/jaclaff/constantpool/ConstantPoolTypeMethodHandle.java=UTF-8
+encoding//src/com/mitp0sh/jaclaff/constantpool/ConstantPoolTypeMethodType.java=UTF-8
 encoding//src/com/mitp0sh/jaclaff/test/Test0.java=UTF-8

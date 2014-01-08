@@ -22,8 +22,8 @@ public class AttributeSourceDebugExtension extends AbstractAttribute
     {
 		AttributeSourceDebugExtension attribute = new AttributeSourceDebugExtension();
 
-		byte[] debugExtension = new byte[attribute.getAttributeLength()];
-		dis.read(debugExtension, 0, attribute.getAttributeLength());
+		byte[] debugExtension = new byte[(int)attribute.getAttributeLength()];
+		dis.read(debugExtension, 0, (int)attribute.getAttributeLength());
 		attribute.setDebugExtension(debugExtension);
 		
 		return attribute;

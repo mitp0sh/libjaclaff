@@ -4,33 +4,34 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class LineNumberTableEntry 
 {
-	private short           startPc = 0;
-	private short        lineNumber = 0;
+	private int           startPc = 0;
+	private int        lineNumber = 0;
 	
 	/* additional info */
 	private int    instructionIndexStartPc = 0;
 	
-	public short getStartPc()
+	public int getStartPc()
 	{
 		return startPc;
 	}
 	
-	public void setStartPc(short startPc)
+	public void setStartPc(int startPc)
 	{
 		this.startPc = startPc;
 	}
 	
-	public short getLineNumber() 
+	public int getLineNumber() 
 	{
 		return lineNumber;
 	}
 	
-	public void setLineNumber(short lineNumber) 
+	public void setLineNumber(int lineNumber) 
 	{
 		this.lineNumber = lineNumber;
 	}
@@ -45,11 +46,13 @@ public class LineNumberTableEntry
 		this.instructionIndexStartPc = instructionIndex;
 	}
 	
-	public static LineNumberTableEntry deserialize(DataInputStream dis) throws IOException
+	public static LineNumberTableEntry deserialize(DesCtx ctx) throws IOException
     {	
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		LineNumberTableEntry lineNumberTableEntry = new LineNumberTableEntry();
-		lineNumberTableEntry.setStartPc((short)dis.readUnsignedShort());
-		lineNumberTableEntry.setLineNumber((short)dis.readUnsignedShort());
+		lineNumberTableEntry.setStartPc(dis.readUnsignedShort());
+		lineNumberTableEntry.setLineNumber(dis.readUnsignedShort());
 		
 		return lineNumberTableEntry;
     }

@@ -5,20 +5,21 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 
 public class Classes 
 {	
-	private ClassEntry[]            classes = null;	
+	private ClassEntry[] classes = null;	
 
-	public Classes(short numberOfClasses)
+	public Classes(int numberOfClasses)
 	{	
-		this.classes         = new ClassEntry[numberOfClasses];
+		this.classes = new ClassEntry[numberOfClasses];
 	}
 	
-	public short getNumberOfClasses()
+	public int getNumberOfClasses()
 	{
-		return (short) this.classes.length;
+		return this.classes.length;
 	}
 
 	public ClassEntry[] getClasses() 
@@ -26,7 +27,7 @@ public class Classes
 		return classes;
 	}
 
-	public static Classes deserialize(DataInputStream dis, short numberOfClasses, ConstantPool constantPool) throws IOException
+	public static Classes deserialize(DataInputStream dis, int numberOfClasses, ConstantPool constantPool) throws IOException
 	{
 		Classes attribute = new Classes(numberOfClasses);
 		
@@ -38,13 +39,13 @@ public class Classes
 		return attribute;
     }
 	
-	public static byte[] serialize(Classes classes) throws IOException
+	public static byte[] serialize(SerCtx ctx, Classes classes) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		for(int i = 0; i < classes.getNumberOfClasses(); i++)
 		{
-			baos.write(ClassEntry.serialize(classes.getClasses()[i]));
+			baos.write(ClassEntry.serialize(ctx, classes.getClasses()[i]));
 		}
 		
 		return baos.toByteArray();

@@ -6,20 +6,21 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class AttributeSourceFile extends AbstractAttribute
 {
-	private short                     sourceFileIndex = 0;
-	private ConstantPoolTypeUtf8     sourceFileObject = null;
+	private int                     sourceFileIndex = 0;
+	private ConstantPoolTypeUtf8   sourceFileObject = null;
 
-	public short getSourceFileIndex()
+	public int getSourceFileIndex()
 	{
 		return sourceFileIndex;
 	}
 
-	public void setSourceFileIndex(short sourceFileIndex)
+	public void setSourceFileIndex(int sourceFileIndex)
 	{
 		this.sourceFileIndex = sourceFileIndex;
 	}
@@ -37,22 +38,30 @@ public class AttributeSourceFile extends AbstractAttribute
 	public static void decoupleFromIndices(AttributeSourceFile attribute, ConstantPool constantPool)
 	{
 		attribute.setSourceFileObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.sourceFileIndex));
-		attribute.setSourceFileIndex((short)0);
+		attribute.setSourceFileIndex(0);
 	}
 	
 	public static AttributeSourceFile deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
     {
 		AttributeSourceFile attribute = new AttributeSourceFile();
 
-		attribute.setSourceFileIndex((short)dis.readUnsignedShort());
+		attribute.setSourceFileIndex(dis.readUnsignedShort());
 		
 		decoupleFromIndices(attribute, constantPool);
 		
 		return attribute;
     }
 	
-	public static byte[] serialize(AttributeSourceFile attribute) throws IOException
+	public static void coupleToIndices(SerCtx ctx, AttributeSourceFile attribute)
 	{
+		short sourceFileIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getSourceFileObject());
+		attribute.setSourceFileIndex(sourceFileIndex);
+	}
+	
+	public static byte[] serialize(SerCtx ctx, AttributeSourceFile attribute) throws IOException
+	{
+		coupleToIndices(ctx, attribute);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(attribute.getSourceFileIndex(), Short.class));

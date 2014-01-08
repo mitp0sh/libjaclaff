@@ -10,8 +10,8 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class ConstantPoolTypeClass extends AbstractConstantPoolType
 {
-	private short                  nameIndex = 0;
-	private ConstantPoolTypeUtf8     cptName = null;	
+	private int                  nameIndex = 0;
+	private ConstantPoolTypeUtf8   cptName = null;	
 
 	public ConstantPoolTypeClass()
 	{
@@ -19,12 +19,12 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 		super.setConstant_pool_tag(AbstractConstantPoolType.CONSTANT_POOL_TAG_CLASS);	
 	}	
 	
-	public short getNameIndex()
+	public int getNameIndex()
 	{
 		return this.nameIndex;
 	}
 
-	public void setNameIndex(short nameIndex) 
+	public void setNameIndex(int nameIndex) 
 	{
 		this.nameIndex = nameIndex;
 	}
@@ -43,7 +43,7 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 	{
 		ConstantPoolTypeClass cptClass = new ConstantPoolTypeClass();
 		
-		cptClass.setNameIndex((short)dis.readUnsignedShort());
+		cptClass.setNameIndex(dis.readUnsignedShort());
 		
 		return cptClass;
 	}
@@ -58,15 +58,13 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 		return baos.toByteArray();
 	}
 	
-	public static ConstantPoolTypeClass clone(ConstantPoolTypeClass src)
+	public ConstantPoolTypeClass clone()
 	{
 		/* create new empty instance */
-		ConstantPoolTypeClass clone = new ConstantPoolTypeClass();
-		
+		ConstantPoolTypeClass clone = (ConstantPoolTypeClass)super.clone();
+	
 		/* fill instance with original data */
-		clone.setConstant_pool_string_representation(src.getConstant_pool_string_representation());
-		clone.setConstant_pool_tag(src.getConstant_pool_tag());
-		clone.setCptName(src.getCptName());
+		clone.setCptName(this.getCptName());
 		
 		return clone;
 	}
@@ -74,6 +72,11 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
+		if(obj == null)
+		{
+			return false;
+		}
+		
 		ConstantPoolTypeClass cptClass = null;
 		try
 		{

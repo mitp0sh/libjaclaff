@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 
 public class ElementValue
@@ -42,12 +43,12 @@ public class ElementValue
 		return elementValue;
 	}
 	
-	public static byte[] serialize(ElementValue elementValue) throws IOException
+	public static byte[] serialize(SerCtx ctx, ElementValue elementValue) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(new byte[]{(byte)elementValue.getTag()});
-		baos.write(Value.serialize(elementValue.getValue(), elementValue.getTag()));
+		baos.write(Value.serialize(ctx, elementValue.getValue(), elementValue.getTag()));
 		
 		return baos.toByteArray();
 	}

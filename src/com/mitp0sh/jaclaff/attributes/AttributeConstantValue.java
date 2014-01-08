@@ -11,33 +11,22 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class AttributeConstantValue extends AbstractAttribute
 {	 
-	private int                             attributeLength = 0;
-	private short                        constantValueIndex = 0;	
-	private AbstractConstantPoolType    constantValueObject = null;	
+	private int                        constantValueIndex = 0;	
+	private AbstractConstantPoolType  constantValueObject = null;	
 
 	public String getAttributeName()
 	{
 		return AbstractAttribute.attributeConstantValue;
 	}
 
-	public short getConstantValueIndex() 
+	public int getConstantValueIndex() 
 	{
 		return constantValueIndex;
 	}
 
-	public void setConstantValueIndex(short constantValueIndex) 
+	public void setConstantValueIndex(int constantValueIndex) 
 	{
 		this.constantValueIndex = constantValueIndex;
-	}
-
-	public int getAttributeLength() 
-	{
-		return this.attributeLength;
-	}
-	
-	public void setAttributeLength(int attributeLength)
-	{
-		this.attributeLength = attributeLength;
 	}
 	
 	public AbstractConstantPoolType getConstantValueObject() 
@@ -53,14 +42,14 @@ public class AttributeConstantValue extends AbstractAttribute
 	public static void decoupleFromIndices(AttributeConstantValue attribute, ConstantPool constantPool)
 	{
 		attribute.setConstantValueObject(ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.constantValueIndex));
-		attribute.setConstantValueIndex((short)0);
+		attribute.setConstantValueIndex(0);
 	}
 	
 	public static AttributeConstantValue deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
     {
 	    AttributeConstantValue attribute = new AttributeConstantValue();
 	    
-	    attribute.setConstantValueIndex((short)(dis.readUnsignedShort()));	
+	    attribute.setConstantValueIndex(dis.readUnsignedShort());	
 	    
 	    decoupleFromIndices(attribute, constantPool);
 		

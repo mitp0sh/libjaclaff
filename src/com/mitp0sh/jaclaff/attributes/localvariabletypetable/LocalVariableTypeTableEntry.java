@@ -9,61 +9,61 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class LocalVariableTypeTableEntry 
 {
-	private short              start_pc = 0;
-	private short                length = 0;
-	private short            name_index = 0;
-	private short       signature_index = 0;
-	private short                 index = 0;
+	private int              start_pc = 0;
+	private int                length = 0;
+	private int            name_index = 0;
+	private int       signature_index = 0;
+	private int                 index = 0;
 	
 	/* additional info */
 	private int instructionIndexStartPc = 0;
 	
-	public short getStart_pc() 
+	public int getStart_pc() 
 	{
 		return start_pc;
 	}
 
-	public void setStart_pc(short startPc) 
+	public void setStart_pc(int startPc) 
 	{
 		start_pc = startPc;
 	}
 
-	public short getLength() 
+	public int getLength() 
 	{
 		return length;
 	}
 
-	public void setLength(short length) 
+	public void setLength(int length) 
 	{
 		this.length = length;
 	}
 
-	public short getName_index() 
+	public int getName_index() 
 	{
 		return name_index;
 	}
 
-	public void setName_index(short nameIndex) 
+	public void setName_index(int nameIndex) 
 	{
 		name_index = nameIndex;
 	}
 
-	public short getSignature_index() 
+	public int getSignature_index() 
 	{
 		return signature_index;
 	}
 
-	public void setSignature_index(short signatureIndex) 
+	public void setSignature_index(int signatureIndex) 
 	{
 		signature_index = signatureIndex;
 	}
 	
-	public short getIndex() 
+	public int getIndex() 
 	{
 		return index;
 	}
 	
-	public void setIndex(short index) 
+	public void setIndex(int index) 
 	{
 		this.index = index;
 	}
@@ -82,11 +82,11 @@ public class LocalVariableTypeTableEntry
     {
 		LocalVariableTypeTableEntry localVariableTypeTableEntry = new LocalVariableTypeTableEntry();
 		
-		localVariableTypeTableEntry.setStart_pc((short)dis.readUnsignedShort());
-		localVariableTypeTableEntry.setLength((short)dis.readUnsignedShort());
-		localVariableTypeTableEntry.setName_index((short)dis.readUnsignedShort());
-		localVariableTypeTableEntry.setSignature_index((short)dis.readUnsignedShort());
-		localVariableTypeTableEntry.setIndex((short)dis.readUnsignedShort());
+		localVariableTypeTableEntry.setStart_pc(dis.readUnsignedShort());
+		localVariableTypeTableEntry.setLength(dis.readUnsignedShort());
+		localVariableTypeTableEntry.setName_index(dis.readUnsignedShort());
+		localVariableTypeTableEntry.setSignature_index(dis.readUnsignedShort());
+		localVariableTypeTableEntry.setIndex(dis.readUnsignedShort());
 	    
 		return localVariableTypeTableEntry;
     }

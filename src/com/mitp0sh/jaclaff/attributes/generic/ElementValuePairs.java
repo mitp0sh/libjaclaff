@@ -5,17 +5,16 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 
 public class ElementValuePairs 
 {
-	private short                       numElementValuePairs = 0;
-	private ElementValuePairsEntry[]       elementValuePairs = new ElementValuePairsEntry[0];
+	private ElementValuePairsEntry[]     elementValuePairs = new ElementValuePairsEntry[0];
 	
-	private ElementValuePairs(short numElementValuePairs)
+	private ElementValuePairs(int numElementValuePairs)
 	{
-		this.numElementValuePairs = numElementValuePairs;
-		this.elementValuePairs    = new ElementValuePairsEntry[numElementValuePairs];
+		this.elementValuePairs = new ElementValuePairsEntry[numElementValuePairs];
 	}
 
 	public ElementValuePairsEntry[] getElementValuePairs() 
@@ -28,12 +27,12 @@ public class ElementValuePairs
 		this.elementValuePairs = elementValuePairs;
 	}
 
-	public short getNumElementValuePairs()
+	public int getNumElementValuePairs()
 	{
-		return numElementValuePairs;
+		return elementValuePairs.length;
 	}
 	
-	public static ElementValuePairs deserialize(DataInputStream dis, short numElementValuePairs, ConstantPool constantPool) throws IOException
+	public static ElementValuePairs deserialize(DataInputStream dis, int numElementValuePairs, ConstantPool constantPool) throws IOException
 	{
 		ElementValuePairs elementValuePairs = new ElementValuePairs(numElementValuePairs);
 		
@@ -45,13 +44,13 @@ public class ElementValuePairs
 		return elementValuePairs;
 	}
 	
-	public static byte[] serialize(ElementValuePairs elementValuePairs) throws IOException
+	public static byte[] serialize(SerCtx ctx, ElementValuePairs elementValuePairs) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		for(int i = 0; i < elementValuePairs.getNumElementValuePairs(); i++)
 		{
-			baos.write(ElementValuePairsEntry.serialize(elementValuePairs.getElementValuePairs()[i]));
+			baos.write(ElementValuePairsEntry.serialize(ctx, elementValuePairs.getElementValuePairs()[i]));
 		}
 		
 		return baos.toByteArray();

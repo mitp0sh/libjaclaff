@@ -28,7 +28,7 @@ public class SingleInstruction
 		return offset;
 	}
 
-	public void setOffset(int offset)
+	public void seOffset(int offset)
 	{
 		this.offset = offset;
 	}

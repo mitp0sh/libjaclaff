@@ -7,6 +7,8 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.attributes.Attributes;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
@@ -94,12 +96,15 @@ public class FieldEntry
 	{
 		field.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getNameIndex()));
 		field.setNameIndex((short)0);
-		field.setDescriptorObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getNameIndex()));
+		field.setDescriptorObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getDescIndex()));
 		field.setDescIndex((short)0);
 	}
 	
-	public static FieldEntry deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static FieldEntry deserialize(DesCtx ctx) throws IOException
     {
+		ConstantPool constantPool = ctx.getConstantPool();
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		FieldEntry fieldEntry = new FieldEntry();
 		
 		fieldEntry.setAccessFlags((short)dis.readUnsignedShort());
@@ -108,7 +113,7 @@ public class FieldEntry
 		fieldEntry.setAttributeCount((short)dis.readUnsignedShort());
 		if(fieldEntry.getAttributeCount() > 0)
 		{
-			fieldEntry.setAttributes(Attributes.deserialize(dis, fieldEntry.getAttributeCount(), constantPool));
+			fieldEntry.setAttributes(Attributes.deserialize(ctx, fieldEntry.getAttributeCount(), null));
 		}
 		
 		/* decouple indices from object */
@@ -117,8 +122,18 @@ public class FieldEntry
 		return fieldEntry;
     }
 	
-	public static byte[] serialize(FieldEntry fieldEntry, ConstantPool constantPool) throws IOException
+	public static void coupleToIndices(SerCtx ctx, FieldEntry field)
 	{
+		short nameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), field.getNameObject());
+		field.setNameIndex(nameIndex);
+		short descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), field.getDescriptorObject());
+		field.setDescIndex(descriptorIndex);
+	}
+	
+	public static byte[] serialize(SerCtx ctx, FieldEntry fieldEntry) throws IOException
+	{
+		coupleToIndices(ctx, fieldEntry);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(fieldEntry.getAccessFlags(), Short.class));
@@ -127,7 +142,7 @@ public class FieldEntry
 		baos.write(PNC.toByteArray(fieldEntry.getAttributeCount(), Short.class));
 		if(fieldEntry.getAttributeCount() > 0)
 		{
-			baos.write(Attributes.serialize(fieldEntry.getAttributes(), constantPool));
+			baos.write(Attributes.serialize(ctx, fieldEntry.getAttributes()));
 		}
 		
 		return baos.toByteArray();

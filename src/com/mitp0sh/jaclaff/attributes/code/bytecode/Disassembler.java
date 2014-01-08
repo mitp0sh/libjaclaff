@@ -11,7 +11,7 @@ public class Disassembler
 		
 		byte byteCode = (byte)(dis.readUnsignedByte() & 0xFF);
 		instruction.setByteCode(Mnemonics.getJBC()[byteCode & 0xFF]);
-		instruction.setOffset(offset);
+		instruction.seOffset(offset);
 		
 		String format = "";
 		
@@ -189,7 +189,7 @@ public class Disassembler
 		return instruction;
 	}
 	
-	public static MethodInstructions disassemble(DataInputStream dis, int length) throws IOException
+	public static MethodInstructions disassemble(DataInputStream dis, long length) throws IOException
 	{
 		MethodInstructions instructions = new MethodInstructions();
 		

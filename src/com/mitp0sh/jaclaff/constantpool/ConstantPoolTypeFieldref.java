@@ -10,8 +10,8 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class ConstantPoolTypeFieldref extends AbstractConstantPoolType
 {
-	private short                           classIndex = 0;	
-	private short                     nameAndTypeIndex = 0;	
+	private int                           classIndex = 0;	
+	private int                     nameAndTypeIndex = 0;	
 	private ConstantPoolTypeClass             cptClass = null;
 	private ConstantPoolTypeNameAndType cptNameAndType = null;
 
@@ -21,22 +21,22 @@ public class ConstantPoolTypeFieldref extends AbstractConstantPoolType
 		super.setConstant_pool_tag(AbstractConstantPoolType.CONSTANT_POOL_TAG_FIELDREF);
 	}
 	
-	public short getClassIndex()
+	public int getClassIndex()
 	{
 		return this.classIndex;
 	}
 	
-	public void setClassIndex(short classIndex) 
+	public void setClassIndex(int classIndex) 
 	{
 		this.classIndex = classIndex;
 	}
 	
-	public short getNameAndTypeIndex() 
+	public int getNameAndTypeIndex() 
 	{
 		return this.nameAndTypeIndex;
 	}
 	
-	public void setNameAndTypeIndex(short nameAndTypeIndex)
+	public void setNameAndTypeIndex(int nameAndTypeIndex)
 	{
 		this.nameAndTypeIndex = nameAndTypeIndex;
 	}
@@ -65,8 +65,8 @@ public class ConstantPoolTypeFieldref extends AbstractConstantPoolType
 	{
 		ConstantPoolTypeFieldref cptFieldref = new ConstantPoolTypeFieldref();
 		
-		cptFieldref.setClassIndex((short)dis.readUnsignedShort());
-		cptFieldref.setNameAndTypeIndex((short)dis.readUnsignedShort());
+		cptFieldref.setClassIndex(dis.readUnsignedShort());
+		cptFieldref.setNameAndTypeIndex(dis.readUnsignedShort());
 		
 		return cptFieldref;
 	}
@@ -81,16 +81,14 @@ public class ConstantPoolTypeFieldref extends AbstractConstantPoolType
 		return baos.toByteArray();
 	}
 	
-	public static ConstantPoolTypeFieldref clone(ConstantPoolTypeFieldref src)
+	public ConstantPoolTypeFieldref clone()
 	{
 		/* create new empty instance */
-		ConstantPoolTypeFieldref clone = new ConstantPoolTypeFieldref();
+		ConstantPoolTypeFieldref clone = (ConstantPoolTypeFieldref)super.clone();
 		
 		/* fill instance with original data */
-		clone.setConstant_pool_string_representation(src.getConstant_pool_string_representation());
-		clone.setConstant_pool_tag(src.getConstant_pool_tag());
-		clone.setCptClass(src.getCptClass());
-		clone.setCptNameAndType(src.getCptNameAndType());		
+		clone.setCptClass(this.getCptClass());
+		clone.setCptNameAndType(this.getCptNameAndType());
 		
 		return clone;
 	}

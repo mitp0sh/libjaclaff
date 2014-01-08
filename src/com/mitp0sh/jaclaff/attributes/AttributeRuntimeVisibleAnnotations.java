@@ -6,15 +6,16 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.generic.Annotation;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class AttributeRuntimeVisibleAnnotations extends AbstractAttribute
 {
-	private short        numAnnotations = 0;
-	private Annotation[]    annotations = new Annotation[0];
+	private int        numAnnotations = 0;
+	private Annotation[]  annotations = new Annotation[0];
 	
-	public AttributeRuntimeVisibleAnnotations(short numAnnotations)
+	public AttributeRuntimeVisibleAnnotations(int numAnnotations)
 	{
 		this.numAnnotations = numAnnotations;
 		this.annotations    = new Annotation[numAnnotations];
@@ -30,14 +31,14 @@ public class AttributeRuntimeVisibleAnnotations extends AbstractAttribute
 		this.annotations = annotations;
 	}
 	
-	public short getNumAnnotations() 
+	public int getNumAnnotations() 
 	{
 		return numAnnotations;
 	}
 	
 	public static AttributeRuntimeVisibleAnnotations deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
     {		
-		AttributeRuntimeVisibleAnnotations attribute = new AttributeRuntimeVisibleAnnotations((short)dis.readUnsignedShort());
+		AttributeRuntimeVisibleAnnotations attribute = new AttributeRuntimeVisibleAnnotations(dis.readUnsignedShort());
 		
 		for(int i = 0; i < attribute.getNumAnnotations(); i++)
 		{
@@ -47,7 +48,7 @@ public class AttributeRuntimeVisibleAnnotations extends AbstractAttribute
 		return attribute;
     }
 	
-	public static byte[] serialize(AttributeRuntimeVisibleAnnotations attribute) throws IOException
+	public static byte[] serialize(SerCtx ctx, AttributeRuntimeVisibleAnnotations attribute) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -55,7 +56,7 @@ public class AttributeRuntimeVisibleAnnotations extends AbstractAttribute
 		
 		for(int i = 0; i < attribute.getNumAnnotations(); i++)
 		{
-			baos.write(Annotation.serialize(attribute.getAnnotations()[i]));
+			baos.write(Annotation.serialize(ctx, attribute.getAnnotations()[i]));
 		}
 		
 		return baos.toByteArray();

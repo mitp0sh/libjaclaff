@@ -10,15 +10,15 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class AttributeLocalVariableTypeTable extends AbstractAttribute 
 {
-	private short                    localVariableTypeTableLength = 0;
-	private LocalVariableTypeTable         localVariableTypeTable = null;
+	private int                    localVariableTypeTableLength = 0;
+	private LocalVariableTypeTable       localVariableTypeTable = null;
 	
-	public short getLocalVariableTypeTableLength() 
+	public int getLocalVariableTypeTableLength() 
 	{
 		return localVariableTypeTableLength;
 	}
 	
-	public void setLocalVariableTypeTableLength(short localVariableTypeTableLength)
+	public void setLocalVariableTypeTableLength(int localVariableTypeTableLength)
 	{
 		this.localVariableTypeTableLength = localVariableTypeTableLength;
 	}
@@ -37,7 +37,7 @@ public class AttributeLocalVariableTypeTable extends AbstractAttribute
     {
 		AttributeLocalVariableTypeTable attribute = new AttributeLocalVariableTypeTable();
 		
-		attribute.setLocalVariableTypeTableLength((short)dis.readUnsignedShort());
+		attribute.setLocalVariableTypeTableLength(dis.readUnsignedShort());
 		attribute.setLocalVariableTypeTable(LocalVariableTypeTable.deserialize(dis, attribute.getLocalVariableTypeTableLength()));
 		
 		return attribute;

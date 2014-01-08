@@ -5,7 +5,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.code.ExceptionTable;
-import com.mitp0sh.jaclaff.attributes.code.ExceptionTableEntry;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.Disassembler;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
@@ -13,51 +12,53 @@ import com.mitp0sh.jaclaff.attributes.linenumbertable.LineNumberTableEntry;
 import com.mitp0sh.jaclaff.attributes.localvariabletable.LocalVariableTableEntry;
 import com.mitp0sh.jaclaff.attributes.localvariabletypetable.LocalVariableTypeTableEntry;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class AttributeCode extends AbstractAttribute
 {
-	private short                         maxStack = 0;
-	private short                        maxLocals = 0;
-	private int                         codeLength = 0;
-	private MethodInstructions                code = null;
-	private short             exceptionTableLength = 0;
-	private ExceptionTable          exceptionTable = null;
-	private short                  attributesCount = 0;
-	private Attributes                  attributes = null;
+	private int                         maxStack = 0;
+	private int                        maxLocals = 0;
+	private long                      codeLength = 0;
+	private MethodInstructions              code = null;
+	private int             exceptionTableLength = 0;
+	private ExceptionTable        exceptionTable = null;
+	private int                  attributesCount = 0;
+	private Attributes                attributes = null;
 	
 	public String getAttributeName()
 	{
 		return AbstractAttribute.attributeCode;		
 	}
 	
-	public short getMaxStack()
+	public int getMaxStack()
 	{
 		return this.maxStack;
 	}
 
-	public void setMaxStack(short maxStack) 
+	public void setMaxStack(int maxStack) 
 	{
 		this.maxStack = maxStack;
 	}
 
-	public short getMaxLocals()
+	public int getMaxLocals()
 	{
 		return this.maxLocals;
 	}
 
-	public void setMaxLocals(short maxLocals)
+	public void setMaxLocals(int maxLocals)
 	{
 		this.maxLocals = maxLocals;
 	}
 
-	public int getCodeLength()
+	public long getCodeLength()
 	{
 		return this.codeLength;
 	}
 
-	public void setCodeLength(int codeLength)
+	public void setCodeLength(long codeLength)
 	{
 		this.codeLength = codeLength;
 	}
@@ -72,12 +73,12 @@ public class AttributeCode extends AbstractAttribute
 		this.code = code;
 	}
 
-	public short getExceptionTableLength()
+	public int getExceptionTableLength()
 	{
 		return this.exceptionTableLength;
 	}
 
-	public void setExceptionTableLength(short exceptionTableLength)
+	public void setExceptionTableLength(int exceptionTableLength)
 	{
 		this.exceptionTableLength = exceptionTableLength;
 	}
@@ -92,12 +93,12 @@ public class AttributeCode extends AbstractAttribute
 		this.exceptionTable = exceptionTable;
 	}
 
-	public short getAttributesCount()
+	public int getAttributesCount()
 	{
 		return this.attributesCount;
 	}
 
-	public void setAttributesCount(short attributesCount)
+	public void setAttributesCount(int attributesCount)
 	{
 		this.attributesCount = attributesCount;
 	}
@@ -112,39 +113,35 @@ public class AttributeCode extends AbstractAttribute
 		this.attributes = attributes;
 	}
 	
-	public static AttributeCode deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeCode deserialize(DesCtx ctx, Object reference0) throws IOException
     {
+		ConstantPool constantPool = ctx.getConstantPool();
+		DataInputStream dis = ctx.getDataInputStream();
+		
 	    AttributeCode attribute = new AttributeCode();
 	    
-	    attribute.setMaxStack((short)dis.readUnsignedShort());	    
-	    attribute.setMaxLocals((short)dis.readUnsignedShort());	    
+	    attribute.setMaxStack(dis.readUnsignedShort());	    
+	    attribute.setMaxLocals(dis.readUnsignedShort());	    
+	    
 	    attribute.setCodeLength(dis.readInt());
 	    attribute.setCode(Disassembler.disassemble(dis, attribute.getCodeLength()));
-	    attribute.setExceptionTableLength((short)dis.readUnsignedShort());
+	    
+	    attribute.setExceptionTableLength(dis.readUnsignedShort());
 	    if(attribute.getExceptionTableLength() > 0)
 	    {
-	    	attribute.setExceptionTable(ExceptionTable.deserialize(dis, attribute.getExceptionTableLength(), constantPool));
-	    	
-	    	/* decouple from offsets - connect with disassembled instruction */
-	    	decoupleFromOffsets(attribute.getExceptionTable(),
-	    			            attribute.getCode(),
-	    			            constantPool);
+	    	attribute.setExceptionTable(ExceptionTable.deserialize(dis, attribute.getExceptionTableLength(), constantPool, attribute.getCode()));
 	    }	    
-	    attribute.setAttributesCount((short)dis.readUnsignedShort());
+	    
+	    attribute.setAttributesCount(dis.readUnsignedShort());
 	    if(attribute.getAttributesCount() > 0)
 	    {
-	    	attribute.setAttributes(Attributes.deserialize(dis, attribute.getAttributesCount(), constantPool));
-	    	
-	    	/* decouple from offsets - connect with disassembled instruction */
-	    	decoupleFromOffsets(attribute.getAttributes(),
-	    			            attribute.getCode(),
-	    			            constantPool);
+	    	attribute.setAttributes(Attributes.deserialize(ctx, attribute.getAttributesCount(), attribute));	
 	    }	    
 	    
 		return attribute;
     }
 	
-	public static byte[] serialize(AttributeCode attribute, ConstantPool constantPool) throws IOException
+	public static byte[] serialize(SerCtx ctx, AttributeCode attribute) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -155,12 +152,12 @@ public class AttributeCode extends AbstractAttribute
 		baos.write(PNC.toByteArray(attribute.getExceptionTableLength(), Short.class));
 		if(attribute.getExceptionTableLength() > 0)
 	    {
-			baos.write(ExceptionTable.serialize(attribute.getExceptionTable()));
+			baos.write(ExceptionTable.serialize(ctx, attribute.getExceptionTable(), attribute.getCode()));
 	    }
 		baos.write(PNC.toByteArray(attribute.getAttributesCount(), Short.class));
 		if(attribute.getAttributesCount() > 0)
 	    {
-			baos.write(Attributes.serialize(attribute.getAttributes(), constantPool));
+			baos.write(Attributes.serialize(ctx, attribute.getAttributes()));
 	    }
 		
 		return baos.toByteArray();
@@ -248,41 +245,6 @@ public class AttributeCode extends AbstractAttribute
 								break;
 							}	
 						}
-					}
-				}
-			}
-		}
-		else
-		if("de.microshield.jcfl.attributes.code.ExceptionTable".equals(element.getClass().getCanonicalName()))
-		{
-			ExceptionTable exceptionTable = (ExceptionTable)element;
-			
-			for(int x = 0; x < exceptionTable.getExceptionTable().length; x++)
-			{
-				ExceptionTableEntry exceptionTableEntry;
-				exceptionTableEntry = exceptionTable.getExceptionTable()[x];
-				
-				/* iterate all instructions to find the instruction we need */
-				for(int y = 0; y < methodInstructions.getNumberOfInstructions(); y++)
-				{
-					SingleInstruction currentInstruction = methodInstructions.getInstructions()[y];
-					
-					if(exceptionTableEntry.getStartPc() == currentInstruction.getOffset())
-					{
-						exceptionTableEntry.setInstructionIndexStartPc(y);
-						break;
-					}
-					else
-					if(exceptionTableEntry.getEndPc() == currentInstruction.getOffset())
-					{
-						exceptionTableEntry.setInstructionIndexEndPc(y);
-						break;
-					}
-					else
-					if(exceptionTableEntry.getHandlerPc() == currentInstruction.getOffset())
-					{
-						exceptionTableEntry.setInstructionIndexHandlerPc(y);
-						break;
 					}
 				}
 			}

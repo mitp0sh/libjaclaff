@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.Attributes;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.fields.Fields;
 import com.mitp0sh.jaclaff.interfaces.Interfaces;
 import com.mitp0sh.jaclaff.methods.Methods;
@@ -194,23 +195,29 @@ public class VirtualClassFile
 		this.attributes = attributes;
 	}
 	
-	public static VirtualClassFile deserialize(String filename) throws IOException
+	public static VirtualClassFile deserialize(DesCtx ctx, String filename) throws IOException
 	{	
-		return deserialize(new DataInputStream(new FileInputStream(new File(filename))));
+		return deserialize(ctx, new DataInputStream(new FileInputStream(new File(filename))));
 	}
 	
-	public static VirtualClassFile deserialize(File file) throws IOException
+	public static VirtualClassFile deserialize(DesCtx ctx, File file) throws IOException
 	{	
-		return deserialize(new FileInputStream(file));
+		return deserialize(ctx, new FileInputStream(file));
 	}
 	
-	public static VirtualClassFile deserialize(FileInputStream fis) throws IOException
+	public static VirtualClassFile deserialize(DesCtx ctx, FileInputStream fis) throws IOException
 	{	
-		return deserialize(new DataInputStream(fis));
+		return deserialize(ctx, new DataInputStream(fis));
 	}
 	
-	public static VirtualClassFile deserialize(DataInputStream dis) throws IOException
+	public static VirtualClassFile deserialize(DesCtx ctx, DataInputStream dis) throws IOException
 	{
+		if(dis != null)
+		{
+			/* overwrite data input stream */
+			ctx.setDataInputStream(dis);
+		}
+		
 		VirtualClassFile cfd = new VirtualClassFile();
 		
 		/* read magic */		
@@ -226,7 +233,7 @@ public class VirtualClassFile
 		cfd.setConstantPoolCount((short)dis.readUnsignedShort());
 		
 		/* parse constant pool */
-		cfd.setConstantPool(ConstantPool.deserialize(dis, cfd.getConstantPoolCount()));
+		cfd.setConstantPool(ConstantPool.deserialize(ctx, cfd.getConstantPoolCount()));
 		
 		/* read access flags */
 		cfd.setAccessFlags((short)dis.readUnsignedShort());
@@ -247,19 +254,19 @@ public class VirtualClassFile
 		cfd.setFieldsCount((short)dis.readUnsignedShort());
 		
 		/* parse fields */
-		cfd.setFields(Fields.deserialize(dis, cfd.getFieldsCount(), cfd.getConstantPool()));
+		cfd.setFields(Fields.deserialize(ctx, cfd.getFieldsCount()));
 		
 		/* read methods count */
 		cfd.setMethodsCount((short)dis.readUnsignedShort());
 		
 		/* parse methods */
-		cfd.setMethods(Methods.deserialize(dis, cfd.getMethodsCount(), cfd.getConstantPool()));
+		cfd.setMethods(Methods.deserialize(ctx, cfd.getMethodsCount()));
 		
 		/* read attributes count */
 		cfd.setAttributesCount((short)dis.readUnsignedShort());
 		
 		/* parse methods */
-		cfd.setAttributes(Attributes.deserialize(dis, cfd.getAttributesCount(), cfd.getConstantPool()));
+		cfd.setAttributes(Attributes.deserialize(ctx, cfd.getAttributesCount(), null));
 		
 		return cfd;
 	}
@@ -291,16 +298,16 @@ public class VirtualClassFile
 		baos.write(PNC.toByteArray(vcf.getSuperField(), Short.class));
 		
 		baos.write(PNC.toByteArray(vcf.getInterfacesCount(), Short.class));
-		baos.write(Interfaces.serialize(vcf.getInterfaces()));
+		baos.write(Interfaces.serialize(ctx, ctx.getVirtualClassFile().getInterfaces()));
 		
 		baos.write(PNC.toByteArray(vcf.getFieldsCount(), Short.class));
-		baos.write(Fields.serialize(vcf.getFields(), vcf.getConstantPool()));
+		baos.write(Fields.serialize(ctx, ctx.getVirtualClassFile().getFields()));
 		
 		baos.write(PNC.toByteArray(vcf.getMethodsCount(), Short.class));
-		baos.write(Methods.serialize(vcf.getMethods(), vcf.getConstantPool()));
+		baos.write(Methods.serialize(ctx, ctx.getVirtualClassFile().getMethods()));
 		
 		baos.write(PNC.toByteArray(vcf.getAttributesCount(), Short.class));
-		baos.write(Attributes.serialize(vcf.getAttributes(), vcf.getConstantPool()));
+		baos.write(Attributes.serialize(ctx, ctx.getVirtualClassFile().getAttributes()));
 		
 		return baos.toByteArray();
 	}

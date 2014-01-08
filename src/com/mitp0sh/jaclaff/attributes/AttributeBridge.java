@@ -22,8 +22,8 @@ public class AttributeBridge extends AbstractAttribute
     {
 		AttributeBridge attribute = new AttributeBridge();			
 		
-		byte[] content = new byte[attribute.getAttributeLength()];		
-		dis.read(content, 0, attribute.getAttributeLength());		
+		byte[] content = new byte[(int)attribute.getAttributeLength()];		
+		dis.read(content, 0, (int)attribute.getAttributeLength());		
 		attribute.setContent(content);
 		
 		return attribute;

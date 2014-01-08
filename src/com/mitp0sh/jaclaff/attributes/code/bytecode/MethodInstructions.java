@@ -66,4 +66,52 @@ public class MethodInstructions
 		
 		return baos.toByteArray();
 	}
+	
+	public static SingleInstruction lookupInstructionByOffset(MethodInstructions disassembly, int offset)
+	{
+		int currentOffset = 0;
+		
+		for(int i = 0; i < disassembly.getInstructions().length; i++)
+		{
+			currentOffset += disassembly.getInstructions()[i].getPhysicalInstructionLength();
+			if(currentOffset == offset)
+			{
+				return disassembly.getInstructions()[i];
+			}
+		}
+		
+		return null;
+	}
+	
+	public static int getInstructionOffset(SingleInstruction instruction, MethodInstructions disassembly)
+	{
+		boolean instructionFound = false;
+		int      effectiveOffset = 0;
+		
+		/* iterate over all instructions */
+		for(int i = 0; i < disassembly.getInstructions().length; i++)
+		{
+			/* retrieve current instruction */
+			SingleInstruction current = disassembly.getInstructions()[i];
+		
+			/* job done !? */
+			if(current == instruction)
+			{
+				/* instruction found - end criteria reached! */
+				instructionFound = true;
+				break;
+			}
+			
+			/* add to effective offset */
+			effectiveOffset += current.getPhysicalInstructionLength();
+		}
+		
+		if(instructionFound == false)
+		{
+			/* error - instruction not found in disassembly! */
+			return -1;
+		}
+		
+		return effectiveOffset;
+	}
 }

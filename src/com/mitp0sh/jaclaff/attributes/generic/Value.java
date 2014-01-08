@@ -7,6 +7,7 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
@@ -26,20 +27,20 @@ public class Value
 	public static final char ELEMENT_VALUE_TYPE_AT          = '@';
 	public static final char ELEMENT_VALUE_TYPE_ARRAY       = '[';
 	
-	private short             			  constValueIndex = 0;
+	private int             			  constValueIndex = 0;
 	private AbstractConstantPoolType	 constValueObject = null;
 	private EnumConstValue                 enumConstValue = null;
-	private short                          classInfoIndex = 0;
+	private int                          classInfoIndex = 0;
 	private ConstantPoolTypeUtf8          classInfoObject = null;
 	private Annotation                         annotation = null;
 	private ArrayValue                         arrayValue = null;
 	
-	public short getConstValueIndex() 
+	public int getConstValueIndex() 
 	{
 		return constValueIndex;
 	}
 	
-	public void setConstValueIndex(short constValueIndex) 
+	public void setConstValueIndex(int constValueIndex) 
 	{
 		this.constValueIndex = constValueIndex;
 	}
@@ -54,12 +55,12 @@ public class Value
 		this.enumConstValue = enumConstValue;
 	}
 	
-	public short getClassInfoIndex()
+	public int getClassInfoIndex()
 	{
 		return classInfoIndex;
 	}
 	
-	public void setClassInfoIndex(short classInfoIndex)
+	public void setClassInfoIndex(int classInfoIndex)
 	{
 		this.classInfoIndex = classInfoIndex;
 	}
@@ -103,35 +104,6 @@ public class Value
 	{
 		this.classInfoObject = classInfoObject;
 	}
-	
-	public static void decoupleFromIndices(Value value, char tag, ConstantPool constantPool)
-	{
-		switch(tag)
-		{
-		    case ELEMENT_VALUE_TYPE_PRIMITIVE_B:
-		    case ELEMENT_VALUE_TYPE_PRIMITIVE_C:
-		    case ELEMENT_VALUE_TYPE_PRIMITIVE_D:
-		    case ELEMENT_VALUE_TYPE_PRIMITIVE_F:
-		    case ELEMENT_VALUE_TYPE_PRIMITIVE_I:
-		    case ELEMENT_VALUE_TYPE_PRIMITIVE_J:
-		    case ELEMENT_VALUE_TYPE_PRIMITIVE_S:
-		    case ELEMENT_VALUE_TYPE_PRIMITIVE_Z:
-		    case ELEMENT_VALUE_TYPE_S:
-		    {
-		    	AbstractConstantPoolType cpt = ConstantPool.getConstantPoolTypeByIndex(constantPool, value.getConstValueIndex());
-		    	cpt.setConstant_pool_tag((byte)tag);
-		    	value.setConstValueObject(cpt);
-		    	value.setConstValueIndex((short)0);
-		    	break;
-		    }
-		    case ELEMENT_VALUE_TYPE_C:
-		    {
-		    	value.setClassInfoObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, value.getConstValueIndex()));
-		    	value.setClassInfoIndex((short)0);
-		    	break;
-		    }
-		}
-	}
 
 	public static Value deserialize(DataInputStream dis, char tag, ConstantPool constantPool) throws IOException
 	{
@@ -149,7 +121,7 @@ public class Value
 		    case ELEMENT_VALUE_TYPE_PRIMITIVE_Z:
 		    case ELEMENT_VALUE_TYPE_S:
 		    {
-		    	value.setConstValueIndex((short)dis.readUnsignedShort());
+		    	value.setConstValueIndex(dis.readUnsignedShort());
 		    	break;
 		    }
 		    case ELEMENT_VALUE_TYPE_E:
@@ -159,7 +131,7 @@ public class Value
 		    }
 		    case ELEMENT_VALUE_TYPE_C:
 		    {
-		    	value.setClassInfoIndex((short)dis.readUnsignedShort());
+		    	value.setClassInfoIndex(dis.readUnsignedShort());
 		    	break;
 		    }
 		    case ELEMENT_VALUE_TYPE_AT:
@@ -184,8 +156,67 @@ public class Value
 		return value;
 	}
 	
-	public static byte[] serialize(Value value, char tag) throws IOException
+	public static void decoupleFromIndices(Value value, char tag, ConstantPool constantPool)
 	{
+		switch(tag)
+		{
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_B:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_C:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_D:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_F:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_I:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_J:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_S:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_Z:
+		    case ELEMENT_VALUE_TYPE_S:
+		    {
+		    	AbstractConstantPoolType cpt = ConstantPool.getConstantPoolTypeByIndex(constantPool, value.getConstValueIndex());
+		    	value.setConstValueObject(cpt);
+		    	value.setConstValueIndex(0);
+		    	break;
+		    }
+		    case ELEMENT_VALUE_TYPE_C:
+		    {
+		    	value.setClassInfoObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, value.getConstValueIndex()));
+		    	value.setClassInfoIndex(0);
+		    	break;
+		    }
+		}
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, char tag, Value value)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		switch(tag)
+		{
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_B:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_C:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_D:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_F:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_I:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_J:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_S:
+		    case ELEMENT_VALUE_TYPE_PRIMITIVE_Z:
+		    case ELEMENT_VALUE_TYPE_S:
+		    {
+		    	short constValueIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, value.getConstValueObject());
+		    	value.setConstValueIndex(constValueIndex);
+		    	break;
+		    }
+		    case ELEMENT_VALUE_TYPE_C:
+		    {
+		    	short classInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, value.getClassInfoObject());
+		    	value.setClassInfoIndex(classInfoIndex);
+		    	break;
+		    }
+		}
+	}
+	
+	public static byte[] serialize(SerCtx ctx, Value value, char tag) throws IOException
+	{
+		coupleToIndices(ctx, tag, value);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		switch(tag)
@@ -205,7 +236,7 @@ public class Value
 		    }
 		    case ELEMENT_VALUE_TYPE_E:
 		    {
-		    	baos.write(EnumConstValue.serialize(value.getEnumConstValue()));
+		    	baos.write(EnumConstValue.serialize(ctx, value.getEnumConstValue()));
 		    	break;
 		    }
 		    case ELEMENT_VALUE_TYPE_C:
@@ -215,12 +246,12 @@ public class Value
 		    }
 		    case ELEMENT_VALUE_TYPE_AT:
 		    {
-		    	baos.write(Annotation.serialize(value.getAnnotation()));
+		    	baos.write(Annotation.serialize(ctx, value.getAnnotation()));
 		    	break;
 		    }
 		    case ELEMENT_VALUE_TYPE_ARRAY:
 		    {
-		    	baos.write(ArrayValue.serialize(value.getArrayValue()));
+		    	baos.write(ArrayValue.serialize(ctx, value.getArrayValue()));
 		    	break;
 		    }
 		    default:

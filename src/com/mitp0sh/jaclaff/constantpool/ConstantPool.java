@@ -4,10 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 public class ConstantPool
 {
+	private static boolean SHOW_WARNINGS = false;
+	
 	private AbstractConstantPoolType[] constantPool;
 
 	public ConstantPool(short constantPoolCount)
@@ -30,7 +33,7 @@ public class ConstantPool
 		this.constantPool = constantPool;
 	}
 	
-	public String getConstantTypeUtf8Bytes(short index)
+	public String getConstantTypeUtf8Bytes(int index)
 	{	
 		if(this.getConstantPool().length < index ||
 		   this.getConstantPool()[index].getClass().getCanonicalName().indexOf("ConstantPoolTypeUtf8") == -1)
@@ -40,12 +43,14 @@ public class ConstantPool
 		return ((ConstantPoolTypeUtf8)(this.getConstantPool()[index])).getBytes();
 	}
 	
-	public static ConstantPool deserialize(DataInputStream dis, short constantPoolCount) throws IOException
+	public static ConstantPool deserialize(DesCtx ctx, short constantPoolCount) throws IOException
     {
+		DataInputStream       dis = ctx.getDataInputStream();
 		ConstantPool constantPool = new ConstantPool(constantPoolCount);
+		ctx.setConstantPool(constantPool);
 		
 		for(int i = 1; i <= constantPool.getConstantPoolCount(); i++)
-		{
+		{			
 			byte constantPoolTag = (byte)dis.readUnsignedByte();
 			
 			switch(constantPoolTag)
@@ -96,7 +101,7 @@ public class ConstantPool
 				{	 				
 					constantPool.getConstantPool()[i] = ConstantPoolTypeDouble.deserialize(dis);
 					i++;		
-					constantPool.getConstantPool()[i] = new ConstantPoolTypeDouble();		
+					constantPool.getConstantPool()[i] = new ConstantPoolTypeDouble();
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_NAMEANDTYPE:
@@ -109,10 +114,25 @@ public class ConstantPool
 					constantPool.getConstantPool()[i] = ConstantPoolTypeUtf8.deserialize(dis);					
 					break;
 				}
+				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INVOKE_DYNAMIC:
+				{
+					constantPool.getConstantPool()[i] = ConstantPoolTypeInvokeDynamic.deserialize(dis, constantPool);
+					break;
+				}
+				case AbstractConstantPoolType.CONSTANT_POOL_TAG_METHODHANDLE:
+				{
+					constantPool.getConstantPool()[i] = ConstantPoolTypeMethodHandle.deserialize(dis, constantPool);
+					break;
+				}
+				case AbstractConstantPoolType.CONSTANT_POOL_TAG_METHODTYPE:
+				{
+					constantPool.getConstantPool()[i] = ConstantPoolTypeMethodType.deserialize(dis, constantPool);
+					break;
+				}
 				default:
 				{
-					System.out.println("FATAL DESERIALIZATION ERROR: Unknown constant pool tag!");
-					break;
+					System.err.println("FATAL DESERIALIZATION ERROR: Unknown constant pool tag!");
+					return null;
 				}
 			}
 		}
@@ -125,14 +145,14 @@ public class ConstantPool
 	
 	private static void decoupleConstantPoolEntriesFromIndices(ConstantPool constantPool)
 	{
-		for(int i = 1;i < constantPool.getConstantPoolCount(); i++)
+		for(int i = 1;i <= constantPool.getConstantPoolCount(); i++)
 		{	
 			AbstractConstantPoolType abstractCPT = constantPool.getConstantPool()[i];
 			
 			switch(abstractCPT.getConstant_pool_tag())
 			{
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_CLASS:
-				{	
+				{						
 					ConstantPoolTypeClass entry = (ConstantPoolTypeClass)abstractCPT;
 					entry.setCptName((ConstantPoolTypeUtf8)getConstantPoolTypeByIndex(constantPool, entry.getNameIndex()));
 					entry.setNameIndex((short)0);
@@ -187,13 +207,18 @@ public class ConstantPool
 					
 					break;
 				}
+				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INVOKE_DYNAMIC:
+				{
+					// decoupling done at later stage when attribute bootstrap methods is deserialized !!!!
+					break;
+				}
 			}
 		}
 	}
 	
 	private static void coupleConstantPoolEntriesToIndices(SerCtx ctx, ConstantPool constantPool)
 	{
-		for(int i = 1;i < constantPool.getConstantPoolCount(); i++)
+		for(int i = 1; i <= constantPool.getConstantPoolCount(); i++)
 		{	
 			AbstractConstantPoolType abstractCPT = constantPool.getConstantPool()[i];
 	
@@ -247,6 +272,11 @@ public class ConstantPool
 					ConstantPoolTypeString entry = (ConstantPoolTypeString)abstractCPT;
 					short stringIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptString());
 					entry.setStringIndex(stringIndex);
+					break;
+				}
+				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INVOKE_DYNAMIC:
+				{
+					ConstantPoolTypeInvokeDynamic.coupleConstantPoolTypeInvokeDynamicEntries(ctx, (ConstantPoolTypeInvokeDynamic)abstractCPT);
 					break;
 				}
 			}
@@ -328,14 +358,19 @@ public class ConstantPool
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_UTF8:
-			    {
+			    {			    	
 			    	baos.write(ConstantPoolTypeUtf8.serialize(ctx, (ConstantPoolTypeUtf8)elem));
+			    	break;
+			    }
+			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_INVOKE_DYNAMIC:
+			    {
+			    	baos.write(ConstantPoolTypeInvokeDynamic.serialize(ctx, (ConstantPoolTypeInvokeDynamic)elem));
 			    	break;
 			    }
 			    default:
 				{
-					System.out.println("FATAL SERIALIZATION ERROR: Unknown constant pool tag!");
-					break;
+					System.err.println("FATAL SERIALIZATION ERROR: Unknown constant pool tag!");
+					return null;
 				}
 			}
 		}
@@ -345,15 +380,30 @@ public class ConstantPool
 	
 	public static short getIndexFromConstantPoolEntry(ConstantPool constantPool, AbstractConstantPoolType cpt)
 	{
-		for(int i = 1; i < constantPool.getConstantPool().length; i++)
+		if(cpt == null)
 		{
-			AbstractConstantPoolType curr = constantPool.getConstantPool()[i];
+			if(SHOW_WARNINGS)
+			{
+				System.err.println("unable to retrieve index for NULL constant pool entry");	
+			}
+			
+			return 0;
+		}
+		
+		for(int i = 1; i <= constantPool.getConstantPool().length; i++)
+		{	
+			AbstractConstantPoolType curr = constantPool.getConstantPool()[i];		
 			if(cpt.equals(curr))
 			{
 				return (short)i;
 			}
 		}
 	
+		if(SHOW_WARNINGS)
+		{
+			System.err.println("unable to retrieve index for constant pool entry, cpt == " + cpt);
+		}
+		
 		return 0;
 	}
 }

@@ -1,10 +1,10 @@
 package com.mitp0sh.jaclaff.fields;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 
 public class Fields
@@ -13,7 +13,7 @@ public class Fields
 	
 	public Fields(short fieldsCount)
 	{
-		this.fields = new FieldEntry[fieldsCount];
+		this.fields = new FieldEntry[fieldsCount & 0xFFFF];
 	}
 	
 	public FieldEntry[] getFields()
@@ -21,25 +21,25 @@ public class Fields
 		return fields;
 	}
 	
-	public static Fields deserialize(DataInputStream dis, short fieldsCount, ConstantPool constantPool) throws IOException
+	public static Fields deserialize(DesCtx ctx, short fieldsCount) throws IOException
     {	
 		Fields fields = new Fields(fieldsCount);
 		
 		for(int i = 0; i < fieldsCount; i++)
 		{
-			fields.getFields()[i] = FieldEntry.deserialize(dis, constantPool);
+			fields.getFields()[i] = FieldEntry.deserialize(ctx);
 		}
 		
 		return fields;
     }
 	
-	public static byte[] serialize(Fields fields, ConstantPool constantPool) throws IOException
+	public static byte[] serialize(SerCtx ctx, Fields fields) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		for(int i = 0; i < fields.getFields().length; i++)
 		{
-			baos.write(FieldEntry.serialize(fields.getFields()[i], constantPool));
+			baos.write(FieldEntry.serialize(ctx, fields.getFields()[i]));
 		}
 		
 		return baos.toByteArray();

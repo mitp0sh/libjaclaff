@@ -5,20 +5,20 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.linenumbertable.LineNumberTable;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.util.PNC;
-
 
 public class AttributeLineNumberTable extends AbstractAttribute
 {
-	private short           lineNumberTableLength = 0;
-	private LineNumberTable       lineNumberTable = null;
+	private int           lineNumberTableLength = 0;
+	private LineNumberTable     lineNumberTable = null;
 	
-	public short getLineNumberTableLength()
+	public int getLineNumberTableLength()
 	{
 		return lineNumberTableLength;
 	}
 	
-	public void setLineNumberTableLength(short lineNumberTableLength)
+	public void setLineNumberTableLength(int lineNumberTableLength)
 	{
 		this.lineNumberTableLength = lineNumberTableLength;
 	}
@@ -33,12 +33,14 @@ public class AttributeLineNumberTable extends AbstractAttribute
 		this.lineNumberTable = lineNumberTable;
 	}
 	
-	public static AttributeLineNumberTable deserialize(DataInputStream dis) throws IOException
+	public static AttributeLineNumberTable deserialize(DesCtx ctx, AttributeCode attributeCode) throws IOException
     {		
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		AttributeLineNumberTable attribute = new AttributeLineNumberTable();
 
-		attribute.setLineNumberTableLength((short)(dis.readUnsignedShort()));
-		attribute.setLineNumberTable(LineNumberTable.deserialize(dis, attribute.getLineNumberTableLength()));
+		attribute.setLineNumberTableLength(dis.readUnsignedShort());
+		attribute.setLineNumberTable(LineNumberTable.deserialize(ctx, attribute.getLineNumberTableLength()));
 				
 		return attribute;
     }

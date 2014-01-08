@@ -8,7 +8,7 @@ public class LocalVariableTable
 {
 	private LocalVariableTableEntry[] localVariableTable = new LocalVariableTableEntry[0];
 	
-	public LocalVariableTable(short localVariableTableLength)
+	public LocalVariableTable(int localVariableTableLength)
 	{
 		this.localVariableTable = new LocalVariableTableEntry[localVariableTableLength];
 	}
@@ -23,7 +23,7 @@ public class LocalVariableTable
 		this.localVariableTable = localVariableTable;
 	}
 	
-	public static LocalVariableTable deserialize(DataInputStream dis, short localVariableTableLength) throws IOException
+	public static LocalVariableTable deserialize(DataInputStream dis, int localVariableTableLength) throws IOException
     {
 		LocalVariableTable localVariableTable = new LocalVariableTable(localVariableTableLength);
 		

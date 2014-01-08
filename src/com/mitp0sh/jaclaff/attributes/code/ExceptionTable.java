@@ -4,19 +4,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 
 public class ExceptionTable 
 {
 	private ExceptionTableEntry[] exceptionTable = null;
 
-	public ExceptionTable(short exceptionTableLength)
+	public ExceptionTable(int exceptionTableLength)
 	{
 		this.exceptionTable = new ExceptionTableEntry[exceptionTableLength];		
 	}
 	
-	public short getExceptionTableLength()
+	public int getExceptionTableLength()
 	{
 		return (short)this.exceptionTable.length;
 	}
@@ -26,25 +28,25 @@ public class ExceptionTable
 		return exceptionTable;
 	}
 	
-	public static ExceptionTable deserialize(DataInputStream dis, short exceptionTableLength, ConstantPool constantPool) throws IOException
+	public static ExceptionTable deserialize(DataInputStream dis, int exceptionTableLength, ConstantPool constantPool, MethodInstructions disassembly) throws IOException
     {	
 		ExceptionTable attribute = new ExceptionTable(exceptionTableLength);
 		
 		for(int i = 0; i < exceptionTableLength; i++)
 		{
-			attribute.getExceptionTable()[i] = ExceptionTableEntry.deserialize(dis, constantPool);
+			attribute.getExceptionTable()[i] = ExceptionTableEntry.deserialize(dis, constantPool, disassembly);
 		}  
 	    
 		return attribute;
     }
 	
-	public static byte[] serialize(ExceptionTable exceptionTable) throws IOException
+	public static byte[] serialize(SerCtx ctx, ExceptionTable exceptionTable, MethodInstructions disassembly) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		for(int i = 0; i < exceptionTable.getExceptionTableLength(); i++)
 		{
-			baos.write(ExceptionTableEntry.serialize(exceptionTable.getExceptionTable()[i]));
+			baos.write(ExceptionTableEntry.serialize(ctx, exceptionTable.getExceptionTable()[i], disassembly));
 		} 
 		
 		return baos.toByteArray();

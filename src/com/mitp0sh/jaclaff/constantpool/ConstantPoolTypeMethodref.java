@@ -10,8 +10,8 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class ConstantPoolTypeMethodref extends AbstractConstantPoolType
 {
-	private short                           classIndex = 0;	
-	private short                     nameAndTypeIndex = 0;	
+	private int                           classIndex = 0;	
+	private int                     nameAndTypeIndex = 0;	
 	private ConstantPoolTypeClass             cptClass = null;
 	private ConstantPoolTypeNameAndType cptNameAndType = null;
 	
@@ -21,22 +21,22 @@ public class ConstantPoolTypeMethodref extends AbstractConstantPoolType
 		super.setConstant_pool_tag(AbstractConstantPoolType.CONSTANT_POOL_TAG_METHODREF);
 	}
 	
-	public short getClassIndex()
+	public int getClassIndex()
 	{
 		return this.classIndex;
 	}
 	
-	public void setClassIndex(short classIndex) 
+	public void setClassIndex(int classIndex) 
 	{
 		this.classIndex = classIndex;
 	}
 	
-	public short getNameAndTypeIndex() 
+	public int getNameAndTypeIndex() 
 	{
 		return this.nameAndTypeIndex;
 	}
 	
-	public void setNameAndTypeIndex(short nameAndTypeIndex)
+	public void setNameAndTypeIndex(int nameAndTypeIndex)
 	{
 		this.nameAndTypeIndex = nameAndTypeIndex;
 	}
@@ -65,8 +65,8 @@ public class ConstantPoolTypeMethodref extends AbstractConstantPoolType
 	{
 		ConstantPoolTypeMethodref cptMethodref = new ConstantPoolTypeMethodref();
 		
-		cptMethodref.setClassIndex((short)dis.readUnsignedShort());
-		cptMethodref.setNameAndTypeIndex((short)dis.readUnsignedShort());
+		cptMethodref.setClassIndex(dis.readUnsignedShort());
+		cptMethodref.setNameAndTypeIndex(dis.readUnsignedShort());
 		
 		return cptMethodref;
 	}
@@ -82,16 +82,14 @@ public class ConstantPoolTypeMethodref extends AbstractConstantPoolType
 		return baos.toByteArray();
 	}
 	
-	public static ConstantPoolTypeMethodref clone(ConstantPoolTypeMethodref src)
+	public ConstantPoolTypeMethodref clone()
 	{
 		/* create new empty instance */
-		ConstantPoolTypeMethodref clone = new ConstantPoolTypeMethodref();
+		ConstantPoolTypeMethodref clone = (ConstantPoolTypeMethodref)super.clone();
 		
 		/* fill instance with original data */
-		clone.setConstant_pool_string_representation(src.getConstant_pool_string_representation());
-		clone.setConstant_pool_tag(src.getConstant_pool_tag());
-		clone.setCptClass(src.getCptClass());
-		clone.setCptNameAndType(src.getCptNameAndType());		
+		clone.setCptClass(this.getCptClass());
+		clone.setCptNameAndType(this.getCptNameAndType());	
 		
 		return clone;
 	}

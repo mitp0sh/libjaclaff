@@ -47,15 +47,13 @@ public class ConstantPoolTypeFloat extends AbstractConstantPoolType
 		return baos.toByteArray();
 	}
 	
-	public static ConstantPoolTypeFloat clone(ConstantPoolTypeFloat src)
+	public ConstantPoolTypeFloat clone()
 	{
 		/* create new empty instance */
-		ConstantPoolTypeFloat clone = new ConstantPoolTypeFloat();
+		ConstantPoolTypeFloat clone = (ConstantPoolTypeFloat)super.clone();
 		
 		/* fill instance with original data */
-		clone.setConstant_pool_string_representation(src.getConstant_pool_string_representation());
-		clone.setConstant_pool_tag(src.getConstant_pool_tag());
-		clone.setBytes(src.getBytes());
+		clone.setBytes(this.getBytes());
 		
 		return clone;
 	}
