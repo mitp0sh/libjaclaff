@@ -6,9 +6,11 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class AttributeConstantValue extends AbstractAttribute
 {	 
 	private int                        constantValueIndex = 0;	
@@ -39,25 +41,39 @@ public class AttributeConstantValue extends AbstractAttribute
 		this.constantValueObject = constantValueObject;
 	}
 	
-	public static void decoupleFromIndices(AttributeConstantValue attribute, ConstantPool constantPool)
-	{
-		attribute.setConstantValueObject(ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.constantValueIndex));
-		attribute.setConstantValueIndex(0);
-	}
-	
-	public static AttributeConstantValue deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeConstantValue deserialize(DesCtx ctx) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		
 	    AttributeConstantValue attribute = new AttributeConstantValue();
 	    
 	    attribute.setConstantValueIndex(dis.readUnsignedShort());	
 	    
-	    decoupleFromIndices(attribute, constantPool);
+	    decoupleFromIndices(ctx, attribute);
 		
 	    return attribute;
     }
 	
-	public static byte[] serialize(AttributeConstantValue attribute) throws IOException
+	public static void decoupleFromIndices(DesCtx ctx, AttributeConstantValue attribute)
 	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
+		attribute.setConstantValueObject(ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.constantValueIndex));
+		attribute.setConstantValueIndex(0);
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, AttributeConstantValue attribute)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		int constantValueIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, attribute.constantValueObject);
+		attribute.setConstantValueIndex(constantValueIndex);
+	}
+	
+	public static byte[] serialize(SerCtx ctx, AttributeConstantValue attribute) throws IOException
+	{
+		coupleToIndices(ctx, attribute);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(attribute.getConstantValueIndex(), Short.class));

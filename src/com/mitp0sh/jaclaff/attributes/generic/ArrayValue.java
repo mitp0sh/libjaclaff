@@ -4,11 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class ArrayValue 
 {
 	private ElementValue[] elementValues = new ElementValue[0];
@@ -33,14 +33,16 @@ public class ArrayValue
 		this.elementValues = elementValues;
 	}
 	
-	public static ArrayValue deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static ArrayValue deserialize(DesCtx ctx) throws IOException
 	{
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		int numValues = dis.readUnsignedShort();
 		ArrayValue arrayValue = new ArrayValue(numValues);
 		
 		for(int i = 0; i < numValues; i++)
 		{
-			arrayValue.getElementValues()[i] = ElementValue.deserialize(dis, constantPool);
+			arrayValue.getElementValues()[i] = ElementValue.deserialize(ctx);
 		}
 		
 		return arrayValue;

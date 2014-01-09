@@ -4,17 +4,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
+import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
+import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class LineNumberTableEntry 
 {
 	private int           startPc = 0;
 	private int        lineNumber = 0;
 	
-	/* additional info */
-	private int    instructionIndexStartPc = 0;
+	private SingleInstruction startPcInstruction = null;
 	
 	public int getStartPc()
 	{
@@ -36,17 +39,17 @@ public class LineNumberTableEntry
 		this.lineNumber = lineNumber;
 	}
 	
-	public int getInstructionIndexStartPc() 
+	public SingleInstruction getStartPcInstruction() 
 	{
-		return instructionIndexStartPc;
+		return startPcInstruction;
 	}
 
-	public void setInstructionIndexStartPc(int instructionIndex) 
+	public void setStartPcInstruction(SingleInstruction startPcInstruction) 
 	{
-		this.instructionIndexStartPc = instructionIndex;
+		this.startPcInstruction = startPcInstruction;
 	}
-	
-	public static LineNumberTableEntry deserialize(DesCtx ctx) throws IOException
+
+	public static LineNumberTableEntry deserialize(DesCtx ctx, AttributeCode attributeCode) throws IOException
     {	
 		DataInputStream dis = ctx.getDataInputStream();
 		
@@ -54,11 +57,29 @@ public class LineNumberTableEntry
 		lineNumberTableEntry.setStartPc(dis.readUnsignedShort());
 		lineNumberTableEntry.setLineNumber(dis.readUnsignedShort());
 		
+		/* decouple from offsets */
+		decoupleFromOffsets(ctx, lineNumberTableEntry, attributeCode.getCode());
+		
 		return lineNumberTableEntry;
     }
 	
-	public static byte[] serialize(LineNumberTableEntry lineNumberTableEntry) throws IOException
+	protected static void decoupleFromOffsets(DesCtx ctx, LineNumberTableEntry lineNumberTableEntry, MethodInstructions disassembly)
 	{
+		SingleInstruction startPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, lineNumberTableEntry.startPc);
+		lineNumberTableEntry.setStartPcInstruction(startPcInstruction);
+	}
+	
+	protected static void coupleToOffsets(SerCtx ctx, LineNumberTableEntry lineNumberTableEntry, MethodInstructions disassembly)
+	{
+		int startPc = MethodInstructions.getInstructionOffset(lineNumberTableEntry.getStartPcInstruction(), disassembly);
+		lineNumberTableEntry.setStartPc(startPc);
+	}
+	
+	public static byte[] serialize(SerCtx ctx, LineNumberTableEntry lineNumberTableEntry, AttributeCode attributeCode) throws IOException
+	{
+		/* couple to offset before serializing */
+		coupleToOffsets(ctx, lineNumberTableEntry, attributeCode.getCode());
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(lineNumberTableEntry.getStartPc(), Short.class));

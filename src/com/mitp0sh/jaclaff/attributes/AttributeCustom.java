@@ -4,9 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
+
+/* complete */
 public class AttributeCustom extends AbstractAttribute
 {
-private byte[] content = new byte[0];
+	private byte[] content = new byte[0];
 	
 	public byte[] getContent()
 	{
@@ -18,8 +22,10 @@ private byte[] content = new byte[0];
 		this.content = content;
 	}
 
-	public static AttributeCustom deserialize(DataInputStream dis) throws IOException
+	public static AttributeCustom deserialize(DesCtx ctx) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		AttributeCustom attribute = new AttributeCustom();			
 		
 		byte[] content = new byte[(int)attribute.getAttributeLength()];		
@@ -29,7 +35,7 @@ private byte[] content = new byte[0];
 		return attribute;
     }
 	
-	public static byte[] serialize(AttributeCustom attribute) throws IOException
+	public static byte[] serialize(SerCtx ctx, AttributeCustom attribute) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		

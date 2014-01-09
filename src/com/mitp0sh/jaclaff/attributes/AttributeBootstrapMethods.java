@@ -5,10 +5,11 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.bootstrapmethods.BootstrapMethods;
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class AttributeBootstrapMethods extends AbstractAttribute
 {
 	private BootstrapMethods bootstrapMethods = null;
@@ -33,12 +34,15 @@ public class AttributeBootstrapMethods extends AbstractAttribute
 		this.bootstrapMethods = bootstrapMethods;
 	}
 	
-	public static AttributeBootstrapMethods deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeBootstrapMethods deserialize(DesCtx ctx) throws IOException
 	{				
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		int num = dis.readUnsignedShort();
 		AttributeBootstrapMethods attribute = new AttributeBootstrapMethods(num);
 	
-		attribute.setBootstrapMethods(BootstrapMethods.deserialize(dis, attribute.getNumBootstrapMethods(), constantPool));
+		BootstrapMethods bootstrapMethods = BootstrapMethods.deserialize(ctx, attribute.getNumBootstrapMethods()); 
+		attribute.setBootstrapMethods(bootstrapMethods);
 		
 		return attribute;
     }

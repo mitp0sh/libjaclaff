@@ -4,10 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
-
+/* complete */
 public class ElementValue
 {
 	private char    tag = 0; 
@@ -33,12 +33,14 @@ public class ElementValue
 		this.value = value;
 	}
 	
-	public static ElementValue deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static ElementValue deserialize(DesCtx ctx) throws IOException
 	{
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		ElementValue elementValue = new ElementValue();
 		
 		elementValue.setTag((char)dis.readUnsignedByte());
-		elementValue.setValue(Value.deserialize(dis, elementValue.getTag(), constantPool));
+		elementValue.setValue(Value.deserialize(ctx, elementValue.getTag()));
 		
 		return elementValue;
 	}

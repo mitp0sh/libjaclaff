@@ -6,10 +6,11 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class AttributeSourceFile extends AbstractAttribute
 {
 	private int                     sourceFileIndex = 0;
@@ -34,23 +35,27 @@ public class AttributeSourceFile extends AbstractAttribute
 	{
 		this.sourceFileObject = sourceFileObject;
 	}
-
-	public static void decoupleFromIndices(AttributeSourceFile attribute, ConstantPool constantPool)
-	{
-		attribute.setSourceFileObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.sourceFileIndex));
-		attribute.setSourceFileIndex(0);
-	}
 	
-	public static AttributeSourceFile deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeSourceFile deserialize(DesCtx ctx) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		AttributeSourceFile attribute = new AttributeSourceFile();
 
 		attribute.setSourceFileIndex(dis.readUnsignedShort());
 		
-		decoupleFromIndices(attribute, constantPool);
+		decoupleFromIndices(ctx, attribute);
 		
 		return attribute;
     }
+	
+	public static void decoupleFromIndices(DesCtx ctx, AttributeSourceFile attribute)
+	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
+		attribute.setSourceFileObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.sourceFileIndex));
+		attribute.setSourceFileIndex(0);
+	}
 	
 	public static void coupleToIndices(SerCtx ctx, AttributeSourceFile attribute)
 	{

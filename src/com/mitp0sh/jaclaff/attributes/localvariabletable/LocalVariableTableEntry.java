@@ -4,28 +4,36 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
+import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
+import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
+import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class LocalVariableTableEntry 
 {
-	private int              start_pc = 0;
-	private int                length = 0;
-	private int            name_index = 0;
-	private int       signature_index = 0;
-	private int                 index = 0;
+	private int        startPc = 0;
+	private int         length = 0;
+	private int      nameIndex = 0;
+	private int signatureIndex = 0;
+	private int          index = 0;
 	
-	/* additional info */
-	private int instructionIndexStartPc = 0;
-	
-	public int getStart_pc() 
+	private SingleInstruction startPcInstruction = null;
+	private ConstantPoolTypeUtf8      nameObject = null;
+	private ConstantPoolTypeUtf8 signatureObject = null;
+
+	public int getStartPc() 
 	{
-		return start_pc;
+		return startPc;
 	}
 
-	public void setStart_pc(int startPc) 
+	public void setstartPc(int startPc) 
 	{
-		start_pc = startPc;
+		this.startPc = startPc;
 	}
 
 	public int getLength() 
@@ -38,24 +46,24 @@ public class LocalVariableTableEntry
 		this.length = length;
 	}
 
-	public int getName_index() 
+	public int getNameIndex() 
 	{
-		return name_index;
+		return nameIndex;
 	}
 
-	public void setName_index(int nameIndex) 
+	public void setNameIndex(int nameIndex) 
 	{
-		name_index = nameIndex;
+		this.nameIndex = nameIndex;
 	}
 
-	public int getSignature_index() 
+	public int getSignatureIndex() 
 	{
-		return signature_index;
+		return signatureIndex;
 	}
 
-	public void setSignature_index(int signatureIndex) 
+	public void setSignatureIndex(int signatureIndex) 
 	{
-		signature_index = signatureIndex;
+		this.signatureIndex = signatureIndex;
 	}
 	
 	public int getIndex() 
@@ -68,38 +76,105 @@ public class LocalVariableTableEntry
 		this.index = index;
 	}
 	
-	public int getInstructionIndexStartPc() 
+	public SingleInstruction getStartPcInstruction() 
 	{
-		return instructionIndexStartPc;
+		return startPcInstruction;
 	}
 
-	public void setInstructionIndexStartPc(int instructionIndex) 
+	public void setStartPcInstruction(SingleInstruction startPcInstruction) 
 	{
-		this.instructionIndexStartPc = instructionIndex;
+		this.startPcInstruction = startPcInstruction;
+	}
+	
+	public ConstantPoolTypeUtf8 getNameObject() 
+	{
+		return nameObject;
 	}
 
-	public static LocalVariableTableEntry deserialize(DataInputStream dis) throws IOException
+	public void setNameObject(ConstantPoolTypeUtf8 nameObject) 
+	{
+		this.nameObject = nameObject;
+	}
+
+	public ConstantPoolTypeUtf8 getSignatureObject() 
+	{
+		return signatureObject;
+	}
+
+	public void setSignatureObject(ConstantPoolTypeUtf8 signatureObject) 
+	{
+		this.signatureObject = signatureObject;
+	}
+
+	public static LocalVariableTableEntry deserialize(DesCtx ctx, AttributeCode attributeCode) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		LocalVariableTableEntry localVariableTableEntry = new LocalVariableTableEntry();
 		
-		localVariableTableEntry.setStart_pc(dis.readUnsignedShort());
+		localVariableTableEntry.setstartPc(dis.readUnsignedShort());
 		localVariableTableEntry.setLength(dis.readUnsignedShort());
-		localVariableTableEntry.setName_index(dis.readUnsignedShort());
-		localVariableTableEntry.setSignature_index(dis.readUnsignedShort());
+		localVariableTableEntry.setNameIndex(dis.readUnsignedShort());
+		localVariableTableEntry.setSignatureIndex(dis.readUnsignedShort());
 		localVariableTableEntry.setIndex(dis.readUnsignedShort());
 	    
+		decoupleFromIndices(ctx, localVariableTableEntry);
+		decoupleFromOffsets(ctx, localVariableTableEntry, attributeCode.getCode());
+		
 		return localVariableTableEntry;
     }
 	
-	public static byte[] serialize(LocalVariableTableEntry localVariableTableEntry) throws IOException
+	private static void decoupleFromIndices(DesCtx ctx, LocalVariableTableEntry entry)
 	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		entry.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(cp, entry.nameIndex));
+		entry.setNameIndex(0);
+		
+		entry.setSignatureObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(cp, entry.signatureIndex));
+		entry.setSignatureIndex(0);
+	}
+	
+	private static void coupleToIndices(SerCtx ctx, LocalVariableTableEntry entry)
+	{
+		/* retrieve constant pool */
+		ConstantPool cp = ctx.getConstantPool();
+		
+		/* get objects */
+		ConstantPoolTypeUtf8 nameObject      = entry.getNameObject();
+		ConstantPoolTypeUtf8 signatureObject = entry.getSignatureObject();
+		
+	    int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, nameObject);
+	    entry.setNameIndex(nameIndex);
+	    
+	    int signatureIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, signatureObject);
+	    entry.setSignatureIndex(signatureIndex);
+	}
+	
+	protected static void decoupleFromOffsets(DesCtx ctx, LocalVariableTableEntry localVariableTableEntry, MethodInstructions disassembly)
+	{
+		SingleInstruction startPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, localVariableTableEntry.startPc);
+		localVariableTableEntry.setStartPcInstruction(startPcInstruction);
+	}
+	
+	protected static void coupleToOffsets(SerCtx ctx, LocalVariableTableEntry localVariableTableEntry, MethodInstructions disassembly)
+	{
+		int startPc = MethodInstructions.getInstructionOffset(localVariableTableEntry.getStartPcInstruction(), disassembly);
+		localVariableTableEntry.setstartPc(startPc);
+	}
+	
+	public static byte[] serialize(SerCtx ctx, LocalVariableTableEntry localVariableTableEntry, AttributeCode attributeCode) throws IOException
+	{
+		coupleToIndices(ctx, localVariableTableEntry);
+		coupleToOffsets(ctx, localVariableTableEntry, attributeCode.getCode());
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(PNC.toByteArray(localVariableTableEntry.getStart_pc(), Short.class));
-		baos.write(PNC.toByteArray(localVariableTableEntry.getLength(), Short.class));
-		baos.write(PNC.toByteArray(localVariableTableEntry.getName_index(), Short.class));
-		baos.write(PNC.toByteArray(localVariableTableEntry.getSignature_index(), Short.class));
-		baos.write(PNC.toByteArray(localVariableTableEntry.getIndex(), Short.class));
+		baos.write(PNC.toByteArray(localVariableTableEntry.getStartPc(),        Short.class));
+		baos.write(PNC.toByteArray(localVariableTableEntry.getLength(),         Short.class));
+		baos.write(PNC.toByteArray(localVariableTableEntry.getNameIndex(),      Short.class));
+		baos.write(PNC.toByteArray(localVariableTableEntry.getSignatureIndex(), Short.class));
+		baos.write(PNC.toByteArray(localVariableTableEntry.getIndex(),          Short.class));
 				
 		return baos.toByteArray();
 	}

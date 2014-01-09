@@ -6,10 +6,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import com.mitp0sh.jaclaff.attributes.stackmaptable.StackMapFrame;
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class AttributeStackMapTable extends AbstractAttribute
 {
 	private ArrayList<StackMapFrame> stackMapFrameList = new ArrayList<StackMapFrame>();
@@ -29,14 +30,16 @@ public class AttributeStackMapTable extends AbstractAttribute
 		this.stackMapFrameList = stackMapFrameList;
 	}
 	
-	public static AttributeStackMapTable deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeStackMapTable deserialize(DesCtx ctx) throws IOException
     {
-		AttributeStackMapTable attribute = new AttributeStackMapTable();
-		int number = dis.readUnsignedShort();
+		DataInputStream dis = ctx.getDataInputStream();
 		
-		for(int i = 0; i < number; i++)
+		AttributeStackMapTable attribute = new AttributeStackMapTable();
+		
+		int num = dis.readUnsignedShort();
+		for(int i = 0; i < num; i++)
 		{
-			attribute.getStackMapFrameList().add(StackMapFrame.deserialize(dis, constantPool));
+			attribute.getStackMapFrameList().add(StackMapFrame.deserialize(ctx));
 		}
 		
 		return attribute;
@@ -46,10 +49,10 @@ public class AttributeStackMapTable extends AbstractAttribute
 	{
 		ByteArrayOutputStream baos = new  ByteArrayOutputStream();
 		
-		int number = attribute.getStackMapFrameList().size();
-		baos.write(PNC.toByteArray(number, Short.class));
+		int num = attribute.getStackMapFrameList().size();
+		baos.write(PNC.toByteArray(num, Short.class));
 		
-		for(int i = 0; i < number; i++)
+		for(int i = 0; i < num; i++)
 		{
 			baos.write(StackMapFrame.serialize(ctx, attribute.getStackMapFrameList().get(i)));
 		}

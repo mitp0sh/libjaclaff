@@ -142,7 +142,7 @@ public class MethodEntry
 		baos.write(PNC.toByteArray(methodEntry.getAttributeCount(), Short.class));
 		if(methodEntry.getAttributeCount() > 0)
 		{
-			baos.write(Attributes.serialize(ctx, methodEntry.getAttributes()));
+			baos.write(Attributes.serialize(ctx, methodEntry.getAttributes(), null));
 		}
 		
 		return baos.toByteArray();

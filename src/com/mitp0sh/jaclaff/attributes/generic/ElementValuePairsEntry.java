@@ -6,15 +6,16 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class ElementValuePairsEntry 
 {
-	private int          				elementNameIndex = 0;
-	private ConstantPoolTypeUtf8	   elementNameObject = null;
-	private ElementValue       				elementValue = null;
+	private int          		  elementNameIndex = 0;
+	private ConstantPoolTypeUtf8 elementNameObject = null;
+	private ElementValue       		  elementValue = null;
 	
 	public int getElementNameIndex()
 	{
@@ -46,19 +47,23 @@ public class ElementValuePairsEntry
 		this.elementNameObject = elementNameObject;
 	}
 	
-	public static ElementValuePairsEntry deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static ElementValuePairsEntry deserialize(DesCtx ctx) throws IOException
 	{
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		ElementValuePairsEntry elementValuePairsEntry = new ElementValuePairsEntry();
 		elementValuePairsEntry.setElementNameIndex(dis.readUnsignedShort());
-		elementValuePairsEntry.setElementValue(ElementValue.deserialize(dis, constantPool));
+		elementValuePairsEntry.setElementValue(ElementValue.deserialize(ctx));
 		
-		decoupleFromIndices(elementValuePairsEntry, constantPool);
+		decoupleFromIndices(ctx, elementValuePairsEntry);
 		
 		return elementValuePairsEntry;
 	}
 	
-	public static void decoupleFromIndices(ElementValuePairsEntry evpe, ConstantPool constantPool)
+	public static void decoupleFromIndices(DesCtx ctx, ElementValuePairsEntry evpe)
 	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		evpe.setElementNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, evpe.elementNameIndex));
 		evpe.setElementNameIndex(0);		
 	}

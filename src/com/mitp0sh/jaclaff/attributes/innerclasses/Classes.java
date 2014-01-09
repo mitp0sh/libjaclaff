@@ -1,16 +1,15 @@
 package com.mitp0sh.jaclaff.attributes.innerclasses;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
-
+/* complete */
 public class Classes 
 {	
-	private ClassEntry[] classes = null;	
+	private ClassEntry[] classes = new ClassEntry[0];	
 
 	public Classes(int numberOfClasses)
 	{	
@@ -27,13 +26,13 @@ public class Classes
 		return classes;
 	}
 
-	public static Classes deserialize(DataInputStream dis, int numberOfClasses, ConstantPool constantPool) throws IOException
-	{
-		Classes attribute = new Classes(numberOfClasses);
+	public static Classes deserialize(DesCtx ctx, int num) throws IOException
+	{		
+		Classes attribute = new Classes(num);
 		
-		for(int i = 0; i < numberOfClasses; i++)
+		for(int i = 0; i < num; i++)
 		{
-			attribute.getClasses()[i] = ClassEntry.deserialize(dis, constantPool);
+			attribute.getClasses()[i] = ClassEntry.deserialize(ctx);
 		}
 		
 		return attribute;

@@ -8,17 +8,23 @@ import java.util.ArrayList;
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeMethodHandle;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class BootstrapMethodEntry
 {
 	private int bootstrapMethodRefIndex = 0;
-	private int   numBootstrapArguments = 0;
-	private int[]    bootstrapArguments = null;
+	private int[]    bootstrapArguments = new int[0];
 	
 	private ConstantPoolTypeMethodHandle         bootstrapMethodRefObject = null;
 	private ArrayList<AbstractConstantPoolType> bootstrapArgumentsObjects = new ArrayList<AbstractConstantPoolType>();
+	
+	public BootstrapMethodEntry(int num)
+	{
+		this.bootstrapArguments = new int[num];
+	}
 	
 	public int getBootstrapMethodRefIndex()
 	{
@@ -32,12 +38,7 @@ public class BootstrapMethodEntry
 	
 	public int getNumBootstrapArguments() 
 	{
-		return numBootstrapArguments;
-	}
-	
-	public void setNumBootstrapArguments(int numBootstrapArguments) 
-	{
-		this.numBootstrapArguments = numBootstrapArguments;
+		return bootstrapArguments.length;
 	}
 	
 	public int[] getBootstrapArguments() 
@@ -70,25 +71,30 @@ public class BootstrapMethodEntry
 		this.bootstrapArgumentsObjects = bootstrapArgumentsObjects;
 	}
 	
-	public static BootstrapMethodEntry deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static BootstrapMethodEntry deserialize(DesCtx ctx) throws IOException
 	{
-		BootstrapMethodEntry bootstrapMethodEntry = new BootstrapMethodEntry();
+		DataInputStream dis = ctx.getDataInputStream();
 		
-		bootstrapMethodEntry.setBootstrapMethodRefIndex(dis.readUnsignedShort());
-		bootstrapMethodEntry.setNumBootstrapArguments(dis.readUnsignedShort());
+		int bootstrapMethodRefIndex = dis.readUnsignedShort();
+		int                     num = dis.readUnsignedShort();
+		
+		BootstrapMethodEntry bootstrapMethodEntry = new BootstrapMethodEntry(num);
+		bootstrapMethodEntry.setBootstrapMethodRefIndex(bootstrapMethodRefIndex);
 		
 		for(int i = 0; i < bootstrapMethodEntry.getNumBootstrapArguments(); i++)
 		{
 			bootstrapMethodEntry.bootstrapArguments[i] = dis.readUnsignedShort();
 		}
 		
-		decoupleFromIndices(bootstrapMethodEntry, constantPool);
+		decoupleFromIndices(ctx, bootstrapMethodEntry);
 		
 		return bootstrapMethodEntry;
     }
 	
-	public static void decoupleFromIndices(BootstrapMethodEntry bootstrapMethodEntry, ConstantPool constantPool)
+	public static void decoupleFromIndices(DesCtx ctx, BootstrapMethodEntry bootstrapMethodEntry)
 	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		bootstrapMethodEntry.setBootstrapMethodRefObject((ConstantPoolTypeMethodHandle)ConstantPool.getConstantPoolTypeByIndex(constantPool, bootstrapMethodEntry.getBootstrapMethodRefIndex()));
 		bootstrapMethodEntry.setBootstrapMethodRefIndex(0);
 		

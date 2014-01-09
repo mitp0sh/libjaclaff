@@ -4,6 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
+
+/* complete */
 public class AttributeBridge extends AbstractAttribute
 {
 	private byte[] content = new byte[0];
@@ -18,8 +22,10 @@ public class AttributeBridge extends AbstractAttribute
 		this.content = content;
 	}
 
-	public static AttributeBridge deserialize(DataInputStream dis) throws IOException
+	public static AttributeBridge deserialize(DesCtx ctx) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		AttributeBridge attribute = new AttributeBridge();			
 		
 		byte[] content = new byte[(int)attribute.getAttributeLength()];		
@@ -29,7 +35,7 @@ public class AttributeBridge extends AbstractAttribute
 		return attribute;
     }
 	
-	public static byte[] serialize(AttributeBridge attribute) throws IOException
+	public static byte[] serialize(SerCtx ctx, AttributeBridge attribute) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		

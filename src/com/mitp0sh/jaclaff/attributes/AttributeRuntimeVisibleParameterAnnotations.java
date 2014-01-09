@@ -5,15 +5,15 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.runtimeinvisibleparameterannotations.ParameterAnnotation;
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
-
+/* complete */
 public class AttributeRuntimeVisibleParameterAnnotations extends AbstractAttribute
 {	
 	private ParameterAnnotation[] parameterAnnotations = new ParameterAnnotation[0];
 	
-	private AttributeRuntimeVisibleParameterAnnotations(short numParameters)
+	private AttributeRuntimeVisibleParameterAnnotations(int numParameters)
 	{
 		this.parameterAnnotations = new ParameterAnnotation[numParameters];
 	}
@@ -33,13 +33,16 @@ public class AttributeRuntimeVisibleParameterAnnotations extends AbstractAttribu
 		this.parameterAnnotations = parameterAnnotations;
 	}
 	
-	public static AttributeRuntimeVisibleParameterAnnotations deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeRuntimeVisibleParameterAnnotations deserialize(DesCtx ctx) throws IOException
     {		
-		AttributeRuntimeVisibleParameterAnnotations attribute = new AttributeRuntimeVisibleParameterAnnotations(dis.readByte());
+		DataInputStream dis = ctx.getDataInputStream();
 		
-		for(byte i = 0; i < attribute.getNumParameters(); i++)
+		int num =  dis.readUnsignedByte();
+		AttributeRuntimeVisibleParameterAnnotations attribute = new AttributeRuntimeVisibleParameterAnnotations(num);
+		
+		for(byte i = 0; i < num; i++)
 		{
-			attribute.getParameterAnnotations()[i] = ParameterAnnotation.deserialize(dis, constantPool);
+			attribute.getParameterAnnotations()[i] = ParameterAnnotation.deserialize(ctx);
 		}
 		
 		return attribute;
@@ -49,9 +52,10 @@ public class AttributeRuntimeVisibleParameterAnnotations extends AbstractAttribu
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(new byte[]{(byte)attribute.getNumParameters()});
+		int num = attribute.getNumParameters();
+		baos.write(new byte[]{(byte)num});
 		
-		for(byte i = 0; i < attribute.getNumParameters(); i++)
+		for(byte i = 0; i < num; i++)
 		{
 			baos.write(ParameterAnnotation.serialize(ctx, attribute.getParameterAnnotations()[i]));
 		}

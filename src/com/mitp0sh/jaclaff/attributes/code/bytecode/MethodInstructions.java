@@ -73,11 +73,12 @@ public class MethodInstructions
 		
 		for(int i = 0; i < disassembly.getInstructions().length; i++)
 		{
-			currentOffset += disassembly.getInstructions()[i].getPhysicalInstructionLength();
 			if(currentOffset == offset)
 			{
 				return disassembly.getInstructions()[i];
 			}
+			
+			currentOffset += disassembly.getInstructions()[i].getPhysicalInstructionLength();
 		}
 		
 		return null;

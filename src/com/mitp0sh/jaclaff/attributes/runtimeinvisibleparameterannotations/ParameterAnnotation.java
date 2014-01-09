@@ -5,11 +5,11 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.generic.Annotation;
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class ParameterAnnotation
 {	
 	private Annotation[] annotations = new Annotation[0];
@@ -34,13 +34,16 @@ public class ParameterAnnotation
 		this.annotations = annotations;
 	}
 	
-	public static ParameterAnnotation deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static ParameterAnnotation deserialize(DesCtx ctx) throws IOException
     {
-		ParameterAnnotation parameterAnnotation = new ParameterAnnotation(dis.readUnsignedShort());
+		DataInputStream dis = ctx.getDataInputStream();
 		
-		for(short i = 0; i < parameterAnnotation.getNumAnnotations(); i++)
+		int num = dis.readUnsignedShort();
+		ParameterAnnotation parameterAnnotation = new ParameterAnnotation(num);
+		
+		for(short i = 0; i < num; i++)
 		{
-			parameterAnnotation.getAnnotations()[i] = Annotation.deserialize(dis, constantPool);
+			parameterAnnotation.getAnnotations()[i] = Annotation.deserialize(ctx);
 		}
 		
 		return parameterAnnotation;
@@ -50,9 +53,10 @@ public class ParameterAnnotation
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(PNC.toByteArray(parameterAnnotation.getNumAnnotations(), Short.class));
+		int num = parameterAnnotation.getNumAnnotations();
+		baos.write(PNC.toByteArray(num, Short.class));
 		
-		for(short i = 0; i < parameterAnnotation.getNumAnnotations(); i++)
+		for(short i = 0; i < num; i++)
 		{
 			baos.write(Annotation.serialize(ctx, parameterAnnotation.getAnnotations()[i]));
 		}

@@ -7,10 +7,11 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeNameAndType;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class AttributeEnclosingMethod extends AbstractAttribute
 {
 	private int                           classIndex = 0;
@@ -58,24 +59,33 @@ public class AttributeEnclosingMethod extends AbstractAttribute
 		this.methodObject = methodObject;
 	}
 	
-	public static AttributeEnclosingMethod deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeEnclosingMethod deserialize(DesCtx ctx) throws IOException
     {				
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		AttributeEnclosingMethod attribute = new AttributeEnclosingMethod();
 		
 		attribute.setClassIndex(dis.readUnsignedShort());
 		attribute.setMethodIndex(dis.readUnsignedShort());
 		
-		decoupleFromIndices(attribute, constantPool);
+		decoupleFromIndices(ctx, attribute);
 		
 		return attribute;
     }
 	
-	public static void decoupleFromIndices(AttributeEnclosingMethod aem, ConstantPool constantPool)
+	public static void decoupleFromIndices(DesCtx ctx, AttributeEnclosingMethod attribute)
 	{
-		aem.setClassObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, aem.classIndex));
-		aem.setClassIndex(0);
-		aem.setMethodObject((ConstantPoolTypeNameAndType)ConstantPool.getConstantPoolTypeByIndex(constantPool, aem.methodIndex));
-		aem.setMethodIndex(0);
+		ConstantPool cp = ctx.getConstantPool();
+		
+		ConstantPoolTypeClass classObject = null;
+		classObject = (ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(cp, attribute.classIndex);
+		attribute.setClassObject(classObject);
+		attribute.setClassIndex(0);
+		
+		ConstantPoolTypeNameAndType methodObject = null;
+		methodObject = (ConstantPoolTypeNameAndType)ConstantPool.getConstantPoolTypeByIndex(cp, attribute.methodIndex);
+		attribute.setMethodObject(methodObject);
+		attribute.setMethodIndex(0);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, AttributeEnclosingMethod attribute)
@@ -95,7 +105,7 @@ public class AttributeEnclosingMethod extends AbstractAttribute
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(PNC.toByteArray(attribute.getClassIndex(), Short.class));
+		baos.write(PNC.toByteArray(attribute.getClassIndex(),  Short.class));
 		baos.write(PNC.toByteArray(attribute.getMethodIndex(), Short.class));
 		
 		return baos.toByteArray();

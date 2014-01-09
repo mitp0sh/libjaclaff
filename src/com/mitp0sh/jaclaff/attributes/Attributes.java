@@ -39,13 +39,13 @@ public class Attributes
 		return attributes;
     }
 	
-	public static byte[] serialize(SerCtx ctx, Attributes attributes) throws IOException
+	public static byte[] serialize(SerCtx ctx, Attributes attributes, Object reference0) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		for(int i = 0; i < attributes.getAttributesCount(); i++)
 		{
-			baos.write(AbstractAttribute.serialize(ctx, attributes.getAttributes()[i]));
+			baos.write(AbstractAttribute.serialize(ctx, attributes.getAttributes()[i], reference0));
 		}
 		
 		return baos.toByteArray();

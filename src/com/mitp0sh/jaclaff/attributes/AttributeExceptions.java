@@ -6,30 +6,24 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class AttributeExceptions extends AbstractAttribute
 {
-	private int                    numberOfExceptions = 0;
 	private int[]                          exceptions = null;
-	private ConstantPoolTypeClass[]   exceptionsObjects = null;
+	private ConstantPoolTypeClass[] exceptionsObjects = new ConstantPoolTypeClass[0];
 
 	public AttributeExceptions(int numberOfExceptions)
 	{
-		this.numberOfExceptions = numberOfExceptions;
 		this.exceptions         = new int[numberOfExceptions];		
 	}
 	
 	public int getNumberOfExceptions()
 	{
-		return numberOfExceptions;
-	}
-
-	public void setNumberOfExceptions(int numberOfExceptions)
-	{
-		this.numberOfExceptions = numberOfExceptions;
+		return exceptionsObjects.length;
 	}
 
 	public int[] getExceptions()
@@ -52,25 +46,31 @@ public class AttributeExceptions extends AbstractAttribute
 		this.exceptionsObjects = exceptionsObjects;
 	}
 
-	public static AttributeExceptions deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeExceptions deserialize(DesCtx ctx) throws IOException
     {				
-		AttributeExceptions attribute = new AttributeExceptions(dis.readUnsignedShort());
+		DataInputStream dis = ctx.getDataInputStream();
 		
-		for(int i = 0; i < attribute.getNumberOfExceptions(); i++)
+		int num = dis.readUnsignedShort();
+		AttributeExceptions attribute = new AttributeExceptions(num);
+		
+		for(int i = 0; i < num; i++)
 		{
 			attribute.getExceptions()[i] = dis.readUnsignedShort();
 		}
 		
-		decoupleFromIndices(attribute, constantPool);
+		decoupleFromIndices(ctx, attribute);
 		
 		return attribute;
     }
 	
-	public static void decoupleFromIndices(AttributeExceptions attribute, ConstantPool constantPool)
+	public static void decoupleFromIndices(DesCtx ctx, AttributeExceptions attribute)
 	{
-		attribute.setExceptionsObjects(new ConstantPoolTypeClass[attribute.getExceptions().length]);
+		ConstantPool constantPool = ctx.getConstantPool();
 		
-		for(int i = 0; i < attribute.getExceptions().length; i++)
+		int num = attribute.getNumberOfExceptions();
+		attribute.setExceptionsObjects(new ConstantPoolTypeClass[num]);
+		
+		for(int i = 0; i < num; i++)
 		{
 			attribute.getExceptionsObjects()[i] = (ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.getExceptions()[i]);
 			attribute.getExceptions()[i]        = 0;
@@ -79,7 +79,8 @@ public class AttributeExceptions extends AbstractAttribute
 	
 	public static void coupleToIndices(SerCtx ctx, AttributeExceptions attribute)
 	{
-		for(int i = 0; i < attribute.getExceptions().length; i++)
+		int num = attribute.getNumberOfExceptions();
+		for(int i = 0; i < num; i++)
 		{
 			short currentIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getExceptionsObjects()[i]);
 			attribute.getExceptions()[i] = currentIndex;
@@ -92,9 +93,10 @@ public class AttributeExceptions extends AbstractAttribute
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(PNC.toByteArray(attribute.getNumberOfExceptions(), Short.class));
+		int num = attribute.getNumberOfExceptions();
+		baos.write(PNC.toByteArray(num, Short.class));
 		
-		for(int i = 0; i < attribute.getNumberOfExceptions(); i++)
+		for(int i = 0; i < num; i++)
 		{
 			baos.write(PNC.toByteArray(attribute.getExceptions()[i], Short.class));
 		}

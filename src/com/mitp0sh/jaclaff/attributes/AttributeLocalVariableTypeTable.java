@@ -5,22 +5,23 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.localvariabletypetable.LocalVariableTypeTable;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class AttributeLocalVariableTypeTable extends AbstractAttribute 
 {
-	private int                    localVariableTypeTableLength = 0;
-	private LocalVariableTypeTable       localVariableTypeTable = null;
+	private LocalVariableTypeTable localVariableTypeTable = null;
 	
 	public int getLocalVariableTypeTableLength() 
 	{
-		return localVariableTypeTableLength;
-	}
-	
-	public void setLocalVariableTypeTableLength(int localVariableTypeTableLength)
-	{
-		this.localVariableTypeTableLength = localVariableTypeTableLength;
+		if(localVariableTypeTable != null)
+		{
+			return localVariableTypeTable.getLocalVariableTypeTableLength();
+		}
+		
+		return 0;
 	}
 	
 	public LocalVariableTypeTable getLocalVariableTypeTable()
@@ -33,22 +34,24 @@ public class AttributeLocalVariableTypeTable extends AbstractAttribute
 		this.localVariableTypeTable = localVariableTypeTable;
 	}
 	
-	public static AttributeLocalVariableTypeTable deserialize(DataInputStream dis) throws IOException
+	public static AttributeLocalVariableTypeTable deserialize(DesCtx ctx, AttributeCode attributeCode) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		AttributeLocalVariableTypeTable attribute = new AttributeLocalVariableTypeTable();
 		
-		attribute.setLocalVariableTypeTableLength(dis.readUnsignedShort());
-		attribute.setLocalVariableTypeTable(LocalVariableTypeTable.deserialize(dis, attribute.getLocalVariableTypeTableLength()));
+		int localVariableTypeTableLength = dis.readUnsignedShort();
+		attribute.setLocalVariableTypeTable(LocalVariableTypeTable.deserialize(ctx, localVariableTypeTableLength, attributeCode));
 		
 		return attribute;
     }
 	
-	public static byte[] serialize(AttributeLocalVariableTypeTable attribute) throws IOException
+	public static byte[] serialize(SerCtx ctx, AttributeLocalVariableTypeTable attribute, AttributeCode attributeCode) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(attribute.getLocalVariableTypeTableLength(), Short.class));
-		baos.write(LocalVariableTypeTable.serialize(attribute.getLocalVariableTypeTable()));
+		baos.write(LocalVariableTypeTable.serialize(ctx, attribute.getLocalVariableTypeTable(), attributeCode));
 		
 		return baos.toByteArray();
 	}

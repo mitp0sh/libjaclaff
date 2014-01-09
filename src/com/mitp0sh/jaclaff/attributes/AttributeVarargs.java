@@ -1,13 +1,13 @@
 package com.mitp0sh.jaclaff.attributes;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 
+/* complete */
 public class AttributeVarargs extends AbstractAttribute
 {
-	public static AttributeVarargs deserialize(DataInputStream dis, ConstantPool cp) throws IOException
+	public static AttributeVarargs deserialize(DesCtx ctx) throws IOException
     {
 		AttributeVarargs attribute = new AttributeVarargs();
 		

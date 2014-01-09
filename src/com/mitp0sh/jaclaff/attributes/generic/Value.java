@@ -7,10 +7,11 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class Value
 {
 	public static final char ELEMENT_VALUE_TYPE_PRIMITIVE_B = 'B';
@@ -27,13 +28,13 @@ public class Value
 	public static final char ELEMENT_VALUE_TYPE_AT          = '@';
 	public static final char ELEMENT_VALUE_TYPE_ARRAY       = '[';
 	
-	private int             			  constValueIndex = 0;
-	private AbstractConstantPoolType	 constValueObject = null;
-	private EnumConstValue                 enumConstValue = null;
-	private int                          classInfoIndex = 0;
-	private ConstantPoolTypeUtf8          classInfoObject = null;
-	private Annotation                         annotation = null;
-	private ArrayValue                         arrayValue = null;
+	private int                       constValueIndex = 0;
+	private AbstractConstantPoolType constValueObject = null;
+	private EnumConstValue             enumConstValue = null;
+	private int                        classInfoIndex = 0;
+	private ConstantPoolTypeUtf8      classInfoObject = null;
+	private Annotation                     annotation = null;
+	private ArrayValue                     arrayValue = null;
 	
 	public int getConstValueIndex() 
 	{
@@ -105,8 +106,10 @@ public class Value
 		this.classInfoObject = classInfoObject;
 	}
 
-	public static Value deserialize(DataInputStream dis, char tag, ConstantPool constantPool) throws IOException
+	public static Value deserialize(DesCtx ctx, char tag) throws IOException
 	{
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		Value value = new Value();
 		
 		switch(tag)
@@ -126,7 +129,7 @@ public class Value
 		    }
 		    case ELEMENT_VALUE_TYPE_E:
 		    {
-		    	value.setEnumConstValue(EnumConstValue.deserialize(dis, constantPool));
+		    	value.setEnumConstValue(EnumConstValue.deserialize(ctx));
 		    	break;
 		    }
 		    case ELEMENT_VALUE_TYPE_C:
@@ -136,28 +139,30 @@ public class Value
 		    }
 		    case ELEMENT_VALUE_TYPE_AT:
 		    {
-		    	value.setAnnotation(Annotation.deserialize(dis, constantPool));
+		    	value.setAnnotation(Annotation.deserialize(ctx));
 		    	break;
 		    }
 		    case ELEMENT_VALUE_TYPE_ARRAY:
 		    {
-		    	value.setArrayValue(ArrayValue.deserialize(dis, constantPool));
+		    	value.setArrayValue(ArrayValue.deserialize(ctx));
 		    	break;
 		    }
 		    default:
 		    {
-		    	System.out.println("DUnknown element value tag! - " + tag);
-		    	break;
+		    	System.err.println("DUnknown element value tag! - " + tag);
+		    	return null;
 		    }
 		}
 		
-		decoupleFromIndices(value, tag, constantPool);
+		decoupleFromIndices(ctx, value, tag);
 		
 		return value;
 	}
 	
-	public static void decoupleFromIndices(Value value, char tag, ConstantPool constantPool)
+	public static void decoupleFromIndices(DesCtx ctx, Value value, char tag)
 	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		switch(tag)
 		{
 		    case ELEMENT_VALUE_TYPE_PRIMITIVE_B:

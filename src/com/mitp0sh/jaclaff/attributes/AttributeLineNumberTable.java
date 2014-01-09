@@ -6,21 +6,22 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.linenumbertable.LineNumberTable;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class AttributeLineNumberTable extends AbstractAttribute
 {
-	private int           lineNumberTableLength = 0;
-	private LineNumberTable     lineNumberTable = null;
+	private LineNumberTable lineNumberTable = null;
 	
 	public int getLineNumberTableLength()
 	{
-		return lineNumberTableLength;
-	}
-	
-	public void setLineNumberTableLength(int lineNumberTableLength)
-	{
-		this.lineNumberTableLength = lineNumberTableLength;
+		if(lineNumberTable != null)
+		{
+			return lineNumberTable.getLineNumberTableLength();
+		}
+		
+		return 0;
 	}
 	
 	public LineNumberTable getLineNumberTable() 
@@ -39,18 +40,18 @@ public class AttributeLineNumberTable extends AbstractAttribute
 		
 		AttributeLineNumberTable attribute = new AttributeLineNumberTable();
 
-		attribute.setLineNumberTableLength(dis.readUnsignedShort());
-		attribute.setLineNumberTable(LineNumberTable.deserialize(ctx, attribute.getLineNumberTableLength()));
+		int lineNumberTableLength = dis.readUnsignedShort();
+		attribute.setLineNumberTable(LineNumberTable.deserialize(ctx, lineNumberTableLength, attributeCode));
 				
 		return attribute;
     }
 	
-	public static byte[] serialize(AttributeLineNumberTable attribute) throws IOException
+	public static byte[] serialize(SerCtx ctx, AttributeLineNumberTable attribute, AttributeCode attributeCode) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(PNC.toByteArray(attribute.getLineNumberTableLength(), Short.class));
-		baos.write(LineNumberTable.serialize(attribute.getLineNumberTable()));
+		baos.write(LineNumberTable.serialize(ctx, attribute.getLineNumberTable(), attributeCode));
 		
 		return baos.toByteArray();
 	}

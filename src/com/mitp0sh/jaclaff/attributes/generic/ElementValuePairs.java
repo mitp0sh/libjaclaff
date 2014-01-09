@@ -1,13 +1,12 @@
 package com.mitp0sh.jaclaff.attributes.generic;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
-
+/* complete */
 public class ElementValuePairs 
 {
 	private ElementValuePairsEntry[]     elementValuePairs = new ElementValuePairsEntry[0];
@@ -32,13 +31,13 @@ public class ElementValuePairs
 		return elementValuePairs.length;
 	}
 	
-	public static ElementValuePairs deserialize(DataInputStream dis, int numElementValuePairs, ConstantPool constantPool) throws IOException
-	{
+	public static ElementValuePairs deserialize(DesCtx ctx, int numElementValuePairs) throws IOException
+	{		
 		ElementValuePairs elementValuePairs = new ElementValuePairs(numElementValuePairs);
 		
 		for(int i = 0; i < numElementValuePairs; i++)
 		{
-			elementValuePairs.getElementValuePairs()[i] = ElementValuePairsEntry.deserialize(dis, constantPool);	
+			elementValuePairs.getElementValuePairs()[i] = ElementValuePairsEntry.deserialize(ctx);	
 		}
 		
 		return elementValuePairs;

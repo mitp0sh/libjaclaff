@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -40,8 +41,11 @@ public class AppendFrame extends AbstractStackMapFrame
 		this.locals = locals;
 	}
 	
-	public static AppendFrame deserialize(DataInputStream dis, ConstantPool constantPool, byte frameType) throws IOException
+	public static AppendFrame deserialize(DesCtx ctx, byte frameType) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		/* create new append frame instance */
 		AppendFrame appendFrame = new AppendFrame();		
 		

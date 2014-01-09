@@ -10,7 +10,6 @@ import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
 public abstract class AbstractAttribute
 {	
 	public static final String attributeConstantValue                                 = "ConstantValue";
@@ -82,7 +81,7 @@ public abstract class AbstractAttribute
 		
 		if(attributeName.equals(attributeConstantValue))
 		{
-			attribute = AttributeConstantValue.deserialize(dis, constantPool);
+			attribute = AttributeConstantValue.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeCode))
@@ -92,37 +91,37 @@ public abstract class AbstractAttribute
 		else
 		if(attributeName.equals(attributeExceptions))
 		{
-			attribute = AttributeExceptions.deserialize(dis, constantPool);
+			attribute = AttributeExceptions.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeInnerClasses))
 		{
-			attribute = AttributeInnerClasses.deserialize(dis, constantPool);
+			attribute = AttributeInnerClasses.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeEnclosingMethod))
 		{
-			attribute = AttributeEnclosingMethod.deserialize(dis, constantPool);
+			attribute = AttributeEnclosingMethod.deserialize(ctx);
 		}		
 		else
 		if(attributeName.equals(attributeSynthetic))
 		{
-			attribute = AttributeSynthetic.deserialize(dis);
+			attribute = AttributeSynthetic.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeSignature))
 		{
-			attribute = AttributeSignature.deserialize(dis, constantPool);
+			attribute = AttributeSignature.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeSourceFile))
 		{
-			attribute = AttributeSourceFile.deserialize(dis, constantPool);
+			attribute = AttributeSourceFile.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeSourceDebugExtension)) // not tested !!!!!!
 		{
-			attribute = AttributeSourceDebugExtension.deserialize(dis);
+			attribute = AttributeSourceDebugExtension.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeLineNumberTable))
@@ -132,67 +131,67 @@ public abstract class AbstractAttribute
 		else
 		if(attributeName.equals(attributeLocalVariableTable))
 		{
-			attribute = AttributeLocalVariableTable.deserialize(dis);
+			attribute = AttributeLocalVariableTable.deserialize(ctx, (AttributeCode)reference0);
 		}
 		else
 		if(attributeName.equals(attributeLocalVariableTypeTable))
 		{
-			attribute = AttributeLocalVariableTypeTable.deserialize(dis);
+			attribute = AttributeLocalVariableTypeTable.deserialize(ctx, (AttributeCode)reference0);
 		}
 		else
 		if(attributeName.equals(attributeDeprecated))
 		{
-			attribute = AttributeDeprecated.deserialize(dis);
+			attribute = AttributeDeprecated.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeRuntimeVisibleAnnotations))
 		{
-			attribute = AttributeRuntimeVisibleAnnotations.deserialize(dis, constantPool);
+			attribute = AttributeRuntimeVisibleAnnotations.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeRuntimeInvisibleAnnotations))
 		{
-			attribute = AttributeRuntimeInvisibleAnnotations.deserialize(dis, constantPool);
+			attribute = AttributeRuntimeInvisibleAnnotations.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeRuntimeVisibleParameterAnnotations))
 		{
-			attribute = AttributeRuntimeVisibleParameterAnnotations.deserialize(dis, constantPool);
+			attribute = AttributeRuntimeVisibleParameterAnnotations.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeRuntimeInvisibleParameterAnnotations))
 		{
-			attribute = AttributeRuntimeInvisibleParameterAnnotations.deserialize(dis, constantPool);
+			attribute = AttributeRuntimeInvisibleParameterAnnotations.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeAnnotationDefault))
 		{
-			attribute = AttributeAnnotationDefault.deserialize(dis, constantPool);
+			attribute = AttributeAnnotationDefault.deserialize(ctx);
 		}		
 		else
 		if(attributeName.equals(attributeBridge))
 		{
-			attribute = AttributeBridge.deserialize(dis);
+			attribute = AttributeBridge.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeStackMapTable))
 		{
-			attribute = AttributeStackMapTable.deserialize(dis, constantPool);
+			attribute = AttributeStackMapTable.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeBootstrapMethods)) // not tested !!!!
 		{
-			attribute = AttributeBootstrapMethods.deserialize(dis, constantPool);
+			attribute = AttributeBootstrapMethods.deserialize(ctx);
 		}
 		else
 		if(attributeName.equals(attributeVarargs))
 		{
-			attribute = AttributeVarargs.deserialize(dis, constantPool);
+			attribute = AttributeVarargs.deserialize(ctx);
 		}
 		else
 		{
 			System.err.println("Deserialization - Contains custom attribute!");
-			attribute = AttributeCustom.deserialize(dis);			
+			attribute = AttributeCustom.deserialize(ctx);			
 		}
 		
 		attribute.setAttributeNameIndex(attributeNameIndex);
@@ -217,7 +216,7 @@ public abstract class AbstractAttribute
 	}
 	
 	
-	public static byte[] serialize(SerCtx ctx, AbstractAttribute attribute) throws IOException
+	public static byte[] serialize(SerCtx ctx, AbstractAttribute attribute, Object reference0) throws IOException
 	{
 		coupleToIndices(ctx, attribute);
 		
@@ -231,7 +230,7 @@ public abstract class AbstractAttribute
 		
 		if(attributeName.equals(attributeConstantValue))
 		{
-			baos.write(AttributeConstantValue.serialize((AttributeConstantValue)attribute));
+			baos.write(AttributeConstantValue.serialize(ctx, (AttributeConstantValue)attribute));
 		}
 		else
 		if(attributeName.equals(attributeCode))
@@ -271,22 +270,22 @@ public abstract class AbstractAttribute
 		else
 		if(attributeName.equals(attributeSourceDebugExtension))
 		{
-			baos.write(AttributeSourceDebugExtension.serialize((AttributeSourceDebugExtension)attribute));
+			baos.write(AttributeSourceDebugExtension.serialize(ctx, (AttributeSourceDebugExtension)attribute));
 		}
 		else
 		if(attributeName.equals(attributeLineNumberTable))
 		{
-			baos.write(AttributeLineNumberTable.serialize((AttributeLineNumberTable)attribute));
+			baos.write(AttributeLineNumberTable.serialize(ctx, (AttributeLineNumberTable)attribute, (AttributeCode)reference0));
 		}
 		else
 		if(attributeName.equals(attributeLocalVariableTable))
 		{
-			baos.write(AttributeLocalVariableTable.serialize((AttributeLocalVariableTable)attribute));
+			baos.write(AttributeLocalVariableTable.serialize(ctx, (AttributeLocalVariableTable)attribute, (AttributeCode)reference0));
 		}
 		else
 		if(attributeName.equals(attributeLocalVariableTypeTable))
 		{
-			baos.write(AttributeLocalVariableTypeTable.serialize((AttributeLocalVariableTypeTable)attribute));
+			baos.write(AttributeLocalVariableTypeTable.serialize(ctx, (AttributeLocalVariableTypeTable)attribute, (AttributeCode)reference0));
 		}
 		else
 		if(attributeName.equals(attributeDeprecated))
@@ -321,7 +320,7 @@ public abstract class AbstractAttribute
 		else
 		if(attributeName.equals(attributeBridge))
 		{
-			baos.write(AttributeBridge.serialize((AttributeBridge)attribute));
+			baos.write(AttributeBridge.serialize(ctx, (AttributeBridge)attribute));
 		}
 		else
 		if(attributeName.equals(attributeStackMapTable))
@@ -341,7 +340,7 @@ public abstract class AbstractAttribute
 		else
 		{
 			System.err.println("Serialization - Contains custom attribute!");
-			baos.write(AttributeCustom.serialize((AttributeCustom)attribute));
+			baos.write(AttributeCustom.serialize(ctx, (AttributeCustom)attribute));
 		}
 		
 		return baos.toByteArray();

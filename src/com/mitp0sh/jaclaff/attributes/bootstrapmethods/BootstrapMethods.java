@@ -1,16 +1,17 @@
 package com.mitp0sh.jaclaff.attributes.bootstrapmethods;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeInvokeDynamic;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
+/* complete */
 public class BootstrapMethods 
 {
-	private BootstrapMethodEntry[] bootstrapMethodEntries = null;	
+	private BootstrapMethodEntry[] bootstrapMethodEntries = new BootstrapMethodEntry[0];	
 
 	public BootstrapMethods(int numberOfBootstrapMethods)
 	{	
@@ -27,12 +28,14 @@ public class BootstrapMethods
 		return bootstrapMethodEntries;
 	}
 	
-	public static BootstrapMethods deserialize(DataInputStream dis, int numberOfBootstrapMethodEntries, ConstantPool cp) throws IOException
+	public static BootstrapMethods deserialize(DesCtx ctx, int num) throws IOException
 	{
-		BootstrapMethods bootstrapMethods = new BootstrapMethods(numberOfBootstrapMethodEntries);
-		for(int i = 0; i < numberOfBootstrapMethodEntries; i++)
+		ConstantPool cp = ctx.getConstantPool();
+		
+		BootstrapMethods bootstrapMethods = new BootstrapMethods(num);
+		for(int i = 0; i < num; i++)
 		{
-			bootstrapMethods.bootstrapMethodEntries[i] = BootstrapMethodEntry.deserialize(dis, cp);
+			bootstrapMethods.bootstrapMethodEntries[i] = BootstrapMethodEntry.deserialize(ctx);
 		}
 		
 		/* late decouple constant pool type invoke dynamics !!! */

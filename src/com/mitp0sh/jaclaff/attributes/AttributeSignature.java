@@ -6,10 +6,11 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class AttributeSignature extends AbstractAttribute
 {
 	private int                    signatureIndex = 0;
@@ -35,19 +36,23 @@ public class AttributeSignature extends AbstractAttribute
 		this.signatureObject = signatureObject;
 	}
 	
-	public static AttributeSignature deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeSignature deserialize(DesCtx ctx) throws IOException
     {		
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		AttributeSignature attribute = new AttributeSignature();
 		
 		attribute.setSignatureIndex(dis.readUnsignedShort());
 		
-		decoupleFromIndices(attribute, constantPool);
+		decoupleFromIndices(ctx, attribute);
 		
 		return attribute;
     }
 	
-	public static void decoupleFromIndices(AttributeSignature attribute, ConstantPool constantPool)
+	public static void decoupleFromIndices(DesCtx ctx, AttributeSignature attribute)
 	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		attribute.setSignatureObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.signatureIndex));
 		attribute.setSignatureIndex(0);
 	}

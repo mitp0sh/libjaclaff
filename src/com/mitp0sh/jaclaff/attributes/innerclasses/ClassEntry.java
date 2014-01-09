@@ -7,19 +7,20 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class ClassEntry
 {	
-	private int                     innerClassInfoIndex = 0;
-	private ConstantPoolTypeClass    innerClassInfoObject = null;
-	private int                     outerClassInfoIndex = 0;
-	private ConstantPoolTypeClass    outerClassInfoObject = null;
-	private int                          innerNameIndex = 0;
-	private ConstantPoolTypeUtf8          innerNameObject = null;
-	private short                   innerClassAccessFlags = 0;
+	private int                    innerClassInfoIndex = 0;
+	private ConstantPoolTypeClass innerClassInfoObject = null;
+	private int                    outerClassInfoIndex = 0;
+	private ConstantPoolTypeClass outerClassInfoObject = null;
+	private int                         innerNameIndex = 0;
+	private ConstantPoolTypeUtf8       innerNameObject = null;
+	private short                innerClassAccessFlags = 0;
 	
 	public int getInnerClassInfoIndex() 
 	{
@@ -90,19 +91,11 @@ public class ClassEntry
 	{
 		this.innerNameObject = innerNameObject;
 	}
-	
-	public static void decoupleFromIndices(ClassEntry classEntry, ConstantPool constantPool)
-	{
-		classEntry.setInnerClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerClassInfoIndex));
-		classEntry.setInnerClassInfoIndex(0);
-		classEntry.setOuterClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.outerClassInfoIndex));
-		classEntry.setOuterClassInfoIndex(0);		
-		classEntry.setInnerNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerNameIndex));
-		classEntry.setInnerNameIndex(0);
-	}
 
-	public static ClassEntry deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static ClassEntry deserialize(DesCtx ctx) throws IOException
 	{
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		ClassEntry attribute = new ClassEntry();
 		
 		attribute.setInnerClassInfoIndex(dis.readUnsignedShort());
@@ -110,10 +103,22 @@ public class ClassEntry
 		attribute.setInnerNameIndex(dis.readUnsignedShort());
 		attribute.setInnerClassAccessFlags((short)dis.readUnsignedShort());
 		
-		decoupleFromIndices(attribute, constantPool);
+		decoupleFromIndices(ctx, attribute);
 		
 		return attribute;
     }
+	
+	public static void decoupleFromIndices(DesCtx ctx, ClassEntry classEntry)
+	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
+		classEntry.setInnerClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerClassInfoIndex));
+		classEntry.setInnerClassInfoIndex(0);
+		classEntry.setOuterClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.outerClassInfoIndex));
+		classEntry.setOuterClassInfoIndex(0);		
+		classEntry.setInnerNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerNameIndex));
+		classEntry.setInnerNameIndex(0);
+	}
 	
 	private static void coupleToIndices(SerCtx ctx, ClassEntry classEntry)
 	{

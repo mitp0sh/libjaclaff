@@ -142,7 +142,7 @@ public class FieldEntry
 		baos.write(PNC.toByteArray(fieldEntry.getAttributeCount(), Short.class));
 		if(fieldEntry.getAttributeCount() > 0)
 		{
-			baos.write(Attributes.serialize(ctx, fieldEntry.getAttributes()));
+			baos.write(Attributes.serialize(ctx, fieldEntry.getAttributes(), null));
 		}
 		
 		return baos.toByteArray();

@@ -3,8 +3,11 @@ package com.mitp0sh.jaclaff.attributes.linenumbertable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 
+/* complete */
 public class LineNumberTable
 {
 	private LineNumberTableEntry[] lineNumberTable = new LineNumberTableEntry[0];
@@ -29,24 +32,25 @@ public class LineNumberTable
 		this.lineNumberTable = lineNumberTable;
 	}
 	
-	public static LineNumberTable deserialize(DesCtx ctx, int lineNumberTableLength) throws IOException
+	public static LineNumberTable deserialize(DesCtx ctx, int length, AttributeCode attributeCode) throws IOException
     {	
-		LineNumberTable lineNumberTable = new LineNumberTable(lineNumberTableLength);
-		for(int i = 0; i < lineNumberTableLength; i++)
+		LineNumberTable lineNumberTable = new LineNumberTable(length);
+		for(int i = 0; i < length; i++)
 		{
-			lineNumberTable.getLineNumberTable()[i] = LineNumberTableEntry.deserialize(ctx);
+			lineNumberTable.getLineNumberTable()[i] = LineNumberTableEntry.deserialize(ctx, attributeCode);
 		}
 		
 		return lineNumberTable;
     }
 	
-	public static byte[] serialize(LineNumberTable lineNumberTable) throws IOException
+	public static byte[] serialize(SerCtx ctx, LineNumberTable lineNumberTable, AttributeCode attributeCode) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		for(int i = 0; i < lineNumberTable.getLineNumberTableLength(); i++)
 		{
-			baos.write(LineNumberTableEntry.serialize(lineNumberTable.getLineNumberTable()[i]));
+			LineNumberTableEntry current = lineNumberTable.getLineNumberTable()[i];
+			baos.write(LineNumberTableEntry.serialize(ctx, current, attributeCode));
 		}
 		
 		return baos.toByteArray();

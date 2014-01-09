@@ -6,15 +6,16 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class Annotation 
 {
-	private int                            typeIndex = 0;
-	private ConstantPoolTypeUtf8          typeObject = null;
-	private ElementValuePairs      elementValuePairs = null;
+	private int                       typeIndex = 0;
+	private ConstantPoolTypeUtf8     typeObject = null;
+	private ElementValuePairs elementValuePairs = null;
 	
 	public int getTypeIndex() 
 	{
@@ -51,21 +52,25 @@ public class Annotation
 		this.typeObject = typeObject;
 	}
 
-	public static Annotation deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static Annotation deserialize(DesCtx ctx) throws IOException
 	{
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		Annotation annotation = new Annotation();
 		
 		annotation.setTypeIndex(dis.readUnsignedShort());
 		int numElementValuePairs = dis.readUnsignedShort();
-		annotation.setElementValuePairs(ElementValuePairs.deserialize(dis, numElementValuePairs, constantPool));
+		annotation.setElementValuePairs(ElementValuePairs.deserialize(ctx, numElementValuePairs));
 		
-		decoupleFromIndices(annotation, constantPool);
+		decoupleFromIndices(ctx, annotation);
 		
 		return annotation;
 	}
 	
-	public static void decoupleFromIndices(Annotation annotation, ConstantPool constantPool)
+	public static void decoupleFromIndices(DesCtx ctx, Annotation annotation)
 	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		annotation.setTypeObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, annotation.typeIndex));
 		annotation.setTypeIndex(0);
 	}

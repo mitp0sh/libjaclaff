@@ -6,10 +6,11 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class EnumConstValue
 {
 	private int                    typeNameIndex = 0;
@@ -57,22 +58,27 @@ public class EnumConstValue
 		this.constNameObject = constNameObject;
 	}
 	
-	public static EnumConstValue deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static EnumConstValue deserialize(DesCtx ctx) throws IOException
 	{		
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		EnumConstValue enumConstValue = new EnumConstValue();
 		
 		enumConstValue.setTypeNameIndex(dis.readUnsignedShort());
 		enumConstValue.setConstNameIndex(dis.readUnsignedShort());
 		
-		decoupleFromIndices(enumConstValue, constantPool);
+		decoupleFromIndices(ctx, enumConstValue);
 		
 		return enumConstValue;
 	}
 	
-	public static void decoupleFromIndices(EnumConstValue enumConstValue, ConstantPool constantPool)
+	public static void decoupleFromIndices(DesCtx ctx, EnumConstValue enumConstValue)
 	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		enumConstValue.setTypeNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, enumConstValue.typeNameIndex));
 		enumConstValue.setTypeNameIndex(0);
+		
 		enumConstValue.setConstNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, enumConstValue.constNameIndex));
 		enumConstValue.setConstNameIndex(0);
 	}
@@ -80,8 +86,10 @@ public class EnumConstValue
 	public static void coupleToIndices(SerCtx ctx, EnumConstValue enumConstValue)
 	{
 		ConstantPool cp = ctx.getConstantPool();
+		
 		short typeNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, enumConstValue.getTypeNameObject());
 		enumConstValue.setTypeNameIndex(typeNameIndex);
+		
 		short constNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, enumConstValue.getConstNameObject());
 		enumConstValue.setConstNameIndex(constNameIndex);
 	}
@@ -92,7 +100,7 @@ public class EnumConstValue
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(PNC.toByteArray(enumConstValue.getTypeNameIndex(), Short.class));
+		baos.write(PNC.toByteArray(enumConstValue.getTypeNameIndex(),  Short.class));
 		baos.write(PNC.toByteArray(enumConstValue.getConstNameIndex(), Short.class));
 		
 		return baos.toByteArray();

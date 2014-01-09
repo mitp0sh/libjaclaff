@@ -7,10 +7,6 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.attributes.code.ExceptionTable;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.Disassembler;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
-import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
-import com.mitp0sh.jaclaff.attributes.linenumbertable.LineNumberTableEntry;
-import com.mitp0sh.jaclaff.attributes.localvariabletable.LocalVariableTableEntry;
-import com.mitp0sh.jaclaff.attributes.localvariabletypetable.LocalVariableTypeTableEntry;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
@@ -157,97 +153,9 @@ public class AttributeCode extends AbstractAttribute
 		baos.write(PNC.toByteArray(attribute.getAttributesCount(), Short.class));
 		if(attribute.getAttributesCount() > 0)
 	    {
-			baos.write(Attributes.serialize(ctx, attribute.getAttributes()));
+			baos.write(Attributes.serialize(ctx, attribute.getAttributes(), attribute));
 	    }
 		
 		return baos.toByteArray();
-	}
-	
-	public static void decoupleFromOffsets(Object             	element, 
-			                               MethodInstructions 	methodInstructions, 
-			                               ConstantPool       	constantPool)
-	{
-		if("de.microshield.jcfl.attributes.Attributes".equals(element.getClass().getCanonicalName()))
-		{
-			Attributes attributes = (Attributes)element;
-			
-			/* iterate attributes to find relevant ones */
-			for(int i = 0; i < attributes.getAttributesCount(); i++)
-			{
-				String attributeName = attributes.getAttributes()[i].getAttributeNameObject().getBytes();
-				
-				if(AbstractAttribute.attributeLineNumberTable.equals(attributeName))
-				{
-					AttributeLineNumberTable attribute = (AttributeLineNumberTable)attributes.getAttributes()[i];
-				
-					/* iterate all line number table entries */
-					for(int x = 0; x < attribute.getLineNumberTableLength(); x++)
-					{
-						LineNumberTableEntry lineNumberTableEntry;
-						lineNumberTableEntry = attribute.getLineNumberTable().getLineNumberTable()[i];
-						
-						/* iterate all instructions to find the instruction we need */
-						for(int y = 0; y < methodInstructions.getNumberOfInstructions(); y++)
-						{
-							SingleInstruction currentInstruction = methodInstructions.getInstructions()[y];
-							
-							if(lineNumberTableEntry.getStartPc() == currentInstruction.getOffset())
-							{
-								lineNumberTableEntry.setInstructionIndexStartPc(y);
-								break;
-							}	
-						}
-					}
-				}
-				else
-				if(AbstractAttribute.attributeLocalVariableTable.equals(attributeName))
-				{
-					AttributeLocalVariableTable attribute = (AttributeLocalVariableTable)attributes.getAttributes()[i];
-				
-					/* iterate all line number table entries */
-					for(int x = 0; x < attribute.getLocalVariableTable().getLocalVariableTable().length; x++)
-					{
-						LocalVariableTableEntry localVariableTableEntry;
-						localVariableTableEntry = attribute.getLocalVariableTable().getLocalVariableTable()[x];
-						
-						/* iterate all instructions to find the instruction we need */
-						for(int y = 0; y < methodInstructions.getNumberOfInstructions(); y++)
-						{
-							SingleInstruction currentInstruction = methodInstructions.getInstructions()[y];
-							
-							if(localVariableTableEntry.getStart_pc() == currentInstruction.getOffset())
-							{
-								localVariableTableEntry.setInstructionIndexStartPc(y);
-								break;
-							}	
-						}
-					}
-				}
-				else
-				if(AbstractAttribute.attributeLocalVariableTypeTable.equals(attributeName))
-				{
-					AttributeLocalVariableTypeTable attribute = (AttributeLocalVariableTypeTable)attributes.getAttributes()[i];
-				
-					/* iterate all line number table entries */
-					for(int x = 0; x < attribute.getLocalVariableTypeTable().getLocalVariableTypeTable().length; x++)
-					{
-						LocalVariableTypeTableEntry localVariableTypeTableEntry;
-						localVariableTypeTableEntry = attribute.getLocalVariableTypeTable().getLocalVariableTypeTable()[x];
-						
-						/* iterate all instructions to find the instruction we need */
-						for(int y = 0; y < methodInstructions.getNumberOfInstructions(); y++)
-						{
-							SingleInstruction currentInstruction = methodInstructions.getInstructions()[y];
-							
-							if(localVariableTypeTableEntry.getStart_pc() == currentInstruction.getOffset())
-							{
-								localVariableTypeTableEntry.setInstructionIndexStartPc(y);
-								break;
-							}	
-						}
-					}
-				}
-			}
-		}
 	}
 }

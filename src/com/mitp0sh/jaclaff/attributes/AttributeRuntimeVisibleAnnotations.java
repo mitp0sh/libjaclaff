@@ -5,19 +5,17 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.generic.Annotation;
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-
+/* complete */
 public class AttributeRuntimeVisibleAnnotations extends AbstractAttribute
 {
-	private int        numAnnotations = 0;
 	private Annotation[]  annotations = new Annotation[0];
 	
 	public AttributeRuntimeVisibleAnnotations(int numAnnotations)
 	{
-		this.numAnnotations = numAnnotations;
 		this.annotations    = new Annotation[numAnnotations];
 	}
 	
@@ -33,16 +31,19 @@ public class AttributeRuntimeVisibleAnnotations extends AbstractAttribute
 	
 	public int getNumAnnotations() 
 	{
-		return numAnnotations;
+		return annotations.length;
 	}
 	
-	public static AttributeRuntimeVisibleAnnotations deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static AttributeRuntimeVisibleAnnotations deserialize(DesCtx ctx) throws IOException
     {		
-		AttributeRuntimeVisibleAnnotations attribute = new AttributeRuntimeVisibleAnnotations(dis.readUnsignedShort());
+		DataInputStream dis = ctx.getDataInputStream();
+		
+		int num = dis.readUnsignedShort();
+		AttributeRuntimeVisibleAnnotations attribute = new AttributeRuntimeVisibleAnnotations(num);
 		
 		for(int i = 0; i < attribute.getNumAnnotations(); i++)
 		{
-			attribute.getAnnotations()[i] = Annotation.deserialize(dis, constantPool);
+			attribute.getAnnotations()[i] = Annotation.deserialize(ctx);
 		}
 		
 		return attribute;

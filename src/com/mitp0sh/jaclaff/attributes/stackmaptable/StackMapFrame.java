@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 public class StackMapFrame
@@ -21,8 +22,11 @@ public class StackMapFrame
 		this.stackMapFrame = stackMapFrame;
 	}
 	
-	public static StackMapFrame deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static StackMapFrame deserialize(DesCtx ctx) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		StackMapFrame stackMapFrame = new StackMapFrame();
 		AbstractStackMapFrame asmf = null;
 		
@@ -64,7 +68,7 @@ public class StackMapFrame
 		if(frameType >= AbstractStackMapFrame.FRAME_TYPE_APPEND_FRAME_START &&
 		   frameType <= AbstractStackMapFrame.FRAME_TYPE_APPEND_FRAME_END)
 		{
-			AppendFrame appendFrame = AppendFrame.deserialize(dis, constantPool, frameType);
+			AppendFrame appendFrame = AppendFrame.deserialize(ctx, frameType);
 			asmf = appendFrame; 
 		}
 		else

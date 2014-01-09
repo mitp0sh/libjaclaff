@@ -307,7 +307,7 @@ public class VirtualClassFile
 		baos.write(Methods.serialize(ctx, ctx.getVirtualClassFile().getMethods()));
 		
 		baos.write(PNC.toByteArray(vcf.getAttributesCount(), Short.class));
-		baos.write(Attributes.serialize(ctx, ctx.getVirtualClassFile().getAttributes()));
+		baos.write(Attributes.serialize(ctx, ctx.getVirtualClassFile().getAttributes(), null));
 		
 		return baos.toByteArray();
 	}

@@ -1,5 +1,6 @@
 package com.mitp0sh.jaclaff.attributes.stackmaptable;
 
+/* complete */
 public abstract class AbstractStackMapFrame
 {
 	private short  stack_map_frame_type;

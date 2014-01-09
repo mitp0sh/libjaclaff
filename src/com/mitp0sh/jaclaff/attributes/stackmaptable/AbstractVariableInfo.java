@@ -1,5 +1,6 @@
 package com.mitp0sh.jaclaff.attributes.stackmaptable;
 
+/* complete */
 public abstract class AbstractVariableInfo
 {
 	private short   variable_info_tag;
