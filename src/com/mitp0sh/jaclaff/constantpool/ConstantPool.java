@@ -13,7 +13,7 @@ public class ConstantPool
 	
 	private AbstractConstantPoolType[] constantPool;
 
-	public ConstantPool(short constantPoolCount)
+	public ConstantPool(int constantPoolCount)
 	{
 		this.setConstantPool(new AbstractConstantPoolType[constantPoolCount]);
 	}
@@ -43,7 +43,7 @@ public class ConstantPool
 		return ((ConstantPoolTypeUtf8)(this.getConstantPool()[index])).getBytes();
 	}
 	
-	public static ConstantPool deserialize(DesCtx ctx, short constantPoolCount) throws IOException
+	public static ConstantPool deserialize(DesCtx ctx, int constantPoolCount) throws IOException
     {
 		DataInputStream       dis = ctx.getDataInputStream();
 		ConstantPool constantPool = new ConstantPool(constantPoolCount);

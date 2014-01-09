@@ -11,9 +11,14 @@ public class Fields
 {	
 	private FieldEntry[] fields = new FieldEntry[0];	
 	
-	public Fields(short fieldsCount)
+	public Fields(int fieldsCount)
 	{
-		this.fields = new FieldEntry[fieldsCount & 0xFFFF];
+		this.fields = new FieldEntry[fieldsCount];
+	}
+	
+	public int getNumberOfFields()
+	{
+		return fields.length;
 	}
 	
 	public FieldEntry[] getFields()
@@ -21,7 +26,7 @@ public class Fields
 		return fields;
 	}
 	
-	public static Fields deserialize(DesCtx ctx, short fieldsCount) throws IOException
+	public static Fields deserialize(DesCtx ctx, int fieldsCount) throws IOException
     {	
 		Fields fields = new Fields(fieldsCount);
 		

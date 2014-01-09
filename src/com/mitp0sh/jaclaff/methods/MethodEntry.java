@@ -15,11 +15,11 @@ import com.mitp0sh.jaclaff.util.PNC;
 public class MethodEntry
 {
 	private short                     accessFlags = 0;
-	private short                       nameIndex = 0;
+	private int                         nameIndex = 0;
 	private ConstantPoolTypeUtf8       nameObject = null;
-	private short                       descIndex = 0;
+	private int                         descIndex = 0;
 	private ConstantPoolTypeUtf8 descriptorObject = null;
-	private short                  attributeCount = 0;
+	private int                    attributeCount = 0;
 	private Attributes                 attributes = null;
 	
 	public short getAccessFlags()
@@ -32,22 +32,22 @@ public class MethodEntry
 		this.accessFlags = accessFlags;
 	}
 	
-	public short getNameIndex()
+	public int getNameIndex()
 	{
 		return nameIndex;
 	}
 	
-	public void setNameIndex(short nameIndex)
+	public void setNameIndex(int nameIndex)
 	{
 		this.nameIndex = nameIndex;
 	}
 	
-	public short getDescIndex()
+	public int getDescIndex()
 	{
 		return descIndex;
 	}
 	
-	public void setDescIndex(short descIndex)
+	public void setDescIndex(int descIndex)
 	{
 		this.descIndex = descIndex;
 	}
@@ -72,12 +72,12 @@ public class MethodEntry
 		this.descriptorObject = descriptorObject;
 	}
 	
-	public short getAttributeCount()
+	public int getAttributeCount()
 	{
 		return attributeCount;
 	}
 	
-	public void setAttributeCount(short attributeCount)
+	public void setAttributeCount(int attributeCount)
 	{
 		this.attributeCount = attributeCount;
 	}

@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.Attributes;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.fields.Fields;
 import com.mitp0sh.jaclaff.interfaces.Interfaces;
@@ -18,22 +19,22 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class VirtualClassFile 
 {
-	private int                        magic = 0;
-	private short               minorVersion = 0;
-	private short               majorVersion = 0;
-	private short          constantPoolCount = 0;
-	private ConstantPool        constantPool = null;	
-	private short                accessFlags = 0;
-	private short                  thisField = 0;
-	private short                 superField = 0;
-	private short            interfacesCount = 0;
-	private Interfaces            interfaces = null;	
-	private short                fieldsCount = 0;
-	private Fields                    fields = null;	
-	private short               methodsCount = 0;	
-	private Methods                  methods = null;
-	private short            attributesCount = 0;
-	private Attributes            attributes = null;
+	private int                 magic = 0;
+	private short        minorVersion = 0;
+	private short        majorVersion = 0;
+	private int     constantPoolCount = 0;
+	private ConstantPool constantPool = null;	
+	private short         accessFlags = 0;
+	private int             thisField = 0;
+	private int            superField = 0;
+	private Interfaces     interfaces = null;	
+	private Fields             fields = null;		
+	private Methods           methods = null;
+	private int       attributesCount = 0;
+	private Attributes     attributes = null;
+	
+	private ConstantPoolTypeClass  thisFieldObject = null;
+	private ConstantPoolTypeClass superFieldObject = null;
 	
 	public int getMagic()
 	{
@@ -65,12 +66,12 @@ public class VirtualClassFile
 		this.majorVersion = MajorVersion;
 	}
 
-	public short getConstantPoolCount() 
+	public int getConstantPoolCount() 
 	{
 		return this.constantPoolCount;
 	}
 
-	public void setConstantPoolCount(short ConstantPoolCount) 
+	public void setConstantPoolCount(int ConstantPoolCount) 
 	{
 		this.constantPoolCount = ConstantPoolCount;
 	}
@@ -95,34 +96,34 @@ public class VirtualClassFile
 		this.accessFlags = accessFlags;
 	}
 
-	public short getThisField()
+	public int getThisField()
 	{
 		return thisField;
 	}
 
-	public void setThisField(short thisField) 
+	public void setThisField(int thisField) 
 	{
 		this.thisField = thisField;
 	}
 
-	public short getSuperField() 
+	public int getSuperField() 
 	{
 		return superField;
 	}
 
-	public void setSuperField(short superField)
+	public void setSuperField(int superField)
 	{
 		this.superField = superField;
 	}
 	
-	public short getInterfacesCount() 
+	public int getInterfacesCount() 
 	{
-		return interfacesCount;
-	}
-
-	public void setInterfacesCount(short interfacesCount) 
-	{
-		this.interfacesCount = interfacesCount;
+		if(interfaces != null)
+		{
+			return interfaces.getNumberOfInterfaces();
+		}
+		
+		return 0;
 	}
 
 	public Interfaces getInterfaces()
@@ -135,14 +136,14 @@ public class VirtualClassFile
 		this.interfaces = interfaces;
 	}
 	
-	public short getFieldsCount()
+	public int getFieldsCount()
 	{
-		return fieldsCount;
-	}
-
-	public void setFieldsCount(short fieldsCount)
-	{
-		this.fieldsCount = fieldsCount;
+		if(fields != null)
+		{
+			return fields.getNumberOfFields();
+		}
+		
+		return 0;
 	}
 	
 	public Fields getFields()
@@ -155,14 +156,14 @@ public class VirtualClassFile
 		this.fields = fields;
 	}
 	
-	public short getMethodsCount() 
+	public int getMethodsCount() 
 	{
-		return methodsCount;
-	}
-
-	public void setMethodsCount(short methodsCount) 
-	{
-		this.methodsCount = methodsCount;
+		if(methods != null)
+		{
+			return methods.getNumberOfMethods();
+		}
+		
+		return 0;
 	}
 
 	public Methods getMethods() 
@@ -175,12 +176,12 @@ public class VirtualClassFile
 		this.methods = methods;
 	}
 	
-	public short getAttributesCount()
+	public int getAttributesCount()
 	{
 		return attributesCount;
 	}
 
-	public void setAttributesCount(short attributesCount) 
+	public void setAttributesCount(int attributesCount) 
 	{
 		this.attributesCount = attributesCount;
 	}
@@ -193,6 +194,26 @@ public class VirtualClassFile
 	public void setAttributes(Attributes attributes)
 	{
 		this.attributes = attributes;
+	}
+	
+	public ConstantPoolTypeClass getThisFieldObject()
+	{
+		return thisFieldObject;
+	}
+
+	public void setThisFieldObject(ConstantPoolTypeClass thisFieldObject) 
+	{
+		this.thisFieldObject = thisFieldObject;
+	}
+
+	public ConstantPoolTypeClass getSuperFieldObject() 
+	{
+		return superFieldObject;
+	}
+
+	public void setSuperFieldObject(ConstantPoolTypeClass superFieldObject) 
+	{
+		this.superFieldObject = superFieldObject;
 	}
 	
 	public static VirtualClassFile deserialize(DesCtx ctx, String filename) throws IOException
@@ -230,7 +251,7 @@ public class VirtualClassFile
 		cfd.setMajorVersion((short)dis.readUnsignedShort());
 		
 		/* read constant pool count */
-		cfd.setConstantPoolCount((short)dis.readUnsignedShort());
+		cfd.setConstantPoolCount(dis.readUnsignedShort());
 		
 		/* parse constant pool */
 		cfd.setConstantPool(ConstantPool.deserialize(ctx, cfd.getConstantPoolCount()));
@@ -239,36 +260,61 @@ public class VirtualClassFile
 		cfd.setAccessFlags((short)dis.readUnsignedShort());
 		
 		/* read this field */
-		cfd.setThisField((short)dis.readUnsignedShort());
+		cfd.setThisField(dis.readUnsignedShort());
 		
 		/* read super field */
-		cfd.setSuperField((short)dis.readUnsignedShort());
+		cfd.setSuperField(dis.readUnsignedShort());
 		
 		/* read interfaces count */
-		cfd.setInterfacesCount((short)dis.readUnsignedShort());
+		int numberOfInterfaces = dis.readUnsignedShort();
 		
 		/* parse interfaces */
-		cfd.setInterfaces(Interfaces.deserialize(dis, cfd.getInterfacesCount(), cfd.getConstantPool()));
+		cfd.setInterfaces(Interfaces.deserialize(ctx, numberOfInterfaces));
 		
 		/* read fields count */
-		cfd.setFieldsCount((short)dis.readUnsignedShort());
+		int numberOfFields = dis.readUnsignedShort();
 		
 		/* parse fields */
-		cfd.setFields(Fields.deserialize(ctx, cfd.getFieldsCount()));
+		cfd.setFields(Fields.deserialize(ctx, numberOfFields));
 		
 		/* read methods count */
-		cfd.setMethodsCount((short)dis.readUnsignedShort());
+		int numberOfMethods = dis.readUnsignedShort();
 		
 		/* parse methods */
-		cfd.setMethods(Methods.deserialize(ctx, cfd.getMethodsCount()));
+		cfd.setMethods(Methods.deserialize(ctx, numberOfMethods));
 		
 		/* read attributes count */
-		cfd.setAttributesCount((short)dis.readUnsignedShort());
+		cfd.setAttributesCount(dis.readUnsignedShort());
 		
 		/* parse methods */
 		cfd.setAttributes(Attributes.deserialize(ctx, cfd.getAttributesCount(), null));
 		
+		/* decouple from indices */
+		decoupleFromIndices(ctx, cfd);
+		
 		return cfd;
+	}
+	
+	public static void decoupleFromIndices(DesCtx ctx, VirtualClassFile vcf)
+	{
+		ConstantPool constantPool = ctx.getConstantPool();
+		
+		ConstantPoolTypeClass thisFieldObject = null;
+		thisFieldObject = (ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, vcf.getThisField());
+		vcf.setThisFieldObject(thisFieldObject);
+		
+		ConstantPoolTypeClass superFieldObject = null;
+		superFieldObject = (ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, vcf.getSuperField());
+		vcf.setSuperFieldObject(superFieldObject);
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, VirtualClassFile vcf)
+	{
+		short thisFieldIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), vcf.getThisFieldObject());
+		vcf.setThisField(thisFieldIndex);
+		
+		short superFieldIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), vcf.getSuperFieldObject());
+		vcf.setSuperField(superFieldIndex);
 	}
 	
 	public static byte[] serialize(SerCtx ctx) throws IOException
@@ -281,6 +327,9 @@ public class VirtualClassFile
 			/* set source constant pool */
 			ctx.setConstantPool(vcf.getConstantPool());
 		}
+		
+		/* couple to indices */
+		coupleToIndices(ctx, vcf);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		

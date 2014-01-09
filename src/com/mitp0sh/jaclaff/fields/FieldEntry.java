@@ -15,11 +15,11 @@ import com.mitp0sh.jaclaff.util.PNC;
 public class FieldEntry
 {
 	private short                     accessFlags = 0;
-	private short                       nameIndex = 0;
+	private int                         nameIndex = 0;
 	private ConstantPoolTypeUtf8       nameObject = null;
-	private short                       descIndex = 0;
+	private int                         descIndex = 0;
 	private ConstantPoolTypeUtf8 descriptorObject = null;
-	private short                  attributeCount = 0;
+	private int                    attributeCount = 0;
 	private Attributes                 attributes = null;
 
 	public short getAccessFlags()
@@ -32,22 +32,22 @@ public class FieldEntry
 		this.accessFlags = accessFlags;
 	}
 	
-	public short getNameIndex()
+	public int getNameIndex()
 	{
 		return nameIndex;
 	}
 	
-	public void setNameIndex(short nameIndex)
+	public void setNameIndex(int nameIndex)
 	{
 		this.nameIndex = nameIndex;
 	}
 	
-	public short getDescIndex()
+	public int getDescIndex()
 	{
 		return descIndex;
 	}
 	
-	public void setDescIndex(short descIndex)
+	public void setDescIndex(int descIndex)
 	{
 		this.descIndex = descIndex;
 	}
@@ -72,12 +72,12 @@ public class FieldEntry
 		this.descriptorObject = descriptorObject;
 	}
 	
-	public short getAttributeCount()
+	public int getAttributeCount()
 	{
 		return attributeCount;
 	}
 	
-	public void setAttributeCount(short attributeCount)
+	public void setAttributeCount(int attributeCount)
 	{
 		this.attributeCount = attributeCount;
 	}
@@ -90,14 +90,6 @@ public class FieldEntry
 	public void setAttributes(Attributes attributes)
 	{
 		this.attributes = attributes;
-	}
-	
-	public static void decoupleFromIndices(FieldEntry field, ConstantPool constantPool)
-	{
-		field.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getNameIndex()));
-		field.setNameIndex((short)0);
-		field.setDescriptorObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getDescIndex()));
-		field.setDescIndex((short)0);
 	}
 	
 	public static FieldEntry deserialize(DesCtx ctx) throws IOException
@@ -121,6 +113,14 @@ public class FieldEntry
 		
 		return fieldEntry;
     }
+	
+	public static void decoupleFromIndices(FieldEntry field, ConstantPool constantPool)
+	{
+		field.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getNameIndex()));
+		field.setNameIndex((short)0);
+		field.setDescriptorObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getDescIndex()));
+		field.setDescIndex((short)0);
+	}
 	
 	public static void coupleToIndices(SerCtx ctx, FieldEntry field)
 	{

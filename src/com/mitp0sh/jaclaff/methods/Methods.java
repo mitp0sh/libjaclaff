@@ -11,9 +11,14 @@ public class Methods
 {
 private MethodEntry[] methods = new MethodEntry[0];	
 	
-	public Methods(short methodCount)
+	public Methods(int methodCount)
 	{
-		this.methods = new MethodEntry[methodCount & 0xFFFF];
+		this.methods = new MethodEntry[methodCount];
+	}
+	
+	public int getNumberOfMethods()
+	{
+		return methods.length;
 	}
 	
 	public MethodEntry[] getMethods()
@@ -21,7 +26,7 @@ private MethodEntry[] methods = new MethodEntry[0];
 		return this.methods;
 	}
 	
-	public static Methods deserialize(DesCtx ctx, short methodsCount) throws IOException
+	public static Methods deserialize(DesCtx ctx, int methodsCount) throws IOException
     {	
 		Methods methods = new Methods(methodsCount);
 		
