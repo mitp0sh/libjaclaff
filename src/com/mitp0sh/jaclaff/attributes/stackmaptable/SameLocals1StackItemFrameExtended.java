@@ -4,28 +4,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 public class SameLocals1StackItemFrameExtended extends AbstractStackMapFrame
 {
-	private short                offsetDelta = 0;
 	private VerificationTypeInfo stackObject = null;
 	
 	public SameLocals1StackItemFrameExtended()
 	{
 		setStack_map_frame_string_representation("same_locals_1_stack_item_frame_extended");
-	}
-	
-	public short getOffsetDelta() 
-	{
-		return offsetDelta;
-	}
-
-	public void setOffsetDelta(short offsetDelta) 
-	{
-		this.offsetDelta = offsetDelta;
+		setStack_map_frame_is_explicit(true);
 	}
 
 	public VerificationTypeInfo getStackObject() 
@@ -38,22 +30,30 @@ public class SameLocals1StackItemFrameExtended extends AbstractStackMapFrame
 		this.stackObject = stackObject;
 	}
 	
-	public static SameLocals1StackItemFrameExtended deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static SameLocals1StackItemFrameExtended deserialize(DesCtx ctx, AttributeCode attributeCode, AbstractStackMapFrame previousFrame) throws IOException
     {
+		DataInputStream       dis = ctx.getDataInputStream();
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		SameLocals1StackItemFrameExtended sameLocals1StackItemFrameExtended = new SameLocals1StackItemFrameExtended();
+		sameLocals1StackItemFrameExtended.setPreviousFrame(previousFrame);
 		
 		/* read offset delta */
-		short offsetDelta = dis.readShort();
+		int offsetDelta = dis.readUnsignedShort();
 		sameLocals1StackItemFrameExtended.setOffsetDelta(offsetDelta);
 		
 		/* deserialize single verification type info */
 		sameLocals1StackItemFrameExtended.setStackObject(VerificationTypeInfo.deserialize(dis, constantPool));
+		
+		decoupleFromOffsets(ctx, sameLocals1StackItemFrameExtended, attributeCode);
 		
 		return sameLocals1StackItemFrameExtended;
     }
 	
 	public static byte[] serialize(SerCtx ctx, SameLocals1StackItemFrameExtended sameLocals1StackItemFrameExtended) throws IOException
 	{	
+		coupleToOffsets(ctx, sameLocals1StackItemFrameExtended, null);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		/* serialize delta offset */

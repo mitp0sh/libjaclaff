@@ -57,7 +57,7 @@ public class ConstantPool
 			{
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_CLASS:
 				{					 					
-					constantPool.getConstantPool()[i] = ConstantPoolTypeClass.deserialize(dis);					
+					constantPool.getConstantPool()[i] = ConstantPoolTypeClass.deserialize(dis);	
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_FIELDREF:
@@ -154,9 +154,8 @@ public class ConstantPool
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_CLASS:
 				{						
 					ConstantPoolTypeClass entry = (ConstantPoolTypeClass)abstractCPT;
-					entry.setCptName((ConstantPoolTypeUtf8)getConstantPoolTypeByIndex(constantPool, entry.getNameIndex()));
+					entry.setNameObject((ConstantPoolTypeUtf8)getConstantPoolTypeByIndex(constantPool, entry.getNameIndex()));
 					entry.setNameIndex((short)0);
-					
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_FIELDREF:
@@ -227,7 +226,7 @@ public class ConstantPool
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_CLASS:
 				{	
 					ConstantPoolTypeClass entry = (ConstantPoolTypeClass)abstractCPT;
-					short nameIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptName());
+					short nameIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getNameObject());
 					entry.setNameIndex(nameIndex);
 					break;
 				}

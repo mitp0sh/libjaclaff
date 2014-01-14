@@ -5,41 +5,26 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 public class FullFrame extends AbstractStackMapFrame
 {
-	private short                      offsetDelta = 0;
-	private short                   numberOfLocals = 0;
 	private ArrayList<VerificationTypeInfo> locals = new ArrayList<VerificationTypeInfo>();
-	private short               numberOfStackItems = 0;
 	private ArrayList<VerificationTypeInfo>  stack = new ArrayList<VerificationTypeInfo>();
 	
 	public FullFrame()
 	{
 		setStack_map_frame_string_representation("full_frame");
-	}
-	
-	public short getOffsetDelta() 
-	{
-		return offsetDelta;
+		setStack_map_frame_is_explicit(true);
 	}
 
-	public void setOffsetDelta(short offsetDelta) 
+	public int getNumberOfLocals() 
 	{
-		this.offsetDelta = offsetDelta;
-	}
-
-	public short getNumberOfLocals() 
-	{
-		return numberOfLocals;
-	}
-
-	public void setNumberOfLocals(short numberOfLocals) 
-	{
-		this.numberOfLocals = numberOfLocals;
+		return locals.size();
 	}
 
 	public ArrayList<VerificationTypeInfo> getLocals() 
@@ -52,14 +37,9 @@ public class FullFrame extends AbstractStackMapFrame
 		this.locals = locals;
 	}
 
-	public short getNumberOfStackItems() 
+	public int getNumberOfStackItems() 
 	{
-		return numberOfStackItems;
-	}
-
-	public void setNumberOfStackItems(short numberOfStackItems) 
-	{
-		this.numberOfStackItems = numberOfStackItems;
+		return stack.size();
 	}
 
 	public ArrayList<VerificationTypeInfo> getStack() 
@@ -72,35 +52,40 @@ public class FullFrame extends AbstractStackMapFrame
 		this.stack = stack;
 	}
 	
-	public static FullFrame deserialize(DataInputStream dis, ConstantPool constantPool, byte frameType) throws IOException
+	public static FullFrame deserialize(DesCtx ctx, short frameType, AttributeCode code, AbstractStackMapFrame previousFrame) throws IOException
     {
+		DataInputStream       dis = ctx.getDataInputStream();
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		/* create new append frame instance */
-		FullFrame fullFrame = new FullFrame();		
+		FullFrame fullFrame = new FullFrame();	
+		fullFrame.setPreviousFrame(previousFrame);
 		
 		/* read offset delta */
-		short offsetDelta = dis.readShort();
+		int offsetDelta = dis.readUnsignedShort();
 		fullFrame.setOffsetDelta(offsetDelta);
-		short numberOfLocals = dis.readShort();
-		fullFrame.setNumberOfLocals(numberOfLocals);
 		
+		int numberOfLocals = dis.readUnsignedShort();		
 		for(int i = 0; i < numberOfLocals; i++)
 		{
 			fullFrame.locals.add(VerificationTypeInfo.deserialize(dis, constantPool));
 		}
 		
-		short numberOfStackItems = dis.readShort();
-		fullFrame.setNumberOfStackItems(numberOfStackItems);
-		
+		int numberOfStackItems = dis.readUnsignedShort();	
 		for(int i = 0; i < numberOfStackItems; i++)
 		{
 			fullFrame.stack.add(VerificationTypeInfo.deserialize(dis, constantPool));
 		}
+		
+		decoupleFromOffsets(ctx, fullFrame, code);
 		
 		return fullFrame;
     }
 	
 	public static byte[] serialize(SerCtx ctx, FullFrame fullFrame) throws IOException
 	{	
+		coupleToOffsets(ctx, fullFrame, null);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		/* serialize delta offset */

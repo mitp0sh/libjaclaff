@@ -4,27 +4,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 public class SameLocals1StackItemFrame extends AbstractStackMapFrame
 {
-	private byte           offsetDelta = 0;
 	private VerificationTypeInfo stack = null;
 
 	public SameLocals1StackItemFrame()
 	{
 		setStack_map_frame_string_representation("same_locals_1_stack_item_frame");
-	}
-	
-	public byte getOffsetDelta() 
-	{
-		return offsetDelta;
-	}
-
-	public void setOffsetDelta(byte offsetDelta) 
-	{
-		this.offsetDelta = offsetDelta;
+		setStack_map_frame_is_explicit(true);
 	}
 	
 	public VerificationTypeInfo getStack() 
@@ -37,19 +29,27 @@ public class SameLocals1StackItemFrame extends AbstractStackMapFrame
 		this.stack = stack;
 	}
 	
-	public static SameLocals1StackItemFrame deserialize(DataInputStream dis, ConstantPool constantPool, byte frameType) throws IOException
+	public static SameLocals1StackItemFrame deserialize(DesCtx ctx, short frameType, AttributeCode attributeCode, AbstractStackMapFrame previousFrame) throws IOException
     {
+		DataInputStream       dis = ctx.getDataInputStream();
+		ConstantPool constantPool = ctx.getConstantPool();
+		
 		SameLocals1StackItemFrame sameLocals1StackItemFrame = new SameLocals1StackItemFrame();
-		sameLocals1StackItemFrame.setOffsetDelta((byte)(frameType - 64));
+		sameLocals1StackItemFrame.setPreviousFrame(previousFrame);
+		sameLocals1StackItemFrame.setOffsetDelta(frameType - 64);
 		
 		/* deserialize single verification type info */
 		sameLocals1StackItemFrame.setStack(VerificationTypeInfo.deserialize(dis, constantPool));
+		
+		decoupleFromOffsets(ctx, sameLocals1StackItemFrame, attributeCode);
 		
 		return sameLocals1StackItemFrame;
     }
 	
 	public static byte[] serialize(SerCtx ctx, SameLocals1StackItemFrame sameLocals1StackItemFrame) throws IOException
 	{	
+		coupleToOffsets(ctx, sameLocals1StackItemFrame, null);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		/* serialize single verification type info */

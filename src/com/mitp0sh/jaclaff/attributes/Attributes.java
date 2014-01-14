@@ -19,7 +19,7 @@ public class Attributes
 	
 	public int getAttributesCount()
 	{
-		return (short)attributes.length;
+		return attributes.length;
 	}
 	
 	public AbstractAttribute[] getAttributes() 

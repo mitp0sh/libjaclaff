@@ -73,6 +73,8 @@ public class MethodInstructions
 		
 		for(int i = 0; i < disassembly.getInstructions().length; i++)
 		{
+			//System.out.println("i = " + (i + 1) + ", offset: " + currentOffset + ", inst: " + disassembly.getInstructions()[i].getByteCode().getByteCodeName());
+			
 			if(currentOffset == offset)
 			{
 				return disassembly.getInstructions()[i];

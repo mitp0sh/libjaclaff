@@ -4,43 +4,41 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 public class SameFrameExtended extends AbstractStackMapFrame
 {
-	private short offsetDelta = 0;
-
 	public SameFrameExtended()
 	{
 		setStack_map_frame_string_representation("same_frame_extended");
+		setStack_map_frame_is_explicit(true);
 	}
 	
-	public short getOffsetDelta() 
-	{
-		return offsetDelta;
-	}
-
-	public void setOffsetDelta(short offsetDelta) 
-	{
-		this.offsetDelta = offsetDelta;
-	}
-	
-	public static SameFrameExtended deserialize(DataInputStream dis) throws IOException
+	public static SameFrameExtended deserialize(DesCtx ctx, AttributeCode attributeCode, AbstractStackMapFrame previousFrame) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		SameFrameExtended sameFrameExtended = new SameFrameExtended();
+		sameFrameExtended.setPreviousFrame(previousFrame);
 		
 		/* read offset delta */
-		short offsetDelta = (byte)dis.readUnsignedShort();
+		int offsetDelta = dis.readUnsignedShort();
 		sameFrameExtended.setOffsetDelta(offsetDelta);
+		
+		decoupleFromOffsets(ctx, sameFrameExtended, attributeCode);
 		
 		return sameFrameExtended;
     }
 	
 	public static byte[] serialize(SerCtx ctx, SameFrameExtended sameFrameExtended) throws IOException
 	{	
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		coupleToOffsets(ctx, sameFrameExtended, null);
 		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	
 		baos.write(PNC.toByteArray(sameFrameExtended.getOffsetDelta(), Short.class));
 		
 		return baos.toByteArray();

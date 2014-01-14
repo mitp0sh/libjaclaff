@@ -10,8 +10,8 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class ConstantPoolTypeClass extends AbstractConstantPoolType
 {
-	private int                  nameIndex = 0;
-	private ConstantPoolTypeUtf8   cptName = null;	
+	private int                   nameIndex = 0;
+	private ConstantPoolTypeUtf8 nameObject = null;	
 
 	public ConstantPoolTypeClass()
 	{
@@ -29,14 +29,14 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 		this.nameIndex = nameIndex;
 	}
 	
-	public ConstantPoolTypeUtf8 getCptName()
+	public ConstantPoolTypeUtf8 getNameObject()
 	{
-		return cptName;
+		return nameObject;
 	}
 
-	public void setCptName(ConstantPoolTypeUtf8 cptName)
+	public void setNameObject(ConstantPoolTypeUtf8 nameObject)
 	{
-		this.cptName = cptName;
+		this.nameObject = nameObject;
 	}
 	
 	public static ConstantPoolTypeClass deserialize(DataInputStream dis) throws IOException
@@ -64,7 +64,7 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 		ConstantPoolTypeClass clone = (ConstantPoolTypeClass)super.clone();
 	
 		/* fill instance with original data */
-		clone.setCptName(this.getCptName());
+		clone.setNameObject(this.getNameObject());
 		
 		return clone;
 	}
@@ -87,6 +87,46 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 			return false;
 		}
 		
-		return cptClass.cptName.equals(this.cptName);
+		return cptClass.nameObject.equals(this.nameObject);
+	}
+	
+	public String getNonQualifiedClassName()
+	{
+		if(getNameObject() == null)
+		{
+			return "0";
+		}
+		
+		String bytes = getNameObject().getBytes();
+		if(bytes == null)
+		{
+			return "1";
+		}
+		
+		String[] splitedBytes = bytes.split("/");
+		return splitedBytes[splitedBytes.length - 1];
+	}
+	
+	public String getFullQualifiedClassName()
+	{
+		if(getNameObject() == null)
+		{
+			return "0";
+		}
+		
+		String bytes = getNameObject().getBytes();
+		if(bytes == null)
+		{
+			return "1";
+		}
+		
+		bytes = bytes.replaceAll("/", ".");
+		return bytes;
+	}
+
+	@Override
+	public String toString()
+	{	
+		return getFullQualifiedClassName();
 	}
 }

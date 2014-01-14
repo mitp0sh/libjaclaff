@@ -3,8 +3,11 @@ package com.mitp0sh.jaclaff.attributes.stackmaptable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
+import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
+import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
@@ -22,66 +25,66 @@ public class StackMapFrame
 		this.stackMapFrame = stackMapFrame;
 	}
 	
-	public static StackMapFrame deserialize(DesCtx ctx) throws IOException
+	public static StackMapFrame deserialize(DesCtx ctx, AttributeCode attributeCode, ArrayList<StackMapFrame> stackMapFrameList, AbstractStackMapFrame previousFrame) throws IOException
     {
 		DataInputStream dis = ctx.getDataInputStream();
-		ConstantPool constantPool = ctx.getConstantPool();
 		
 		StackMapFrame stackMapFrame = new StackMapFrame();
-		AbstractStackMapFrame asmf = null;
+		AbstractStackMapFrame  asmf = null;
 		
 		/* read frame type */
-		byte frameType = (byte)dis.readUnsignedByte();
-		if(frameType >= AbstractStackMapFrame.FRAME_TYPE_SAME_FRAME_START &&
-		   frameType <= AbstractStackMapFrame.FRAME_TYPE_SAME_FRAME_END)
+		short frameType = (short)dis.readUnsignedByte();
+		if(frameType >= FrameType.SAME_FRAME_START &&
+		   frameType <= FrameType.SAME_FRAME_END)
 		{
-			SameFrame sameFrame = SameFrame.deserialize(dis, frameType);
+			SameFrame sameFrame = SameFrame.deserialize(ctx, frameType, attributeCode, previousFrame);
 			asmf = sameFrame;
 		}
 		else
-		if(frameType >= AbstractStackMapFrame.FRAME_TYPE_SAME_LOCALS_1_STACK_ITEM_FRAME_START &&
-		   frameType <= AbstractStackMapFrame.FRAME_TYPE_SAME_LOCALS_1_STACK_ITEM_FRAME_END)
+		if(frameType >= FrameType.SAME_LOCALS_1_STACK_ITEM_FRAME_START &&
+		   frameType <= FrameType.SAME_LOCALS_1_STACK_ITEM_FRAME_END)
 		{
-			SameLocals1StackItemFrame sameLocals1StackItemFrame = SameLocals1StackItemFrame.deserialize(dis, constantPool, frameType);
+			SameLocals1StackItemFrame sameLocals1StackItemFrame = SameLocals1StackItemFrame.deserialize(ctx, frameType, attributeCode, previousFrame);
 			asmf = sameLocals1StackItemFrame; 
 		}
 		else
-		if(frameType == AbstractStackMapFrame.FRAME_TYPE_SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED)
+		if(frameType == FrameType.SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED)
 		{
-			SameLocals1StackItemFrameExtended sameLocals1StackItemFrameExtended = SameLocals1StackItemFrameExtended.deserialize(dis, constantPool);
+			SameLocals1StackItemFrameExtended sameLocals1StackItemFrameExtended = SameLocals1StackItemFrameExtended.deserialize(ctx, attributeCode, previousFrame);
 			asmf = sameLocals1StackItemFrameExtended; 
 		}
 		else
-		if(frameType >= AbstractStackMapFrame.FRAME_TYPE_CHOP_FRAME_START &&
-		   frameType <= AbstractStackMapFrame.FRAME_TYPE_CHOP_FRAME_END)
+		if(frameType >= FrameType.CHOP_FRAME_START &&
+		   frameType <= FrameType.CHOP_FRAME_END)
 		{
-			ChopFrame chopFrame = ChopFrame.deserialize(dis, frameType);
+			ChopFrame chopFrame = ChopFrame.deserialize(ctx, frameType, attributeCode, previousFrame);
 			asmf = chopFrame; 
 		}
 		else
-		if(frameType == AbstractStackMapFrame.FRAME_TYPE_SAME_FRAME_EXTENDED)
+		if(frameType == FrameType.SAME_FRAME_EXTENDED)
 		{
-			SameFrameExtended sameFrameExtended = SameFrameExtended.deserialize(dis);
+			SameFrameExtended sameFrameExtended = SameFrameExtended.deserialize(ctx, attributeCode, previousFrame);
 			asmf = sameFrameExtended;
 		}
 		else
-		if(frameType >= AbstractStackMapFrame.FRAME_TYPE_APPEND_FRAME_START &&
-		   frameType <= AbstractStackMapFrame.FRAME_TYPE_APPEND_FRAME_END)
+		if(frameType >= FrameType.APPEND_FRAME_START &&
+		   frameType <= FrameType.APPEND_FRAME_END)
 		{
-			AppendFrame appendFrame = AppendFrame.deserialize(ctx, frameType);
+			AppendFrame appendFrame = AppendFrame.deserialize(ctx, frameType, attributeCode, previousFrame);
 			asmf = appendFrame; 
 		}
 		else
-		if(frameType == AbstractStackMapFrame.FRAME_TYPE_FULL_FRAME)
+		if(frameType == FrameType.FULL_FRAME)
 		{
-			FullFrame fullFrame = FullFrame.deserialize(dis, constantPool, frameType);
+			FullFrame fullFrame = FullFrame.deserialize(ctx, frameType, attributeCode, previousFrame);
 			asmf = fullFrame;
 		}
 		else
 		{
-			return null;
+			System.err.println("error - unable to deserialize stack map frame !!!");
+			System.exit(-1);
 		}
-		
+	
 		stackMapFrame.setStackMapFrame(asmf);
 		
 		return stackMapFrame;
@@ -122,7 +125,7 @@ public class StackMapFrame
 		if(smfClass.toString().equals((SameLocals1StackItemFrameExtended.class.toString())))
 		{
 			/* serialize frame type */
-			byte frameType = (byte)(AbstractStackMapFrame.FRAME_TYPE_SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED);
+			byte frameType = (byte)(FrameType.SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED);
 			baos.write(new byte[]{frameType});
 			
 			/* serialize sameLocals1StackItemFrameExtended frame payload */	
@@ -144,7 +147,7 @@ public class StackMapFrame
 		if(smfClass.toString().equals((SameFrameExtended.class.toString())))
 		{
 			/* serialize frame type */
-			byte frameType = (byte)(AbstractStackMapFrame.FRAME_TYPE_SAME_FRAME_EXTENDED);
+			byte frameType = (byte)(FrameType.SAME_FRAME_EXTENDED);
 			baos.write(new byte[]{frameType});
 			
 			/* serialize same frame extended payload */
@@ -169,7 +172,7 @@ public class StackMapFrame
 			FullFrame fullFrame = (FullFrame)stackMapFrame.getStackMapFrame();
 			
 			/* serialize frame type */
-			byte frameType = (byte)(AbstractStackMapFrame.FRAME_TYPE_FULL_FRAME);
+			byte frameType = (byte)(FrameType.FULL_FRAME);
 			baos.write(new byte[]{frameType});
 			
 			/* serialize full frame payload */
@@ -177,49 +180,42 @@ public class StackMapFrame
 		}
 		else
 		{
-			System.err.println("Unable to serialize StackMapFrame!");
-			return null;
+			System.err.println("error - unable to serialize stack map frame !!!");
+			System.exit(-1);
 		}
 		
 		return baos.toByteArray();
 	}
+	
+	public static SingleInstruction getDeltaOffsetInstructionFromFrame(MethodInstructions disassembly, AbstractStackMapFrame frame)
+	{
+		int                  byteCodeOffset = 0;
+		int     byteCodeOffsetPreviousFrame = 0;
+		AbstractStackMapFrame previousFrame = frame.getPreviousFrame();
+		if(previousFrame != null)
+		{
+			byteCodeOffsetPreviousFrame = previousFrame.getStack_map_frame_bytecode_offset();
+		}
+		byteCodeOffset += byteCodeOffsetPreviousFrame;
+		byteCodeOffset += frame.getOffsetDelta();		
+		
+		if(previousFrame != null)
+		{
+			if(frame.isStack_map_frame_is_explicit())
+			{
+				byteCodeOffset++;
+			}
+		}
+
+		frame.setStack_map_frame_bytecode_offset(byteCodeOffset);
+		
+		SingleInstruction instruction = MethodInstructions.lookupInstructionByOffset(disassembly, byteCodeOffset);
+		if(instruction == null)
+		{
+			System.err.println("error - unable to couple delta offset with instruction object !!!");
+			System.exit(-1);
+		}
+	
+		return instruction;	
+	}
 }
-
-// Each stack_map_frame structure specifies the type state at a particular 
-// bytecode offset. Each frame type specifies (explicitly or implicitly) a 
-// value, offset_delta, that is used to calculate the actual bytecode offset 
-// at which a frame applies. The bytecode offset at which a frame applies is 
-// calculated by adding offset_delta + 1 to the bytecode offset of the previous 
-// frame, unless the previous frame is the initial frame of the method, in which
-// case the bytecode offset is offset_delta.
-
-// By using an offset delta rather than the actual bytecode offset we ensure, 
-// by definition, that stack map frames are in the correctly sorted order. 
-// Furthermore, by consistently using the formula offset_delta + 1 for all 
-// explicit frames, we guarantee the absence of duplicates.
-
-// We say that an instruction in the bytecode has a corresponding stack map 
-// frame if the instruction starts at offset i in the code array of a Code 
-// attribute, and the Code attribute has a StackMapTable attribute whose 
-// entries array has a stack_map_frame structure that applies at bytecode 
-// offset i.
-
-// The stack_map_frame structure consists of a one-byte tag followed by zero 
-// or more bytes, giving more information, depending upon the tag.
-
-// A stack map frame may belong to one of several frame types:
-
-// union stack_map_frame {
-//     same_frame;
-//     same_locals_1_stack_item_frame;
-//     same_locals_1_stack_item_frame_extended;
-//     chop_frame;
-//     same_frame_extended;
-//     append_frame;
-//     full_frame;
-// }
-
-// All frame types, even full_frame, rely on the previous frame for some of 
-// their semantics. This raises the question of what is the very first frame? 
-// The initial frame is implicit, and computed from the method descriptor. 
-// (See the Prolog predicate methodInitialStackFrame (§4.10.1.6).)

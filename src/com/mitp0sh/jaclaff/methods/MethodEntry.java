@@ -16,10 +16,10 @@ public class MethodEntry
 {
 	private short                     accessFlags = 0;
 	private int                         nameIndex = 0;
-	private ConstantPoolTypeUtf8       nameObject = null;
 	private int                         descIndex = 0;
+	
+	private ConstantPoolTypeUtf8       nameObject = null;
 	private ConstantPoolTypeUtf8 descriptorObject = null;
-	private int                    attributeCount = 0;
 	private Attributes                 attributes = null;
 	
 	public short getAccessFlags()
@@ -74,12 +74,14 @@ public class MethodEntry
 	
 	public int getAttributeCount()
 	{
-		return attributeCount;
-	}
-	
-	public void setAttributeCount(int attributeCount)
-	{
-		this.attributeCount = attributeCount;
+		Attributes attributes = getAttributes();
+		
+		if(attributes == null)
+		{
+			return 0;
+		}
+		
+		return attributes.getAttributesCount();
 	}
 	
 	public Attributes getAttributes()
@@ -100,16 +102,17 @@ public class MethodEntry
 		MethodEntry methodEntry = new MethodEntry();
 		
 		methodEntry.setAccessFlags((short)dis.readUnsignedShort());
-		methodEntry.setNameIndex((short)dis.readUnsignedShort());
-		methodEntry.setDescIndex((short)dis.readUnsignedShort());
-		methodEntry.setAttributeCount((short)dis.readUnsignedShort());		
-		if(methodEntry.getAttributeCount() > 0)
-		{
-			methodEntry.setAttributes(Attributes.deserialize(ctx, methodEntry.getAttributeCount(), null));
-		}
+		methodEntry.setNameIndex(dis.readUnsignedShort());
+		methodEntry.setDescIndex(dis.readUnsignedShort());
+		int num = dis.readUnsignedShort();		
 		
 		/* decouple indices from object */
 		decoupleFromIndices(methodEntry, constantPool);
+		
+		if(num > 0)
+		{
+			methodEntry.setAttributes(Attributes.deserialize(ctx, num, null));
+		}
 		
 		return methodEntry;
     }
@@ -117,16 +120,18 @@ public class MethodEntry
 	public static void decoupleFromIndices(MethodEntry method, ConstantPool constantPool)
 	{
 		method.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, method.getNameIndex()));
-		method.setNameIndex((short)0);
+		method.setNameIndex(0);
+		
 		method.setDescriptorObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, method.getDescIndex()));
-		method.setDescIndex((short)0);
+		method.setDescIndex(0);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, MethodEntry method)
 	{
-		short nameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), method.getNameObject());
+		int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), method.getNameObject());
 		method.setNameIndex(nameIndex);
-		short descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), method.getDescriptorObject());
+		
+		int descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), method.getDescriptorObject());
 		method.setDescIndex(descriptorIndex);
 	}
 	
@@ -136,9 +141,9 @@ public class MethodEntry
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(PNC.toByteArray(methodEntry.getAccessFlags(), Short.class));
-		baos.write(PNC.toByteArray(methodEntry.getNameIndex(), Short.class));
-		baos.write(PNC.toByteArray(methodEntry.getDescIndex(), Short.class));
+		baos.write(PNC.toByteArray(methodEntry.getAccessFlags(),    Short.class));
+		baos.write(PNC.toByteArray(methodEntry.getNameIndex(),      Short.class));
+		baos.write(PNC.toByteArray(methodEntry.getDescIndex(),      Short.class));
 		baos.write(PNC.toByteArray(methodEntry.getAttributeCount(), Short.class));
 		if(methodEntry.getAttributeCount() > 0)
 		{

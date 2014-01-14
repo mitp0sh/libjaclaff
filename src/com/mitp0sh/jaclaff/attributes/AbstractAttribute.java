@@ -176,7 +176,7 @@ public abstract class AbstractAttribute
 		else
 		if(attributeName.equals(attributeStackMapTable))
 		{
-			attribute = AttributeStackMapTable.deserialize(ctx);
+			attribute = AttributeStackMapTable.deserialize(ctx, (AttributeCode)reference0);
 		}
 		else
 		if(attributeName.equals(attributeBootstrapMethods)) // not tested !!!!

@@ -1,39 +1,34 @@
 package com.mitp0sh.jaclaff.attributes.stackmaptable;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 public class SameFrame extends AbstractStackMapFrame
 {
-	private byte offsetDelta = 0;
-
 	public SameFrame()
 	{
 		setStack_map_frame_string_representation("same_frame");
+		setStack_map_frame_is_explicit(true);
 	}
 	
-	public byte getOffsetDelta() 
-	{
-		return offsetDelta;
-	}
-
-	public void setOffsetDelta(byte offsetDelta) 
-	{
-		this.offsetDelta = offsetDelta;
-	}
-	
-	public static SameFrame deserialize(DataInputStream dis, byte frameType) throws IOException
+	public static SameFrame deserialize(DesCtx ctx, short frameType, AttributeCode attributeCode, AbstractStackMapFrame previousFrame) throws IOException
     {
 		SameFrame sameFrame = new SameFrame();
-		sameFrame.setOffsetDelta((byte)frameType);
+		sameFrame.setPreviousFrame(previousFrame);
+		sameFrame.setOffsetDelta(frameType);
+		
+		decoupleFromOffsets(ctx, sameFrame, attributeCode);
 		
 		return sameFrame;
     }
 	
 	public static byte[] serialize(SerCtx ctx, SameFrame sameFrame) throws IOException
 	{	
+		coupleToOffsets(ctx, sameFrame, null);
+		
 		return new byte[]{};
 	}
 }

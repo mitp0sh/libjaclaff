@@ -4,27 +4,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 public class ChopFrame extends AbstractStackMapFrame
 {
-	private short offsetDelta = 0;
-	private byte            k = 0;
+	private byte k = 0;
 
 	public ChopFrame()
 	{
 		setStack_map_frame_string_representation("chop_frame");
-	}
-	
-	public short getOffsetDelta() 
-	{
-		return offsetDelta;
-	}
-
-	public void setOffsetDelta(short offsetDelta) 
-	{
-		this.offsetDelta = offsetDelta;
+		setStack_map_frame_is_explicit(true);
 	}
 	
 	public byte getK() 
@@ -37,24 +29,31 @@ public class ChopFrame extends AbstractStackMapFrame
 		this.k = k;
 	}
 	
-	public static ChopFrame deserialize(DataInputStream dis, byte frameType) throws IOException
+	public static ChopFrame deserialize(DesCtx ctx, short frameType, AttributeCode attributeCode, AbstractStackMapFrame previousFrame) throws IOException
     {
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		ChopFrame chopFrame = new ChopFrame();
+		chopFrame.setPreviousFrame(previousFrame);
 		chopFrame.setK((byte)(frameType - 251));
 		
 		/* read offset delta */
-		short offsetDelta = dis.readShort();
+		int offsetDelta = dis.readUnsignedShort();
 		chopFrame.setOffsetDelta(offsetDelta);
+		
+		decoupleFromOffsets(ctx, chopFrame, attributeCode);
 		
 		return chopFrame;
     }
 	
-	public static byte[] serialize(SerCtx ctx, ChopFrame chopFrame) throws IOException
+	public static byte[] serialize(SerCtx ctx, ChopFrame frame) throws IOException
 	{	
+		coupleToOffsets(ctx, frame, null);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		/* serialize delta offset */
-		baos.write(PNC.toByteArray(chopFrame.offsetDelta, Short.class));
+		baos.write(PNC.toByteArray(frame.offsetDelta, Short.class));
 		
 		return baos.toByteArray();
 	}

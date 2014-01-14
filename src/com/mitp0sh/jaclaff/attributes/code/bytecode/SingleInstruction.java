@@ -150,14 +150,14 @@ public class SingleInstruction
 		{	
 			if(getByteCode().getByteCode() == Mnemonics.BC_wide)
 			{
-				/* nothing to do here */
+				return 1;
 			}
 			else
 			if(getByteCode().getByteCode() == Mnemonics.BC_lookupswitch)
 			{
 				try
 				{
-					return LookupSwitch.serialize(getLookupSwitch(), offset).length;
+					return LookupSwitch.serialize(getLookupSwitch(), offset).length + 1;
 				}
 				catch(IOException e)
 				{				
@@ -169,7 +169,7 @@ public class SingleInstruction
 			{
 				try
 				{
-					return TableSwitch.serialize(getTableSwitch(), offset).length;
+					return TableSwitch.serialize(getTableSwitch(), offset).length + 1;
 				}
 				catch(IOException e)
 				{	

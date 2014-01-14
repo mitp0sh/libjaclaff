@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.mitp0sh.jaclaff.attributes.AttributeCode;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
@@ -13,22 +14,12 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class AppendFrame extends AbstractStackMapFrame
 {
-	private short                      offsetDelta = 0;
 	private ArrayList<VerificationTypeInfo> locals = new ArrayList<VerificationTypeInfo>();
-
+	
 	public AppendFrame()
 	{
 		setStack_map_frame_string_representation("append_frame");
-	}
-	
-	public short getOffsetDelta() 
-	{
-		return offsetDelta;
-	}
-
-	public void setOffsetDelta(short offsetDelta) 
-	{
-		this.offsetDelta = offsetDelta;
+		setStack_map_frame_is_explicit(true);
 	}
 
 	public ArrayList<VerificationTypeInfo> getLocals() 
@@ -41,16 +32,17 @@ public class AppendFrame extends AbstractStackMapFrame
 		this.locals = locals;
 	}
 	
-	public static AppendFrame deserialize(DesCtx ctx, byte frameType) throws IOException
+	public static AppendFrame deserialize(DesCtx ctx, short frameType, AttributeCode attributeCode, AbstractStackMapFrame previousFrame) throws IOException
     {
 		DataInputStream dis = ctx.getDataInputStream();
 		ConstantPool constantPool = ctx.getConstantPool();
 		
 		/* create new append frame instance */
 		AppendFrame appendFrame = new AppendFrame();		
+		appendFrame.setPreviousFrame(previousFrame);
 		
 		/* read offset delta */
-		short offsetDelta = dis.readShort();
+		int offsetDelta = dis.readUnsignedShort();
 		appendFrame.setOffsetDelta(offsetDelta);
 		byte k = (byte)(frameType - 251);
 		
@@ -60,11 +52,15 @@ public class AppendFrame extends AbstractStackMapFrame
 			appendFrame.getLocals().add(VerificationTypeInfo.deserialize(dis, constantPool));
 		}
 		
+		decoupleFromOffsets(ctx, appendFrame, attributeCode);
+		
 		return appendFrame;
     }
 	
 	public static byte[] serialize(SerCtx ctx, AppendFrame appendFrame) throws IOException
 	{	
+		coupleToOffsets(ctx, appendFrame, null);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		/* serialize delta offset */
