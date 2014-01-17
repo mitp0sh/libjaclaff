@@ -4,16 +4,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolTypeNameAndTypeDeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 {
-	private int                        nameIndex = 0;	
-	private int                  descriptorIndex = 0;	
-	private ConstantPoolTypeUtf8         cptName = null;
-	private ConstantPoolTypeUtf8   cptDescriptor = null;
+	private int                         nameIndex = 0;	
+	private int                   descriptorIndex = 0;	
+	
+	private ConstantPoolTypeUtf8       nameObject = null;
+	private ConstantPoolTypeUtf8 descriptorObject = null;
 
 	public ConstantPoolTypeNameAndType()
 	{
@@ -26,9 +29,9 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		return this.nameIndex;
 	}
 	
-	public void setNameIndex(int nameIndex) 
+	public void setNameIndex(int index) 
 	{
-		this.nameIndex = nameIndex;
+		this.nameIndex = index;
 	}
 	
 	public int getDescriptorIndex() 
@@ -36,32 +39,45 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		return this.descriptorIndex;
 	}
 	
-	public void setDescriptorIndex(int descriptorIndex)
+	public void setDescriptorIndex(int index)
 	{
-		this.descriptorIndex = descriptorIndex;
+		this.descriptorIndex = index;
 	}
 	
-	public ConstantPoolTypeUtf8 getCptName() 
+	public ConstantPoolTypeUtf8 getNameObject() 
 	{
-		return cptName;
+		return nameObject;
 	}
 
-	public void setCptName(ConstantPoolTypeUtf8 cptName) 
+	public void setNameObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.cptName = cptName;
+		this.nameObject = object;
+		
+		if(object != null)
+		{
+			this.setNameIndex(0);
+			this.addReference(object);
+		}
 	}
 
-	public ConstantPoolTypeUtf8 getCptDescriptor() 
+	public ConstantPoolTypeUtf8 getDescriptorObject() 
 	{
-		return cptDescriptor;
+		return descriptorObject;
 	}
 
-	public void setCptDescriptor(ConstantPoolTypeUtf8 cptDescriptor)
+	public void setDescriptorObject(ConstantPoolTypeUtf8 object)
 	{
-		this.cptDescriptor = cptDescriptor;
+		this.descriptorObject = object;
+		
+		if(object != null)
+		{
+			this.setDescriptorIndex(0);
+			this.addReference(object);
+		}
 	}
 	
-	public static ConstantPoolTypeNameAndType deserialize(DataInputStream dis) throws IOException
+	public static ConstantPoolTypeNameAndType deserialize(DataInputStream dis) throws IOException,
+	                                                                                  InvalidConstantPoolTypeNameAndTypeDeserializationException
 	{
 		ConstantPoolTypeNameAndType cptNameAndType = new ConstantPoolTypeNameAndType();
 		
@@ -69,6 +85,34 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		cptNameAndType.setDescriptorIndex(dis.readUnsignedShort());
 		
 		return cptNameAndType;
+	}
+	
+	public static void decoupleFromIndices(DesCtx ctx, ConstantPoolTypeNameAndType cpt)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		int nameIndex = cpt.getNameIndex();
+		AbstractConstantPoolType acptName = ConstantPool.getConstantPoolTypeByIndex(cp, nameIndex);
+		ConstantPoolTypeUtf8 nameObject = (ConstantPoolTypeUtf8)acptName;
+		cpt.setNameObject(nameObject);
+
+		int descriptorIndex = cpt.getDescriptorIndex();
+		AbstractConstantPoolType acptDescriptor = ConstantPool.getConstantPoolTypeByIndex(cp, descriptorIndex);
+		ConstantPoolTypeUtf8 descriptorObject =  (ConstantPoolTypeUtf8)acptDescriptor;
+		cpt.setDescriptorObject(descriptorObject);
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, ConstantPoolTypeNameAndType cpt)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		ConstantPoolTypeUtf8 nameObject = cpt.getNameObject();
+		int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, nameObject);
+		cpt.setNameIndex(nameIndex);
+		
+		ConstantPoolTypeUtf8 descriptorObject = cpt.getDescriptorObject();
+		int descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, descriptorObject); 
+		cpt.setDescriptorIndex(descriptorIndex);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, ConstantPoolTypeNameAndType elem) throws IOException
@@ -88,8 +132,8 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		ConstantPoolTypeNameAndType clone = (ConstantPoolTypeNameAndType)super.clone();
 		
 		/* fill instance with original data */
-		clone.setCptName(this.getCptName());
-		clone.setCptDescriptor(this.getCptDescriptor());
+		clone.setNameObject(this.getNameObject());
+		clone.setDescriptorObject(this.getDescriptorObject());
 		
 		return clone;
 	}
@@ -97,21 +141,16 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
-		ConstantPoolTypeNameAndType cptNameAndType = null;
 		try
 		{
-			cptNameAndType = (ConstantPoolTypeNameAndType)obj;
+			ConstantPoolTypeNameAndType cpt = (ConstantPoolTypeNameAndType)obj;
+			boolean b0 = cpt.nameObject.equals(this.nameObject);
+			boolean b1 = cpt.descriptorObject.equals(this.descriptorObject);
+			return b0 && b1;
 		}
-		catch(ClassCastException e)
-		{
-			return false;
-		}
+		catch(NullPointerException e){}
+		catch(ClassCastException e){}
 		
-		if(!cptNameAndType.cptName.equals(this.cptName))
-		{
-			return false;
-		}
-		
-		return cptNameAndType.cptDescriptor.equals(this.cptDescriptor);
+		return false;
 	}
 }

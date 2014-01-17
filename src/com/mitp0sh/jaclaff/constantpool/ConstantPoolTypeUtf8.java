@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolTypeUtf8DeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -33,7 +34,8 @@ public class ConstantPoolTypeUtf8 extends AbstractConstantPoolType
 		this.bytes = bytes;
 	}
 	
-	public static ConstantPoolTypeUtf8 deserialize(DataInputStream dis) throws IOException
+	public static ConstantPoolTypeUtf8 deserialize(DataInputStream dis) throws IOException,
+	                                                                           InvalidConstantPoolTypeUtf8DeserializationException
 	{
 		ConstantPoolTypeUtf8 cptUtf8 = new ConstantPoolTypeUtf8();		
 		
@@ -73,21 +75,14 @@ public class ConstantPoolTypeUtf8 extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
-		if(obj == null)
-		{
-			return false;
-		}
-		
-		ConstantPoolTypeUtf8 cptUTF8 = null;
 		try
 		{
-			cptUTF8 = (ConstantPoolTypeUtf8)obj;
+			ConstantPoolTypeUtf8 cpt = (ConstantPoolTypeUtf8)obj;
+			return cpt.bytes.equals(this.bytes);
 		}
-		catch(ClassCastException e)
-		{
-			return false;
-		}
+		catch(NullPointerException e){}
+		catch(ClassCastException e){}
 		
-		return cptUTF8.bytes.equals(this.bytes);
+		return false;
 	}
 }

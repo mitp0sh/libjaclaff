@@ -91,7 +91,7 @@ public class StackMapFrame
     }
 	
 	@SuppressWarnings("rawtypes")
-	public static byte[] serialize(SerCtx ctx, StackMapFrame stackMapFrame) throws IOException
+	public static byte[] serialize(SerCtx ctx, StackMapFrame stackMapFrame, AttributeCode attributeCode) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		Class smfClass = stackMapFrame.getStackMapFrame().getClass();
@@ -101,12 +101,14 @@ public class StackMapFrame
 			/* retrieve append frame */
 			SameFrame sameFrame = (SameFrame)stackMapFrame.getStackMapFrame();
 			
+			AbstractStackMapFrame.coupleToOffsets(ctx, sameFrame, attributeCode);
+			
 			/* serialize frame type */
-			byte frameType = (byte)(sameFrame.getOffsetDelta());
-			baos.write(new byte[]{frameType});
+			short frameType = (short)sameFrame.getOffsetDelta();
+			baos.write(new byte[]{(byte)frameType});
 			
 			/* serialize same frame payload */
-			baos.write(SameFrame.serialize(ctx, sameFrame));
+			baos.write(SameFrame.serialize(ctx, sameFrame, attributeCode));
 		}
 		else
 		if(smfClass.toString().equals((SameLocals1StackItemFrame.class.toString())))
@@ -114,44 +116,58 @@ public class StackMapFrame
 			/* retrieve append frame */
 			SameLocals1StackItemFrame sameLocals1StackItemFrame = (SameLocals1StackItemFrame)stackMapFrame.getStackMapFrame();
 			
+			AbstractStackMapFrame.coupleToOffsets(ctx, sameLocals1StackItemFrame, attributeCode);
+			
 			/* serialize frame type */
-			byte frameType = (byte)(64 + sameLocals1StackItemFrame.getOffsetDelta());
-			baos.write(new byte[]{frameType});
+			short frameType = (short)(64 + sameLocals1StackItemFrame.getOffsetDelta());
+			baos.write(new byte[]{(byte)frameType});
 			
 			/* serialize sameLocals1StackItemFrame frame payload */			
-			baos.write(SameLocals1StackItemFrame.serialize(ctx, sameLocals1StackItemFrame));
+			baos.write(SameLocals1StackItemFrame.serialize(ctx, sameLocals1StackItemFrame, attributeCode));
 		}
 		else
 		if(smfClass.toString().equals((SameLocals1StackItemFrameExtended.class.toString())))
 		{
+			/* retrieve append frame */
+			SameLocals1StackItemFrameExtended sameLocals1StackItemFrameExtended = (SameLocals1StackItemFrameExtended)stackMapFrame.getStackMapFrame();
+			
+			AbstractStackMapFrame.coupleToOffsets(ctx, sameLocals1StackItemFrameExtended, attributeCode);
+			
 			/* serialize frame type */
-			byte frameType = (byte)(FrameType.SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED);
-			baos.write(new byte[]{frameType});
+			short frameType = FrameType.SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED;
+			baos.write(new byte[]{(byte)frameType});
 			
 			/* serialize sameLocals1StackItemFrameExtended frame payload */	
-			baos.write(SameLocals1StackItemFrameExtended.serialize(ctx, (SameLocals1StackItemFrameExtended)stackMapFrame.getStackMapFrame()));
+			baos.write(SameLocals1StackItemFrameExtended.serialize(ctx, sameLocals1StackItemFrameExtended, attributeCode));
 		}
 		else
 		if(smfClass.toString().equals((ChopFrame.class.toString())))
 		{
 			/* retrieve append frame */
 			ChopFrame chopFrame = (ChopFrame)stackMapFrame.getStackMapFrame();
+						
+			AbstractStackMapFrame.coupleToOffsets(ctx, chopFrame, attributeCode);
 			
 			/* serialize frame type */
-			byte frameType = (byte)(251 + chopFrame.getK());
-			baos.write(new byte[]{frameType});
+			short frameType = (short)(251 + chopFrame.getK());
+			baos.write(new byte[]{(byte)frameType});
 			
-			baos.write(ChopFrame.serialize(ctx, chopFrame));
+			baos.write(ChopFrame.serialize(ctx, chopFrame, attributeCode));
 		}
 		else
 		if(smfClass.toString().equals((SameFrameExtended.class.toString())))
 		{
+			/* retrieve same frame extended frame */
+			SameFrameExtended sameFrameExtended = (SameFrameExtended)stackMapFrame.getStackMapFrame();
+						
+			AbstractStackMapFrame.coupleToOffsets(ctx, sameFrameExtended, attributeCode);
+			
 			/* serialize frame type */
-			byte frameType = (byte)(FrameType.SAME_FRAME_EXTENDED);
-			baos.write(new byte[]{frameType});
+			short frameType = FrameType.SAME_FRAME_EXTENDED;
+			baos.write(new byte[]{(byte)frameType});
 			
 			/* serialize same frame extended payload */
-			baos.write(SameFrameExtended.serialize(ctx, (SameFrameExtended)stackMapFrame.getStackMapFrame()));
+			baos.write(SameFrameExtended.serialize(ctx, sameFrameExtended, attributeCode));
 		}
 		else
 		if(smfClass.toString().equals(AppendFrame.class.toString()))
@@ -159,24 +175,28 @@ public class StackMapFrame
 			/* retrieve append frame */
 			AppendFrame appendFrame = (AppendFrame)stackMapFrame.getStackMapFrame();
 			
+			AbstractStackMapFrame.coupleToOffsets(ctx, appendFrame, attributeCode);
+			
 			/* serialize frame type */
-			byte frameType = (byte)(251 + (byte)appendFrame.getLocals().size());
-			baos.write(new byte[]{frameType});
+			short frameType = (short)(251 + appendFrame.getLocals().size());
+			baos.write(new byte[]{(byte)frameType});
 			
 			/* serialize append frame payload */
-			baos.write(AppendFrame.serialize(ctx, appendFrame));
+			baos.write(AppendFrame.serialize(ctx, appendFrame, attributeCode));
 		}
 		else
 		if(smfClass.toString().equals(FullFrame.class.toString()))
 		{
 			FullFrame fullFrame = (FullFrame)stackMapFrame.getStackMapFrame();
 			
+			AbstractStackMapFrame.coupleToOffsets(ctx, fullFrame, attributeCode);
+			
 			/* serialize frame type */
-			byte frameType = (byte)(FrameType.FULL_FRAME);
-			baos.write(new byte[]{frameType});
+			short frameType = FrameType.FULL_FRAME;
+			baos.write(new byte[]{(byte)frameType});
 			
 			/* serialize full frame payload */
-			baos.write(FullFrame.serialize(ctx, fullFrame));
+			baos.write(FullFrame.serialize(ctx, fullFrame, attributeCode));
 		}
 		else
 		{

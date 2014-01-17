@@ -1,6 +1,7 @@
 package com.mitp0sh.jaclaff.attributes.stackmaptable;
 
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
+import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
@@ -196,7 +197,19 @@ public abstract class AbstractStackMapFrame
 	
 	public static void coupleToOffsets(SerCtx ctx, AbstractStackMapFrame frame, AttributeCode attributeCode)
 	{
-		// TODO - NOT YET IMPLEMENTED !!!
-		//System.err.println("TODO - NOT YET IMPLEMENTED !!!");
+		MethodInstructions methodInstructions = attributeCode.getCode();
+		SingleInstruction odiPrev = frame.getPreviousFrame() == null ? null : frame.getPreviousFrame().getOffsetDeltaInstruction();
+		SingleInstruction     odi = frame == null ? null : frame.getOffsetDeltaInstruction();
+		
+		int   offsetDeltaPrevious = odiPrev == null ? 0 : MethodInstructions.getInstructionOffset(odiPrev, methodInstructions);
+		int           offsetDelta = odi == null ? 0 : MethodInstructions.getInstructionOffset(odi, methodInstructions);
+		
+		offsetDelta -= offsetDeltaPrevious;
+		if(frame.isStack_map_frame_is_explicit() && frame.getPreviousFrame() != null)
+		{
+			offsetDelta--;
+		}
+		
+		frame.setOffsetDelta(offsetDelta);
 	}
 }

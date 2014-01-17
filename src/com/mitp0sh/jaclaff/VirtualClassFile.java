@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -11,6 +12,7 @@ import com.mitp0sh.jaclaff.attributes.Attributes;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidDeserializationException;
 import com.mitp0sh.jaclaff.fields.Fields;
 import com.mitp0sh.jaclaff.interfaces.Interfaces;
 import com.mitp0sh.jaclaff.methods.Methods;
@@ -22,7 +24,6 @@ public class VirtualClassFile
 	private int                 magic = 0;
 	private short        minorVersion = 0;
 	private short        majorVersion = 0;
-	private int     constantPoolCount = 0;
 	private ConstantPool constantPool = null;	
 	private short         accessFlags = 0;
 	private int             thisField = 0;
@@ -64,16 +65,6 @@ public class VirtualClassFile
 	public void setMajorVersion(short MajorVersion) 
 	{
 		this.majorVersion = MajorVersion;
-	}
-
-	public int getConstantPoolCount() 
-	{
-		return this.constantPoolCount;
-	}
-
-	public void setConstantPoolCount(int ConstantPoolCount) 
-	{
-		this.constantPoolCount = ConstantPoolCount;
 	}
 	
 	public ConstantPool getConstantPool()
@@ -216,22 +207,36 @@ public class VirtualClassFile
 		this.superFieldObject = superFieldObject;
 	}
 	
-	public static VirtualClassFile deserialize(DesCtx ctx, String filename) throws IOException
+	public static VirtualClassFile deserialize(DesCtx ctx, String filename) throws InvalidDeserializationException
 	{	
-		return deserialize(ctx, new DataInputStream(new FileInputStream(new File(filename))));
+		try
+		{
+			return deserialize(ctx, new DataInputStream(new FileInputStream(new File(filename))));
+		}
+		catch(FileNotFoundException e)
+		{
+			throw new InvalidDeserializationException(e.getMessage());
+		}
 	}
 	
-	public static VirtualClassFile deserialize(DesCtx ctx, File file) throws IOException
+	public static VirtualClassFile deserialize(DesCtx ctx, File file) throws InvalidDeserializationException
 	{	
-		return deserialize(ctx, new FileInputStream(file));
+		try
+		{
+			return deserialize(ctx, new FileInputStream(file));
+		}
+		catch(FileNotFoundException e) 
+		{
+			throw new InvalidDeserializationException(e.getMessage());
+		}
 	}
 	
-	public static VirtualClassFile deserialize(DesCtx ctx, FileInputStream fis) throws IOException
+	public static VirtualClassFile deserialize(DesCtx ctx, FileInputStream fis) throws InvalidDeserializationException
 	{	
 		return deserialize(ctx, new DataInputStream(fis));
 	}
 	
-	public static VirtualClassFile deserialize(DesCtx ctx, DataInputStream dis) throws IOException
+	public static VirtualClassFile deserialize(DesCtx ctx, DataInputStream dis) throws InvalidDeserializationException
 	{
 		if(dis != null)
 		{
@@ -241,56 +246,63 @@ public class VirtualClassFile
 		
 		VirtualClassFile cfd = new VirtualClassFile();
 		
-		/* read magic */		
-		cfd.setMagic(dis.readInt());
+		try
+		{
+			/* read magic */
+			cfd.setMagic(dis.readInt());
 		
-		/* read minor version */
-		cfd.setMinorVersion((short)dis.readUnsignedShort());
-		
-		/* read major version */
-		cfd.setMajorVersion((short)dis.readUnsignedShort());
-		
-		/* read constant pool count */
-		cfd.setConstantPoolCount(dis.readUnsignedShort());
-		
-		/* parse constant pool */
-		cfd.setConstantPool(ConstantPool.deserialize(ctx, cfd.getConstantPoolCount()));
-		
-		/* read access flags */
-		cfd.setAccessFlags((short)dis.readUnsignedShort());
-		
-		/* read this field */
-		cfd.setThisField(dis.readUnsignedShort());
-		
-		/* read super field */
-		cfd.setSuperField(dis.readUnsignedShort());
-		
-		/* read interfaces count */
-		int numberOfInterfaces = dis.readUnsignedShort();
-		
-		/* parse interfaces */
-		cfd.setInterfaces(Interfaces.deserialize(ctx, numberOfInterfaces));
-		
-		/* read fields count */
-		int numberOfFields = dis.readUnsignedShort();
-		
-		/* parse fields */
-		cfd.setFields(Fields.deserialize(ctx, numberOfFields));
-		
-		/* read methods count */
-		int numberOfMethods = dis.readUnsignedShort();
-		
-		/* parse methods */
-		cfd.setMethods(Methods.deserialize(ctx, numberOfMethods));
-		
-		/* read attributes count */
-		cfd.setAttributesCount(dis.readUnsignedShort());
-		
-		/* parse methods */
-		cfd.setAttributes(Attributes.deserialize(ctx, cfd.getAttributesCount(), null));
-		
-		/* decouple from indices */
-		decoupleFromIndices(ctx, cfd);
+			/* read minor version */
+			cfd.setMinorVersion((short)dis.readUnsignedShort());
+			
+			/* read major version */
+			cfd.setMajorVersion((short)dis.readUnsignedShort());
+			
+			/* read constant pool count */
+			int constantPoolCount = dis.readUnsignedShort();
+			
+			/* parse constant pool */
+			cfd.setConstantPool(ConstantPool.deserialize(ctx, constantPoolCount));
+			
+			/* read access flags */
+			cfd.setAccessFlags((short)dis.readUnsignedShort());
+			
+			/* read this field */
+			cfd.setThisField(dis.readUnsignedShort());
+			
+			/* read super field */
+			cfd.setSuperField(dis.readUnsignedShort());
+			
+			/* read interfaces count */
+			int numberOfInterfaces = dis.readUnsignedShort();
+			
+			/* parse interfaces */
+			cfd.setInterfaces(Interfaces.deserialize(ctx, numberOfInterfaces));
+			
+			/* read fields count */
+			int numberOfFields = dis.readUnsignedShort();
+			
+			/* parse fields */
+			cfd.setFields(Fields.deserialize(ctx, numberOfFields));
+			
+			/* read methods count */
+			int numberOfMethods = dis.readUnsignedShort();
+			
+			/* parse methods */
+			cfd.setMethods(Methods.deserialize(ctx, numberOfMethods));
+			
+			/* read attributes count */
+			cfd.setAttributesCount(dis.readUnsignedShort());
+			
+			/* parse methods */
+			cfd.setAttributes(Attributes.deserialize(ctx, cfd.getAttributesCount(), null));
+			
+			/* decouple from indices */
+			decoupleFromIndices(ctx, cfd);
+		}
+		catch(IOException e)
+		{
+			throw new InvalidDeserializationException(e.getMessage());
+		}
 		
 		return cfd;
 	}
@@ -310,10 +322,10 @@ public class VirtualClassFile
 	
 	public static void coupleToIndices(SerCtx ctx, VirtualClassFile vcf)
 	{
-		short thisFieldIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), vcf.getThisFieldObject());
+		int thisFieldIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), vcf.getThisFieldObject());
 		vcf.setThisField(thisFieldIndex);
 		
-		short superFieldIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), vcf.getSuperFieldObject());
+		int superFieldIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), vcf.getSuperFieldObject());
 		vcf.setSuperField(superFieldIndex);
 	}
 	
@@ -338,7 +350,8 @@ public class VirtualClassFile
 		baos.write(PNC.toByteArray(vcf.getMinorVersion(), Short.class));
 		baos.write(PNC.toByteArray(vcf.getMajorVersion(), Short.class));
 		
-		baos.write(PNC.toByteArray(vcf.getConstantPoolCount(), Short.class));
+		int constantPoolCount = ctx.getConstantPool().getConstantPoolCount() + 1;
+		baos.write(PNC.toByteArray(constantPoolCount, Short.class));
 		baos.write(ConstantPool.serialize(ctx, ctx.getConstantPool()));
 		
 		baos.write(PNC.toByteArray(vcf.getAccessFlags(), Short.class));

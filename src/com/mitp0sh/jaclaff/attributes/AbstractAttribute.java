@@ -4,13 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
-public abstract class AbstractAttribute
+public abstract class AbstractAttribute extends AbstractReference
 {	
 	public static final String attributeConstantValue                                 = "ConstantValue";
 	public static final String attributeCode                                          = "Code";
@@ -211,13 +212,15 @@ public abstract class AbstractAttribute
 	
 	public static void coupleToIndices(SerCtx ctx, AbstractAttribute attribute)
 	{
-		short attributeNameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getAttributeNameObject());
+		int attributeNameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getAttributeNameObject());
 		attribute.setAttributeNameIndex(attributeNameIndex);
 	}
 	
 	
 	public static byte[] serialize(SerCtx ctx, AbstractAttribute attribute, Object reference0) throws IOException
 	{
+		byte[] attributePayLoad = null;
+		
 		coupleToIndices(ctx, attribute);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -226,122 +229,127 @@ public abstract class AbstractAttribute
 		String     attributeName = ctx.getConstantPool().getConstantTypeUtf8Bytes(attributeNameIndex);
 		
 		baos.write(PNC.toByteArray(attribute.getAttributeNameIndex(), Short.class));
-		baos.write(PNC.toByteArray(attribute.getAttributeLength(), Integer.class));
 		
 		if(attributeName.equals(attributeConstantValue))
 		{
-			baos.write(AttributeConstantValue.serialize(ctx, (AttributeConstantValue)attribute));
+			attributePayLoad = AttributeConstantValue.serialize(ctx, (AttributeConstantValue)attribute); 
 		}
 		else
 		if(attributeName.equals(attributeCode))
 		{
-			baos.write(AttributeCode.serialize(ctx, (AttributeCode)attribute));
+			attributePayLoad = AttributeCode.serialize(ctx, (AttributeCode)attribute);
 		}
 		else
 		if(attributeName.equals(attributeExceptions))
 		{
-			baos.write(AttributeExceptions.serialize(ctx, (AttributeExceptions)attribute));
+			attributePayLoad = AttributeExceptions.serialize(ctx, (AttributeExceptions)attribute);
 		}
 		else
 		if(attributeName.equals(attributeInnerClasses))
 		{
-			baos.write(AttributeInnerClasses.serialize(ctx, (AttributeInnerClasses)attribute));
+			attributePayLoad = AttributeInnerClasses.serialize(ctx, (AttributeInnerClasses)attribute);
 		}
 		else
 		if(attributeName.equals(attributeEnclosingMethod))
 		{
-			baos.write(AttributeEnclosingMethod.serialize(ctx, (AttributeEnclosingMethod)attribute));
+			attributePayLoad = AttributeEnclosingMethod.serialize(ctx, (AttributeEnclosingMethod)attribute);
 		}		
 		else
 		if(attributeName.equals(attributeSynthetic))
 		{
 			/* nothing to do here */
+			attributePayLoad = new byte[0];
 		}
 		else
 		if(attributeName.equals(attributeSignature))
 		{
-			baos.write(AttributeSignature.serialize(ctx, (AttributeSignature)attribute));
+			attributePayLoad = AttributeSignature.serialize(ctx, (AttributeSignature)attribute);
 		}
 		else
 		if(attributeName.equals(attributeSourceFile))
 		{
-			baos.write(AttributeSourceFile.serialize(ctx, (AttributeSourceFile)attribute));
+			attributePayLoad = AttributeSourceFile.serialize(ctx, (AttributeSourceFile)attribute);
 		}
 		else
 		if(attributeName.equals(attributeSourceDebugExtension))
 		{
-			baos.write(AttributeSourceDebugExtension.serialize(ctx, (AttributeSourceDebugExtension)attribute));
+			attributePayLoad = AttributeSourceDebugExtension.serialize(ctx, (AttributeSourceDebugExtension)attribute);
 		}
 		else
 		if(attributeName.equals(attributeLineNumberTable))
 		{
-			baos.write(AttributeLineNumberTable.serialize(ctx, (AttributeLineNumberTable)attribute, (AttributeCode)reference0));
+			attributePayLoad = AttributeLineNumberTable.serialize(ctx, (AttributeLineNumberTable)attribute, (AttributeCode)reference0);
 		}
 		else
 		if(attributeName.equals(attributeLocalVariableTable))
 		{
-			baos.write(AttributeLocalVariableTable.serialize(ctx, (AttributeLocalVariableTable)attribute, (AttributeCode)reference0));
+			attributePayLoad = AttributeLocalVariableTable.serialize(ctx, (AttributeLocalVariableTable)attribute, (AttributeCode)reference0);
 		}
 		else
 		if(attributeName.equals(attributeLocalVariableTypeTable))
 		{
-			baos.write(AttributeLocalVariableTypeTable.serialize(ctx, (AttributeLocalVariableTypeTable)attribute, (AttributeCode)reference0));
+			attributePayLoad = AttributeLocalVariableTypeTable.serialize(ctx, (AttributeLocalVariableTypeTable)attribute, (AttributeCode)reference0);
 		}
 		else
 		if(attributeName.equals(attributeDeprecated))
 		{
 			/* nothing to do here */
+			attributePayLoad = new byte[0];
 		}
 		else
 		if(attributeName.equals(attributeRuntimeVisibleAnnotations))
 		{
-			baos.write(AttributeRuntimeVisibleAnnotations.serialize(ctx, (AttributeRuntimeVisibleAnnotations)attribute));
+			attributePayLoad = AttributeRuntimeVisibleAnnotations.serialize(ctx, (AttributeRuntimeVisibleAnnotations)attribute);
 		}
 		else
 		if(attributeName.equals(attributeRuntimeInvisibleAnnotations))
 		{
-			baos.write(AttributeRuntimeInvisibleAnnotations.serialize(ctx, (AttributeRuntimeInvisibleAnnotations)attribute));
+			attributePayLoad = AttributeRuntimeInvisibleAnnotations.serialize(ctx, (AttributeRuntimeInvisibleAnnotations)attribute);
 		}
 		else
 		if(attributeName.equals(attributeRuntimeVisibleParameterAnnotations))
 		{
-			baos.write(AttributeRuntimeVisibleParameterAnnotations.serialize(ctx, (AttributeRuntimeVisibleParameterAnnotations)attribute));
+			attributePayLoad = AttributeRuntimeVisibleParameterAnnotations.serialize(ctx, (AttributeRuntimeVisibleParameterAnnotations)attribute);
 		}
 		else
 		if(attributeName.equals(attributeRuntimeInvisibleParameterAnnotations))
 		{
-			baos.write(AttributeRuntimeInvisibleParameterAnnotations.serialize(ctx, (AttributeRuntimeInvisibleParameterAnnotations)attribute));
+			attributePayLoad = AttributeRuntimeInvisibleParameterAnnotations.serialize(ctx, (AttributeRuntimeInvisibleParameterAnnotations)attribute);
 		}
 		else
 		if(attributeName.equals(attributeAnnotationDefault))
 		{
-			baos.write(AttributeAnnotationDefault.serialize(ctx, (AttributeAnnotationDefault)attribute));
+			attributePayLoad = AttributeAnnotationDefault.serialize(ctx, (AttributeAnnotationDefault)attribute);
 		}		
 		else
 		if(attributeName.equals(attributeBridge))
 		{
-			baos.write(AttributeBridge.serialize(ctx, (AttributeBridge)attribute));
+			attributePayLoad = AttributeBridge.serialize(ctx, (AttributeBridge)attribute);
 		}
 		else
 		if(attributeName.equals(attributeStackMapTable))
 		{
-			baos.write(AttributeStackMapTable.serialize(ctx, (AttributeStackMapTable)attribute));
+			attributePayLoad = AttributeStackMapTable.serialize(ctx, (AttributeStackMapTable)attribute, (AttributeCode)reference0);
 		}
 		else
 		if(attributeName.equals(attributeBootstrapMethods))
 		{
-			baos.write(AttributeBootstrapMethods.serialize(ctx, (AttributeBootstrapMethods)attribute));
+			attributePayLoad = AttributeBootstrapMethods.serialize(ctx, (AttributeBootstrapMethods)attribute);
 		}
 		else
 		if(attributeName.equals(attributeVarargs))
 		{
 			/* nothing to do here */
+			attributePayLoad = new byte[0];
 		}
 		else
 		{
 			System.err.println("Serialization - Contains custom attribute!");
-			baos.write(AttributeCustom.serialize(ctx, (AttributeCustom)attribute));
+			attributePayLoad = AttributeCustom.serialize(ctx, (AttributeCustom)attribute);
 		}
+		
+		baos.write(PNC.toByteArray(attributePayLoad.length, Integer.class));
+		baos.write(attributePayLoad);
 		
 		return baos.toByteArray();
 	}

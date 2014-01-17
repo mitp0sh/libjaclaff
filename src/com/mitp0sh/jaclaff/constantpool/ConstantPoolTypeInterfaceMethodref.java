@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolTypeInterfaceMethodrefDeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -12,8 +14,8 @@ public class ConstantPoolTypeInterfaceMethodref extends AbstractConstantPoolType
 {
 	private int                             classIndex = 0;	
 	private int                       nameAndTypeIndex = 0;	
-	private ConstantPoolTypeClass             cptClass = null;
-	private ConstantPoolTypeNameAndType cptNameAndType = null;
+	private ConstantPoolTypeClass             classObject = null;
+	private ConstantPoolTypeNameAndType nameAndTypeObject = null;
 	
 	public ConstantPoolTypeInterfaceMethodref()
 	{
@@ -26,9 +28,9 @@ public class ConstantPoolTypeInterfaceMethodref extends AbstractConstantPoolType
 		return this.classIndex;
 	}
 	
-	public void setClassIndex(int classIndex) 
+	public void setClassIndex(int index) 
 	{
-		this.classIndex = classIndex;
+		this.classIndex = index;
 	}
 	
 	public int getNameAndTypeIndex() 
@@ -36,32 +38,44 @@ public class ConstantPoolTypeInterfaceMethodref extends AbstractConstantPoolType
 		return this.nameAndTypeIndex;
 	}
 	
-	public void setNameAndTypeIndex(int nameAndTypeIndex)
+	public void setNameAndTypeIndex(int index)
 	{
-		this.nameAndTypeIndex = nameAndTypeIndex;
+		this.nameAndTypeIndex = index;
 	}
 	
-	public ConstantPoolTypeClass getCptClass() 
+	public ConstantPoolTypeClass getClassObject() 
 	{
-		return cptClass;
+		return classObject;
 	}
 
-	public void setCptClass(ConstantPoolTypeClass cptClass) 
+	public void setClassObject(ConstantPoolTypeClass object) 
 	{
-		this.cptClass = cptClass;
+		this.classObject = object;
+		
+		if(object != null)
+		{
+			this.setClassIndex(0);
+			this.addReference(object);
+		}
 	}
 
-	public ConstantPoolTypeNameAndType getCptNameAndType() 
+	public ConstantPoolTypeNameAndType getNameAndTypeObject() 
 	{
-		return cptNameAndType;
+		return nameAndTypeObject;
 	}
 
-	public void setCptNameAndType(ConstantPoolTypeNameAndType cptNameAndType)
+	public void setNameAndTypeObject(ConstantPoolTypeNameAndType object)
 	{
-		this.cptNameAndType = cptNameAndType;
+		this.nameAndTypeObject = object;
+		
+		if(object != null)
+		{
+			this.setNameAndTypeIndex(0);
+			this.addReference(object);
+		}
 	}
 	
-	public static ConstantPoolTypeInterfaceMethodref deserialize(DataInputStream dis) throws IOException
+	public static ConstantPoolTypeInterfaceMethodref deserialize(DataInputStream dis) throws InvalidConstantPoolTypeInterfaceMethodrefDeserializationException, IOException
 	{
 		ConstantPoolTypeInterfaceMethodref cptInterfaceMethodref = new ConstantPoolTypeInterfaceMethodref();
 		
@@ -69,6 +83,34 @@ public class ConstantPoolTypeInterfaceMethodref extends AbstractConstantPoolType
 		cptInterfaceMethodref.setNameAndTypeIndex(dis.readUnsignedShort());
 		
 		return cptInterfaceMethodref;
+	}
+	
+	public static void decoupleFromIndices(DesCtx ctx, ConstantPoolTypeInterfaceMethodref cpt)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		int classIndex = cpt.getClassIndex();
+		AbstractConstantPoolType acptClass = ConstantPool.getConstantPoolTypeByIndex(cp, classIndex);
+		ConstantPoolTypeClass classObject = (ConstantPoolTypeClass)acptClass;
+		cpt.setClassObject(classObject);
+
+		int NameAndTypeIndex= cpt.getNameAndTypeIndex();
+		AbstractConstantPoolType acptNameAndType = ConstantPool.getConstantPoolTypeByIndex(cp, NameAndTypeIndex);
+		ConstantPoolTypeNameAndType nameAndTypeObject =  (ConstantPoolTypeNameAndType)acptNameAndType;
+		cpt.setNameAndTypeObject(nameAndTypeObject);
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, ConstantPoolTypeInterfaceMethodref cpt)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		ConstantPoolTypeClass classObject = cpt.getClassObject();
+		int classIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, classObject);
+		cpt.setClassIndex(classIndex);
+		
+		ConstantPoolTypeNameAndType nameAndTypeObject = cpt.getNameAndTypeObject();
+		int nameAndTypeIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, nameAndTypeObject); 
+		cpt.setNameAndTypeIndex(nameAndTypeIndex);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, ConstantPoolTypeInterfaceMethodref elem) throws IOException
@@ -88,8 +130,8 @@ public class ConstantPoolTypeInterfaceMethodref extends AbstractConstantPoolType
 		ConstantPoolTypeInterfaceMethodref clone = (ConstantPoolTypeInterfaceMethodref)super.clone();
 		
 		/* fill instance with original data */
-		clone.setCptClass(this.getCptClass());
-		clone.setCptNameAndType(this.getCptNameAndType());
+		clone.setClassObject(this.getClassObject());
+		clone.setNameAndTypeObject(this.getNameAndTypeObject());
 		
 		return clone;
 	}
@@ -97,21 +139,16 @@ public class ConstantPoolTypeInterfaceMethodref extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
-		ConstantPoolTypeInterfaceMethodref cptInterfaceMethodref = null;
 		try
 		{
-			cptInterfaceMethodref = (ConstantPoolTypeInterfaceMethodref)obj;
+			ConstantPoolTypeInterfaceMethodref cpt = (ConstantPoolTypeInterfaceMethodref)obj;
+			boolean b0 = cpt.classObject.equals(this.classObject);
+			boolean b1 = cpt.nameAndTypeObject.equals(this.nameAndTypeObject);
+			return b0 && b1;
 		}
-		catch(ClassCastException e)
-		{
-			return false;
-		}
+		catch(NullPointerException e){}
+		catch(ClassCastException e){}
 		
-		if(!cptInterfaceMethodref.cptClass.equals(this.cptClass))
-		{
-			return false;
-		}
-		
-		return cptInterfaceMethodref.cptNameAndType.equals(this.cptNameAndType);
+		return false;
 	}
 }

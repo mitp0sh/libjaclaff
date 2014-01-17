@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
@@ -12,15 +13,16 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 /* complete */
-public class ClassEntry
+public class ClassEntry extends AbstractReference
 {	
 	private int                    innerClassInfoIndex = 0;
-	private ConstantPoolTypeClass innerClassInfoObject = null;
 	private int                    outerClassInfoIndex = 0;
-	private ConstantPoolTypeClass outerClassInfoObject = null;
 	private int                         innerNameIndex = 0;
-	private ConstantPoolTypeUtf8       innerNameObject = null;
 	private short                innerClassAccessFlags = 0;
+
+	private ConstantPoolTypeClass innerClassInfoObject = null;
+	private ConstantPoolTypeClass outerClassInfoObject = null;
+	private ConstantPoolTypeUtf8       innerNameObject = null;
 	
 	public int getInnerClassInfoIndex() 
 	{
@@ -67,9 +69,15 @@ public class ClassEntry
 		return innerClassInfoObject;
 	}
 
-	public void setInnerClassInfoObject(ConstantPoolTypeClass innerClassInfoObject)
+	public void setInnerClassInfoObject(ConstantPoolTypeClass object)
 	{
-		this.innerClassInfoObject = innerClassInfoObject;
+		this.innerClassInfoObject = object;
+		
+		if(object != null)
+		{
+			this.setInnerClassInfoIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public ConstantPoolTypeClass getOuterClassInfoObject() 
@@ -77,9 +85,15 @@ public class ClassEntry
 		return outerClassInfoObject;
 	}
 
-	public void setOuterClassInfoObject(ConstantPoolTypeClass outerClassInfoObject) 
+	public void setOuterClassInfoObject(ConstantPoolTypeClass object) 
 	{
-		this.outerClassInfoObject = outerClassInfoObject;
+		this.outerClassInfoObject = object;
+		
+		if(object != null)
+		{
+			this.setOuterClassInfoIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public ConstantPoolTypeUtf8 getInnerNameObject() 
@@ -87,9 +101,15 @@ public class ClassEntry
 		return innerNameObject;
 	}
 
-	public void setInnerNameObject(ConstantPoolTypeUtf8 innerNameObject) 
+	public void setInnerNameObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.innerNameObject = innerNameObject;
+		this.innerNameObject = object;
+		
+		if(object != null)
+		{
+			this.setInnerNameIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public static ClassEntry deserialize(DesCtx ctx) throws IOException
@@ -113,11 +133,8 @@ public class ClassEntry
 		ConstantPool constantPool = ctx.getConstantPool();
 		
 		classEntry.setInnerClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerClassInfoIndex));
-		classEntry.setInnerClassInfoIndex(0);
-		classEntry.setOuterClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.outerClassInfoIndex));
-		classEntry.setOuterClassInfoIndex(0);		
+		classEntry.setOuterClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.outerClassInfoIndex));	
 		classEntry.setInnerNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerNameIndex));
-		classEntry.setInnerNameIndex(0);
 	}
 	
 	private static void coupleToIndices(SerCtx ctx, ClassEntry classEntry)
@@ -130,13 +147,13 @@ public class ClassEntry
 		ConstantPoolTypeClass outerClassInfoObject = classEntry.getOuterClassInfoObject();
 		ConstantPoolTypeUtf8  innerClassNameObject = classEntry.getInnerNameObject();
 		
-	    short innerClassInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, innerClassInfoObject);
+	    int innerClassInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, innerClassInfoObject);
 	    classEntry.setInnerClassInfoIndex(innerClassInfoIndex);
 	    
-	    short outerClassInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, outerClassInfoObject);
+	    int outerClassInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, outerClassInfoObject);
 	    classEntry.setOuterClassInfoIndex(outerClassInfoIndex);
 	    
-	    short innerClassNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, innerClassNameObject);
+	    int innerClassNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, innerClassNameObject);
 	    classEntry.setInnerNameIndex(innerClassNameIndex);
 	}
 	

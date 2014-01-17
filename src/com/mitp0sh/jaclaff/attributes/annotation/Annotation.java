@@ -1,4 +1,4 @@
-package com.mitp0sh.jaclaff.attributes.generic;
+package com.mitp0sh.jaclaff.attributes.annotation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -11,7 +11,7 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 /* complete */
-public class Annotation 
+public class Annotation extends AbstractValue
 {
 	private int                       typeIndex = 0;
 	private ConstantPoolTypeUtf8     typeObject = null;
@@ -47,9 +47,15 @@ public class Annotation
 		return typeObject;
 	}
 
-	public void setTypeObject(ConstantPoolTypeUtf8 typeObject) 
+	public void setTypeObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.typeObject = typeObject;
+		this.typeObject = object;
+		
+		if(object != null)
+		{
+			this.setTypeIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public static Annotation deserialize(DesCtx ctx) throws IOException
@@ -78,7 +84,7 @@ public class Annotation
 	public static void coupleToIndices(SerCtx ctx, Annotation annotation)
 	{
 		ConstantPool cp = ctx.getConstantPool();
-		short typeIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, annotation.getTypeObject());
+		int typeIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, annotation.getTypeObject());
 		annotation.setTypeIndex(typeIndex);
 	}
 	

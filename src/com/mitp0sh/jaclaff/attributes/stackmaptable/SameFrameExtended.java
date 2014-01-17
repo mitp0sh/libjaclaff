@@ -33,10 +33,8 @@ public class SameFrameExtended extends AbstractStackMapFrame
 		return sameFrameExtended;
     }
 	
-	public static byte[] serialize(SerCtx ctx, SameFrameExtended sameFrameExtended) throws IOException
+	public static byte[] serialize(SerCtx ctx, SameFrameExtended sameFrameExtended, AttributeCode attributeCode) throws IOException
 	{	
-		coupleToOffsets(ctx, sameFrameExtended, null);
-		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	
 		baos.write(PNC.toByteArray(sameFrameExtended.getOffsetDelta(), Short.class));

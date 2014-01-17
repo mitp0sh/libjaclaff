@@ -12,7 +12,7 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class ObjectVariableInfo extends AbstractVariableInfo
 {
-	private short                          cpoolIndex = 0;
+	private int                            cpoolIndex = 0;
 	private AbstractConstantPoolType cpoolIndexObject = null;
 
 	public ObjectVariableInfo()
@@ -21,12 +21,12 @@ public class ObjectVariableInfo extends AbstractVariableInfo
 		setVariable_info_string_representation("Object_variable_info");
 	}
 	
-	public short getCPoolIndex()
+	public int getCPoolIndex()
 	{
 		return cpoolIndex;
 	}
 
-	public void setCPoolIndex(short cpoolIndex) 
+	public void setCPoolIndex(int cpoolIndex) 
 	{
 		this.cpoolIndex = cpoolIndex;
 	}
@@ -36,8 +36,15 @@ public class ObjectVariableInfo extends AbstractVariableInfo
 		return cpoolIndexObject;
 	}
 
-	public void setCPoolIndexObject(AbstractConstantPoolType cpoolIndexObject) {
-		this.cpoolIndexObject = cpoolIndexObject;
+	public void setCPoolIndexObject(AbstractConstantPoolType object) 
+	{
+		this.cpoolIndexObject = object;
+		
+		if(object != null)
+		{
+			this.setCPoolIndex(0);
+			this.addReference(object);
+		}
 	}
 	
 	public static ObjectVariableInfo deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
@@ -59,7 +66,7 @@ public class ObjectVariableInfo extends AbstractVariableInfo
 	
 	public static void coupleToIndices(SerCtx ctx, ObjectVariableInfo objectVariableInfo)
 	{
-		short cpoolIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), objectVariableInfo.getCPoolIndexObject());
+		int cpoolIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), objectVariableInfo.getCPoolIndexObject());
 		objectVariableInfo.setCPoolIndex(cpoolIndex);
 	}
 	

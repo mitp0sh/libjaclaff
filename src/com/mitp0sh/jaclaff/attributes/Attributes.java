@@ -2,6 +2,7 @@ package com.mitp0sh.jaclaff.attributes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
@@ -10,30 +11,30 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 public class Attributes
 {	
-	private AbstractAttribute[] attributes = new AbstractAttribute[0];	
+	private ArrayList<AbstractAttribute> attributes = new ArrayList<AbstractAttribute>();
 
-	public Attributes(int attributesCount)
+	public Attributes()
 	{
-		this.attributes = new AbstractAttribute[attributesCount & 0xFFFF];
+		this.attributes = new ArrayList<AbstractAttribute>();
 	}
 	
 	public int getAttributesCount()
 	{
-		return attributes.length;
+		return attributes.size();
 	}
 	
-	public AbstractAttribute[] getAttributes() 
+	public ArrayList<AbstractAttribute> getAttributes() 
 	{
 		return attributes;
 	}
 	
 	public static Attributes deserialize(DesCtx ctx, int attributesCount, Object reference0) throws IOException
     {
-		Attributes attributes = new Attributes(attributesCount);
+		Attributes attributes = new Attributes();
 		
 		for(int i = 0; i < attributesCount; i++)
 		{
-			attributes.getAttributes()[i] = AbstractAttribute.deserialize(ctx, reference0);
+			attributes.getAttributes().add(AbstractAttribute.deserialize(ctx, reference0));
 		}
 		
 		return attributes;
@@ -45,7 +46,7 @@ public class Attributes
 		
 		for(int i = 0; i < attributes.getAttributesCount(); i++)
 		{
-			baos.write(AbstractAttribute.serialize(ctx, attributes.getAttributes()[i], reference0));
+			baos.write(AbstractAttribute.serialize(ctx, attributes.getAttributes().get(i), reference0));
 		}
 		
 		return baos.toByteArray();
@@ -58,7 +59,7 @@ public class Attributes
 		/* search code attribute */
 		for(int i = 0; i < attributes.getAttributesCount(); i++)
 		{
-			AbstractAttribute attribute = attributes.getAttributes()[i];
+			AbstractAttribute attribute = attributes.getAttributes().get(i);
 			
 			int	     nameIndex = attribute.getAttributeNameIndex();
 			String	lAttributeName = constantPool.getConstantTypeUtf8Bytes(nameIndex);

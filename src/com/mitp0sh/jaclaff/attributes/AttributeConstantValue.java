@@ -36,9 +36,15 @@ public class AttributeConstantValue extends AbstractAttribute
 		return constantValueObject;
 	}
 
-	public void setConstantValueObject(AbstractConstantPoolType constantValueObject) 
+	public void setConstantValueObject(AbstractConstantPoolType object) 
 	{
-		this.constantValueObject = constantValueObject;
+		this.constantValueObject = object;
+		
+		if(object != null)
+		{
+			this.setConstantValueIndex(0);
+			this.addReference(object);
+		}
 	}
 	
 	public static AttributeConstantValue deserialize(DesCtx ctx) throws IOException

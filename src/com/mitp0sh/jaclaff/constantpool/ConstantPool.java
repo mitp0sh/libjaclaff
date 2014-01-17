@@ -3,207 +3,190 @@ package com.mitp0sh.jaclaff.constantpool;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolDeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 public class ConstantPool
 {
 	private static boolean SHOW_WARNINGS = false;
 	
-	private AbstractConstantPoolType[] constantPool;
-
-	public ConstantPool(int constantPoolCount)
-	{
-		this.setConstantPool(new AbstractConstantPoolType[constantPoolCount]);
-	}
+	private ArrayList<AbstractConstantPoolType> constantPool = new ArrayList<AbstractConstantPoolType>();
 	
-	public short getConstantPoolCount() 
+	public int getConstantPoolCount() 
 	{
-		return (short)(this.constantPool.length - 1);
+		return constantPool.size();
 	}	
 	
-	public AbstractConstantPoolType[] getConstantPool()
+	public ArrayList<AbstractConstantPoolType> getConstantPool()
 	{
 		return this.constantPool;
-	}
-
-	public void setConstantPool(AbstractConstantPoolType[] constantPool)
-	{
-		this.constantPool = constantPool;
 	}
 	
 	public String getConstantTypeUtf8Bytes(int index)
 	{	
-		if(this.getConstantPool().length < index ||
-		   this.getConstantPool()[index].getClass().getCanonicalName().indexOf("ConstantPoolTypeUtf8") == -1)
+		if(this.getConstantPool().size() < (index - 1) ||
+		   this.getConstantPool().get(index - 1).getClass().getCanonicalName().indexOf("ConstantPoolTypeUtf8") == -1)
 		{
 			return "";
 		}
-		return ((ConstantPoolTypeUtf8)(this.getConstantPool()[index])).getBytes();
+		return ((ConstantPoolTypeUtf8)(this.getConstantPool().get(index - 1))).getBytes();
 	}
 	
-	public static ConstantPool deserialize(DesCtx ctx, int constantPoolCount) throws IOException
+	public static ConstantPool deserialize(DesCtx ctx, int constantPoolCount) throws InvalidConstantPoolDeserializationException, IOException
     {
 		DataInputStream       dis = ctx.getDataInputStream();
-		ConstantPool constantPool = new ConstantPool(constantPoolCount);
+		ConstantPool constantPool = new ConstantPool();
 		ctx.setConstantPool(constantPool);
 		
-		for(int i = 1; i <= constantPool.getConstantPoolCount(); i++)
+		int num = constantPoolCount - 1; // constant pool count, when read from disk, is always +1 to effective count
+		for(int i = 0; i < num; i++)
 		{			
+			AbstractConstantPoolType current = null;
 			byte constantPoolTag = (byte)dis.readUnsignedByte();
 			
 			switch(constantPoolTag)
 			{
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_CLASS:
-				{					 					
-					constantPool.getConstantPool()[i] = ConstantPoolTypeClass.deserialize(dis);	
+				{				
+					current = ConstantPoolTypeClass.deserialize(dis);	
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_FIELDREF:
 				{					 				
-					constantPool.getConstantPool()[i] = ConstantPoolTypeFieldref.deserialize(dis);
+					current = ConstantPoolTypeFieldref.deserialize(dis);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_METHODREF:
 				{	 				
-					constantPool.getConstantPool()[i] = ConstantPoolTypeMethodref.deserialize(dis);
+					current = ConstantPoolTypeMethodref.deserialize(dis);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INTERFACEMETHODREF:
 				{	 				
-					constantPool.getConstantPool()[i] = ConstantPoolTypeInterfaceMethodref.deserialize(dis);					
+					current = ConstantPoolTypeInterfaceMethodref.deserialize(dis);					
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_STRING:
 				{	 			
-					constantPool.getConstantPool()[i] = ConstantPoolTypeString.deserialize(dis);					
+					current = ConstantPoolTypeString.deserialize(dis);					
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INTEGER:
 				{					 					
-					constantPool.getConstantPool()[i] = ConstantPoolTypeInteger.deserialize(dis);					
+					current = ConstantPoolTypeInteger.deserialize(dis);					
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_FLOAT:
 				{	 					
-					constantPool.getConstantPool()[i] = ConstantPoolTypeFloat.deserialize(dis);				
+					current = ConstantPoolTypeFloat.deserialize(dis);				
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_LONG:
 				{	 					
-					constantPool.getConstantPool()[i] = ConstantPoolTypeLong.deserialize(dis);					
-					i++;			
-					constantPool.getConstantPool()[i] = new ConstantPoolTypeLong();
+					current = ConstantPoolTypeLong.deserialize(dis);	
+					constantPool.getConstantPool().add(current);
+					current = new ConstantPoolTypeLong();
+					i++;
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_DOUBLE:
 				{	 				
-					constantPool.getConstantPool()[i] = ConstantPoolTypeDouble.deserialize(dis);
-					i++;		
-					constantPool.getConstantPool()[i] = new ConstantPoolTypeDouble();
+					current = ConstantPoolTypeDouble.deserialize(dis);	
+					constantPool.getConstantPool().add(current);
+					current = new ConstantPoolTypeDouble();
+					i++;
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_NAMEANDTYPE:
 				{	 				
-					constantPool.getConstantPool()[i] = ConstantPoolTypeNameAndType.deserialize(dis);					
+					current = ConstantPoolTypeNameAndType.deserialize(dis);					
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_UTF8:
 				{	
-					constantPool.getConstantPool()[i] = ConstantPoolTypeUtf8.deserialize(dis);					
+					current = ConstantPoolTypeUtf8.deserialize(dis);					
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INVOKE_DYNAMIC:
 				{
-					constantPool.getConstantPool()[i] = ConstantPoolTypeInvokeDynamic.deserialize(dis, constantPool);
+					current = ConstantPoolTypeInvokeDynamic.deserialize(dis, constantPool);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_METHODHANDLE:
 				{
-					constantPool.getConstantPool()[i] = ConstantPoolTypeMethodHandle.deserialize(dis, constantPool);
+					current = ConstantPoolTypeMethodHandle.deserialize(dis, constantPool);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_METHODTYPE:
 				{
-					constantPool.getConstantPool()[i] = ConstantPoolTypeMethodType.deserialize(dis, constantPool);
+					current = ConstantPoolTypeMethodType.deserialize(dis, constantPool);
 					break;
 				}
 				default:
 				{
-					System.err.println("FATAL DESERIALIZATION ERROR: Unknown constant pool tag!");
-					return null;
+					System.err.println("error - unable to deserialize constant pool type !!!");
+					System.exit(-1);
 				}
 			}
+			
+			/* add to constant pool list */
+			constantPool.getConstantPool().add(current);
 		}
 		
 		/* decouple indexes */
-		decoupleConstantPoolEntriesFromIndices(constantPool);
+		decoupleFromIndices(ctx);
 		
 		return constantPool;
     }
 	
-	private static void decoupleConstantPoolEntriesFromIndices(ConstantPool constantPool)
+	private static void decoupleFromIndices(DesCtx ctx)
 	{
-		for(int i = 1;i <= constantPool.getConstantPoolCount(); i++)
-		{	
-			AbstractConstantPoolType abstractCPT = constantPool.getConstantPool()[i];
-			
-			switch(abstractCPT.getConstant_pool_tag())
+		ConstantPool cp = ctx.getConstantPool();
+		Iterator<AbstractConstantPoolType> iter = cp.getConstantPool().iterator();
+		while(iter.hasNext())
+		{
+			AbstractConstantPoolType acpt = iter.next();
+			int tag = acpt.getConstant_pool_tag();
+			switch(tag)
 			{
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_CLASS:
-				{						
-					ConstantPoolTypeClass entry = (ConstantPoolTypeClass)abstractCPT;
-					entry.setNameObject((ConstantPoolTypeUtf8)getConstantPoolTypeByIndex(constantPool, entry.getNameIndex()));
-					entry.setNameIndex((short)0);
+				{				
+					ConstantPoolTypeClass cpt = (ConstantPoolTypeClass)acpt;
+					ConstantPoolTypeClass.decoupleFromIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_FIELDREF:
 				{
-					ConstantPoolTypeFieldref entry = (ConstantPoolTypeFieldref)abstractCPT;
-					entry.setCptClass((ConstantPoolTypeClass)getConstantPoolTypeByIndex(constantPool, entry.getClassIndex()));
-					entry.setClassIndex((short)0);
-					entry.setCptNameAndType((ConstantPoolTypeNameAndType)getConstantPoolTypeByIndex(constantPool, entry.getNameAndTypeIndex()));
-					entry.setNameAndTypeIndex((short)0);
-					
+					ConstantPoolTypeFieldref cpt = (ConstantPoolTypeFieldref)acpt;
+					ConstantPoolTypeFieldref.decoupleFromIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_METHODREF:
 				{
-					ConstantPoolTypeMethodref entry = (ConstantPoolTypeMethodref)abstractCPT;
-					entry.setCptClass((ConstantPoolTypeClass)getConstantPoolTypeByIndex(constantPool, entry.getClassIndex()));
-					entry.setClassIndex((short)0);
-					entry.setCptNameAndType((ConstantPoolTypeNameAndType)getConstantPoolTypeByIndex(constantPool, entry.getNameAndTypeIndex()));
-					entry.setNameAndTypeIndex((short)0);
-					
+					ConstantPoolTypeMethodref cpt = (ConstantPoolTypeMethodref)acpt;
+					ConstantPoolTypeMethodref.decoupleFromIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INTERFACEMETHODREF:
 				{
-					ConstantPoolTypeInterfaceMethodref entry = (ConstantPoolTypeInterfaceMethodref)abstractCPT;
-					entry.setCptClass((ConstantPoolTypeClass)getConstantPoolTypeByIndex(constantPool, entry.getClassIndex()));
-					entry.setClassIndex((short)0);
-					entry.setCptNameAndType((ConstantPoolTypeNameAndType)getConstantPoolTypeByIndex(constantPool, entry.getNameAndTypeIndex()));
-					entry.setNameAndTypeIndex((short)0);
-					
+					ConstantPoolTypeInterfaceMethodref cpt = (ConstantPoolTypeInterfaceMethodref)acpt;
+					ConstantPoolTypeInterfaceMethodref.decoupleFromIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_NAMEANDTYPE:
 				{
-					ConstantPoolTypeNameAndType entry = (ConstantPoolTypeNameAndType)abstractCPT;
-					entry.setCptName((ConstantPoolTypeUtf8)getConstantPoolTypeByIndex(constantPool, entry.getNameIndex()));
-					entry.setNameIndex((short)0);
-					entry.setCptDescriptor((ConstantPoolTypeUtf8)getConstantPoolTypeByIndex(constantPool, entry.getDescriptorIndex()));
-					entry.setDescriptorIndex((short)0);
-					
+					ConstantPoolTypeNameAndType cpt = (ConstantPoolTypeNameAndType)acpt;
+					ConstantPoolTypeNameAndType.decoupleFromIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_STRING:
 				{
-					ConstantPoolTypeString entry = (ConstantPoolTypeString)abstractCPT;
-					entry.setCptString((ConstantPoolTypeUtf8)getConstantPoolTypeByIndex(constantPool, entry.getStringIndex()));
-					entry.setStringIndex((short)0);
-					
+					ConstantPoolTypeString cpt = (ConstantPoolTypeString)acpt;
+					ConstantPoolTypeString.decoupleFromIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INVOKE_DYNAMIC:
@@ -215,67 +198,55 @@ public class ConstantPool
 		}
 	}
 	
-	private static void coupleConstantPoolEntriesToIndices(SerCtx ctx, ConstantPool constantPool)
+	private static void coupleConstantPoolEntriesToIndices(SerCtx ctx, ConstantPool cp)
 	{
-		for(int i = 1; i <= constantPool.getConstantPoolCount(); i++)
-		{	
-			AbstractConstantPoolType abstractCPT = constantPool.getConstantPool()[i];
-	
-			switch(abstractCPT.getConstant_pool_tag())
+		Iterator<AbstractConstantPoolType> iter = cp.getConstantPool().iterator();
+		while(iter.hasNext())
+		{
+			AbstractConstantPoolType acpt = iter.next();
+			int tag = acpt.getConstant_pool_tag();
+			switch(tag)
 			{
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_CLASS:
 				{	
-					ConstantPoolTypeClass entry = (ConstantPoolTypeClass)abstractCPT;
-					short nameIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getNameObject());
-					entry.setNameIndex(nameIndex);
+					ConstantPoolTypeClass cpt = (ConstantPoolTypeClass)acpt;
+					ConstantPoolTypeClass.coupleToIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_FIELDREF:
 				{
-					ConstantPoolTypeFieldref entry = (ConstantPoolTypeFieldref)abstractCPT;
-					short classIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptClass());
-					entry.setClassIndex(classIndex);
-					short nameAndTypeIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptNameAndType()); 
-					entry.setNameAndTypeIndex(nameAndTypeIndex);
+					ConstantPoolTypeFieldref cpt = (ConstantPoolTypeFieldref)acpt;
+					ConstantPoolTypeFieldref.coupleToIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_METHODREF:
 				{
-					ConstantPoolTypeMethodref entry = (ConstantPoolTypeMethodref)abstractCPT;
-					short classIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptClass());
-					entry.setClassIndex(classIndex);
-					short nameAndTypeIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptNameAndType()); 
-					entry.setNameAndTypeIndex(nameAndTypeIndex);
+					ConstantPoolTypeMethodref cpt = (ConstantPoolTypeMethodref)acpt;
+					ConstantPoolTypeMethodref.coupleToIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INTERFACEMETHODREF:
 				{
-					ConstantPoolTypeInterfaceMethodref entry = (ConstantPoolTypeInterfaceMethodref)abstractCPT;
-					short classIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptClass());
-					entry.setClassIndex(classIndex);
-					short nameAndTypeIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptNameAndType()); 
-					entry.setNameAndTypeIndex(nameAndTypeIndex);
+					ConstantPoolTypeInterfaceMethodref cpt = (ConstantPoolTypeInterfaceMethodref)acpt;
+					ConstantPoolTypeInterfaceMethodref.coupleToIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_NAMEANDTYPE:
 				{
-					ConstantPoolTypeNameAndType entry = (ConstantPoolTypeNameAndType)abstractCPT;
-					short nameIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptName());
-					entry.setNameIndex(nameIndex);
-					short descriptorIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptDescriptor());
-					entry.setDescriptorIndex(descriptorIndex);
+					ConstantPoolTypeNameAndType cpt = (ConstantPoolTypeNameAndType)acpt;
+					ConstantPoolTypeNameAndType.coupleToIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_STRING:
 				{
-					ConstantPoolTypeString entry = (ConstantPoolTypeString)abstractCPT;
-					short stringIndex = getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.getCptString());
-					entry.setStringIndex(stringIndex);
+					ConstantPoolTypeString cpt = (ConstantPoolTypeString)acpt;
+					ConstantPoolTypeString.coupleToIndices(ctx, cpt);
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_INVOKE_DYNAMIC:
 				{
-					ConstantPoolTypeInvokeDynamic.coupleConstantPoolTypeInvokeDynamicEntries(ctx, (ConstantPoolTypeInvokeDynamic)abstractCPT);
+					ConstantPoolTypeInvokeDynamic cpt = (ConstantPoolTypeInvokeDynamic)acpt;
+					ConstantPoolTypeInvokeDynamic.coupleConstantPoolTypeInvokeDynamicEntries(ctx, cpt);
 					break;
 				}
 			}
@@ -284,92 +255,90 @@ public class ConstantPool
 	
 	public static AbstractConstantPoolType getConstantPoolTypeByIndex(ConstantPool constantPool, int index)
 	{
-		return constantPool.constantPool[index];
+		return constantPool.getConstantPool().get(index - 1);
 	}
 	
-	public static byte[] serialize(SerCtx ctx, ConstantPool constantPool) throws IOException
+	public static byte[] serialize(SerCtx ctx, ConstantPool cp) throws IOException
 	{		
 		/* couple to indices */
-		coupleConstantPoolEntriesToIndices(ctx, constantPool);
+		coupleConstantPoolEntriesToIndices(ctx, cp);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		for(int i = 1; i <= constantPool.getConstantPoolCount(); i++)
+		Iterator<AbstractConstantPoolType> iter = cp.getConstantPool().iterator();
+		while(iter.hasNext())
 		{
-			AbstractConstantPoolType elem;
-			byte                     tag;
-			
-			elem = constantPool.getConstantPool()[i];
-			tag  = elem.getConstant_pool_tag();
+			AbstractConstantPoolType acpt = iter.next();
+			int tag = acpt.getConstant_pool_tag();
 			
 			switch(tag)
 			{
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_CLASS:
 			    {
-			    	baos.write(ConstantPoolTypeClass.serialize(ctx, (ConstantPoolTypeClass)elem));
+			    	baos.write(ConstantPoolTypeClass.serialize(ctx, (ConstantPoolTypeClass)acpt));
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_FIELDREF:
 			    {
-			    	baos.write(ConstantPoolTypeFieldref.serialize(ctx, (ConstantPoolTypeFieldref)elem));
+			    	baos.write(ConstantPoolTypeFieldref.serialize(ctx, (ConstantPoolTypeFieldref)acpt));
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_METHODREF:
 			    {
-			    	baos.write(ConstantPoolTypeMethodref.serialize(ctx, (ConstantPoolTypeMethodref)elem));
+			    	baos.write(ConstantPoolTypeMethodref.serialize(ctx, (ConstantPoolTypeMethodref)acpt));
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_INTERFACEMETHODREF:
 			    {
-			    	baos.write(ConstantPoolTypeInterfaceMethodref.serialize(ctx, (ConstantPoolTypeInterfaceMethodref)elem));
+			    	baos.write(ConstantPoolTypeInterfaceMethodref.serialize(ctx, (ConstantPoolTypeInterfaceMethodref)acpt));
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_STRING:
 			    {
-			    	baos.write(ConstantPoolTypeString.serialize(ctx, (ConstantPoolTypeString)elem));
+			    	baos.write(ConstantPoolTypeString.serialize(ctx, (ConstantPoolTypeString)acpt));
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_INTEGER:
 			    {
-			    	baos.write(ConstantPoolTypeInteger.serialize(ctx, (ConstantPoolTypeInteger)elem));
+			    	baos.write(ConstantPoolTypeInteger.serialize(ctx, (ConstantPoolTypeInteger)acpt));
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_FLOAT:
 			    {
-			    	baos.write(ConstantPoolTypeFloat.serialize(ctx, (ConstantPoolTypeFloat)elem));
+			    	baos.write(ConstantPoolTypeFloat.serialize(ctx, (ConstantPoolTypeFloat)acpt));
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_LONG:
 			    {
-			    	baos.write(ConstantPoolTypeLong.serialize(ctx, (ConstantPoolTypeLong)elem));
-			    	i++;
+			    	baos.write(ConstantPoolTypeLong.serialize(ctx, (ConstantPoolTypeLong)acpt));
+			    	iter.next();
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_DOUBLE:
 			    {
-			    	baos.write(ConstantPoolTypeDouble.serialize(ctx, (ConstantPoolTypeDouble)elem));
-			    	i++;
+			    	baos.write(ConstantPoolTypeDouble.serialize(ctx, (ConstantPoolTypeDouble)acpt));
+			    	iter.next();
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_NAMEANDTYPE:
 			    {
-			    	baos.write(ConstantPoolTypeNameAndType.serialize(ctx, (ConstantPoolTypeNameAndType)elem));
+			    	baos.write(ConstantPoolTypeNameAndType.serialize(ctx, (ConstantPoolTypeNameAndType)acpt));
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_UTF8:
 			    {			    	
-			    	baos.write(ConstantPoolTypeUtf8.serialize(ctx, (ConstantPoolTypeUtf8)elem));
+			    	baos.write(ConstantPoolTypeUtf8.serialize(ctx, (ConstantPoolTypeUtf8)acpt));
 			    	break;
 			    }
 			    case AbstractConstantPoolType.CONSTANT_POOL_TAG_INVOKE_DYNAMIC:
 			    {
-			    	baos.write(ConstantPoolTypeInvokeDynamic.serialize(ctx, (ConstantPoolTypeInvokeDynamic)elem));
+			    	baos.write(ConstantPoolTypeInvokeDynamic.serialize(ctx, (ConstantPoolTypeInvokeDynamic)acpt));
 			    	break;
 			    }
 			    default:
 				{
-					System.err.println("FATAL SERIALIZATION ERROR: Unknown constant pool tag!");
-					return null;
+					System.err.println("error - unable to serialize constant pool type !!!");
+					System.exit(-1);
 				}
 			}
 		}
@@ -377,7 +346,7 @@ public class ConstantPool
 		return baos.toByteArray();
 	}
 	
-	public static short getIndexFromConstantPoolEntry(ConstantPool constantPool, AbstractConstantPoolType cpt)
+	public static int getIndexFromConstantPoolEntry(ConstantPool constantPool, AbstractConstantPoolType cpt)
 	{
 		if(cpt == null)
 		{
@@ -389,12 +358,12 @@ public class ConstantPool
 			return 0;
 		}
 		
-		for(int i = 1; i <= constantPool.getConstantPool().length; i++)
+		for(int i = 0; i < constantPool.getConstantPoolCount(); i++)
 		{	
-			AbstractConstantPoolType curr = constantPool.getConstantPool()[i];		
+			AbstractConstantPoolType curr = constantPool.getConstantPool().get(i);		
 			if(cpt.equals(curr))
 			{
-				return (short)i;
+				return i + 1;
 			}
 		}
 	

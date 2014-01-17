@@ -15,8 +15,9 @@ import com.mitp0sh.jaclaff.util.PNC;
 public class AttributeEnclosingMethod extends AbstractAttribute
 {
 	private int                           classIndex = 0;
-	private ConstantPoolTypeClass        classObject = null;
 	private int                          methodIndex = 0;
+	
+	private ConstantPoolTypeClass        classObject = null;
 	private ConstantPoolTypeNameAndType methodObject = null;
 
 	public int getClassIndex() 
@@ -44,9 +45,15 @@ public class AttributeEnclosingMethod extends AbstractAttribute
 		return classObject;
 	}
 
-	public void setClassObject(ConstantPoolTypeClass classObject) 
+	public void setClassObject(ConstantPoolTypeClass object) 
 	{
-		this.classObject = classObject;
+		this.classObject = object;
+		
+		if(object != null)
+		{
+			this.setClassIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public ConstantPoolTypeNameAndType getMethodObject() 
@@ -54,9 +61,15 @@ public class AttributeEnclosingMethod extends AbstractAttribute
 		return methodObject;
 	}
 
-	public void setMethodObject(ConstantPoolTypeNameAndType methodObject) 
+	public void setMethodObject(ConstantPoolTypeNameAndType object) 
 	{
-		this.methodObject = methodObject;
+		this.methodObject = object;
+		
+		if(object != null)
+		{
+			this.setMethodIndex(0);
+			this.addReference(object);
+		}
 	}
 	
 	public static AttributeEnclosingMethod deserialize(DesCtx ctx) throws IOException
@@ -80,22 +93,20 @@ public class AttributeEnclosingMethod extends AbstractAttribute
 		ConstantPoolTypeClass classObject = null;
 		classObject = (ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(cp, attribute.classIndex);
 		attribute.setClassObject(classObject);
-		attribute.setClassIndex(0);
 		
 		ConstantPoolTypeNameAndType methodObject = null;
 		methodObject = (ConstantPoolTypeNameAndType)ConstantPool.getConstantPoolTypeByIndex(cp, attribute.methodIndex);
 		attribute.setMethodObject(methodObject);
-		attribute.setMethodIndex(0);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, AttributeEnclosingMethod attribute)
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		short classIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, attribute.getClassObject());
+		int classIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, attribute.getClassObject());
 		attribute.setClassIndex(classIndex);
 		
-		short methodIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, attribute.getMethodObject());
+		int methodIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, attribute.getMethodObject());
 		attribute.setMethodIndex(methodIndex);
 	}
 	

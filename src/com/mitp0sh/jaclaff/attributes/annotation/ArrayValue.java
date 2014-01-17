@@ -1,4 +1,4 @@
-package com.mitp0sh.jaclaff.attributes.generic;
+package com.mitp0sh.jaclaff.attributes.annotation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -9,7 +9,7 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 /* complete */
-public class ArrayValue 
+public class ArrayValue extends AbstractValue
 {
 	private ElementValue[] elementValues = new ElementValue[0];
 	

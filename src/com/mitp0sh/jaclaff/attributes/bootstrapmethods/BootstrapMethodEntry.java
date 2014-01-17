@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeMethodHandle;
@@ -13,7 +14,7 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 /* complete */
-public class BootstrapMethodEntry
+public class BootstrapMethodEntry extends AbstractReference
 {
 	private int bootstrapMethodRefIndex = 0;
 	private int[]    bootstrapArguments = new int[0];
@@ -56,9 +57,15 @@ public class BootstrapMethodEntry
 		return bootstrapMethodRefObject;
 	}
 
-	public void setBootstrapMethodRefObject(ConstantPoolTypeMethodHandle bootstrapMethodRefObject)
+	public void setBootstrapMethodRefObject(ConstantPoolTypeMethodHandle object)
 	{
-		this.bootstrapMethodRefObject = bootstrapMethodRefObject;
+		this.bootstrapMethodRefObject = object;
+		
+		if(object != null)
+		{
+			this.setBootstrapMethodRefIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public ArrayList<AbstractConstantPoolType> getBootstrapArgumentsObjects() 
@@ -93,15 +100,23 @@ public class BootstrapMethodEntry
 	
 	public static void decoupleFromIndices(DesCtx ctx, BootstrapMethodEntry bootstrapMethodEntry)
 	{
-		ConstantPool constantPool = ctx.getConstantPool();
+		ConstantPool cp = ctx.getConstantPool();
 		
-		bootstrapMethodEntry.setBootstrapMethodRefObject((ConstantPoolTypeMethodHandle)ConstantPool.getConstantPoolTypeByIndex(constantPool, bootstrapMethodEntry.getBootstrapMethodRefIndex()));
+		bootstrapMethodEntry.setBootstrapMethodRefObject((ConstantPoolTypeMethodHandle)ConstantPool.getConstantPoolTypeByIndex(cp, bootstrapMethodEntry.getBootstrapMethodRefIndex()));
 		bootstrapMethodEntry.setBootstrapMethodRefIndex(0);
 		
-		for(int i = 0; i < bootstrapMethodEntry.getNumBootstrapArguments(); i++)
+		int num = bootstrapMethodEntry.getNumBootstrapArguments();
+		for(int i = 0; i < num; i++)
 		{
-			bootstrapMethodEntry.getBootstrapArgumentsObjects().add(ConstantPool.getConstantPoolTypeByIndex(constantPool, bootstrapMethodEntry.getBootstrapArguments()[i]));
-			bootstrapMethodEntry.getBootstrapArguments()[i] = 0;
+			AbstractConstantPoolType acpt = ConstantPool.getConstantPoolTypeByIndex(cp, bootstrapMethodEntry.getBootstrapArguments()[i]);
+			bootstrapMethodEntry.getBootstrapArgumentsObjects().add(acpt);
+			
+			// TODO - Find a proper place to do that - refactor whole class, maybe even split class !!!
+			if(acpt != null)
+			{
+				bootstrapMethodEntry.getBootstrapArguments()[i] = 0;
+				bootstrapMethodEntry.addReference(acpt);
+			}
 		}
 	}
 	
@@ -113,12 +128,12 @@ public class BootstrapMethodEntry
 		/* get objects */
 		ConstantPoolTypeMethodHandle methodRef = bootstrapMethodEntry.getBootstrapMethodRefObject();
 		
-	    short methodRefIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, methodRef);
+	    int methodRefIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, methodRef);
 	    bootstrapMethodEntry.setBootstrapMethodRefIndex(methodRefIndex);
 	    
 		for(int i = 0; i < bootstrapMethodEntry.getNumBootstrapArguments(); i++)
 		{
-			short currentBootstrapArgument = ConstantPool.getIndexFromConstantPoolEntry(cp, bootstrapMethodEntry.getBootstrapArgumentsObjects().get(i));
+			int currentBootstrapArgument = ConstantPool.getIndexFromConstantPoolEntry(cp, bootstrapMethodEntry.getBootstrapArgumentsObjects().get(i));
 			bootstrapMethodEntry.getBootstrapArguments()[i] = currentBootstrapArgument;
 		}
 	}

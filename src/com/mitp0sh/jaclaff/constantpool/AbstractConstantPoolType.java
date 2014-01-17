@@ -1,6 +1,8 @@
 package com.mitp0sh.jaclaff.constantpool;
 
-public abstract class AbstractConstantPoolType
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
+
+public abstract class AbstractConstantPoolType extends AbstractReference
 {
 	private byte   constant_pool_tag;
 	private String constant_pool_string_representation;

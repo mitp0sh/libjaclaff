@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.attributes.generic.Annotation;
+import com.mitp0sh.jaclaff.attributes.annotation.Annotation;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;

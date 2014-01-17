@@ -1,9 +1,10 @@
-package com.mitp0sh.jaclaff.attributes.generic;
+package com.mitp0sh.jaclaff.attributes.annotation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
@@ -11,11 +12,13 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 /* complete */
-public class ElementValuePairsEntry 
+public class ElementValuePairsEntry extends AbstractReference
 {
 	private int          		  elementNameIndex = 0;
+	
 	private ConstantPoolTypeUtf8 elementNameObject = null;
-	private ElementValue       		  elementValue = null;
+	
+	private ElementValue              elementValue = null;
 	
 	public int getElementNameIndex()
 	{
@@ -42,9 +45,15 @@ public class ElementValuePairsEntry
 		return elementNameObject;
 	}
 
-	public void setElementNameObject(ConstantPoolTypeUtf8 elementNameObject)
+	public void setElementNameObject(ConstantPoolTypeUtf8 object)
 	{
-		this.elementNameObject = elementNameObject;
+		this.elementNameObject = object;
+		
+		if(object != null)
+		{
+			this.setElementNameIndex(0);
+			this.addReference(object);
+		}
 	}
 	
 	public static ElementValuePairsEntry deserialize(DesCtx ctx) throws IOException
@@ -71,7 +80,7 @@ public class ElementValuePairsEntry
 	public static void coupleToIndices(SerCtx ctx, ElementValuePairsEntry elementValuePairsEntry)
 	{
 		ConstantPool cp = ctx.getConstantPool();
-		short elementNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, elementValuePairsEntry.getElementNameObject());
+		int elementNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, elementValuePairsEntry.getElementNameObject());
 		elementValuePairsEntry.setElementNameIndex(elementNameIndex);
 	}
 	

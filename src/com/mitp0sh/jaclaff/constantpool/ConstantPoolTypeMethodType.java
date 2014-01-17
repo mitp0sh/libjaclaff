@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolTypeMethodTypeDeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -38,7 +39,8 @@ public class ConstantPoolTypeMethodType extends AbstractConstantPoolType
 		this.descriptorObject = descriptorObject;
 	}
 	
-	public static ConstantPoolTypeMethodType deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static ConstantPoolTypeMethodType deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException,
+	                                                                                                            InvalidConstantPoolTypeMethodTypeDeserializationException
 	{
 		ConstantPoolTypeMethodType type = new ConstantPoolTypeMethodType();
 		
@@ -57,7 +59,7 @@ public class ConstantPoolTypeMethodType extends AbstractConstantPoolType
 	
 	public static void coupleToIndices(SerCtx ctx, ConstantPoolTypeMethodType type)
 	{
-		short descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), type.getDescriptorObject());
+		int descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), type.getDescriptorObject());
 		type.setDescriptorIndex(descriptorIndex);
 	}
 	
@@ -86,16 +88,14 @@ public class ConstantPoolTypeMethodType extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
-		ConstantPoolTypeMethodType handle = null;
 		try
 		{
-			handle = (ConstantPoolTypeMethodType)obj;
+			ConstantPoolTypeMethodType cpt = (ConstantPoolTypeMethodType)obj;
+			return cpt.getDescriptorObject().equals(this.descriptorObject);
 		}
-		catch(ClassCastException e)
-		{
-			return false;
-		}
+		catch(NullPointerException e){}
+		catch(ClassCastException e){}
 		
-		return handle.getDescriptorObject().equals(this.descriptorObject);
+		return false;
 	}
 }

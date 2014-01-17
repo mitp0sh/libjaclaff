@@ -37,24 +37,26 @@ public class AttributeStackMapTable extends AbstractAttribute
 		DataInputStream dis = ctx.getDataInputStream();
 		
 		AttributeStackMapTable attribute = new AttributeStackMapTable();
+		ArrayList<StackMapFrame>    list = attribute.getStackMapFrameList();
 		
 		int                                     num = dis.readUnsignedShort();
-		StackMapFrame           previousPreviousSMF = null;
-		StackMapFrame                   previousSMF = null;
-		AbstractStackMapFrame previousPreviousFrame = null;
+		StackMapFrame                    currentSMF = null;
 		AbstractStackMapFrame         previousFrame = null;
+		AbstractStackMapFrame          currentFrame = null;
 		
 		for(int i = 0; i < num; i++)
-		{		
-			if(previousSMF != null)
+		{					
+			currentSMF = StackMapFrame.deserialize(ctx, attributeCode, attribute.stackMapFrameList, previousFrame);
+			list.add(currentSMF);
+			
+			currentFrame = currentSMF.getStackMapFrame();
+			currentFrame.setPreviousFrame(previousFrame);
+			if(previousFrame != null)
 			{
-				previousPreviousSMF   = previousSMF;
-				previousPreviousFrame = previousFrame;
+				previousFrame.setNextFrame(currentFrame);
 			}
 			
-			previousSMF   = StackMapFrame.deserialize(ctx, attributeCode, attribute.stackMapFrameList, previousFrame);
-			previousFrame = previousSMF.getStackMapFrame();
-			attribute.getStackMapFrameList().add(previousSMF);
+			previousFrame = currentFrame;	
 		}
 		
 		decoupleFromDeltaOffset(attribute);
@@ -71,13 +73,12 @@ public class AttributeStackMapTable extends AbstractAttribute
 			StackMapFrame stackMapFrame = iter.next();
 			AbstractStackMapFrame current = stackMapFrame.getStackMapFrame();
 			current.setOffsetDelta(0);
-			current.setPreviousFrame(null);
 			current.setStack_map_frame_bytecode_offset(0);
 			current.setStack_map_frame_type((short)0);
 		}
 	}
 	
-	public static byte[] serialize(SerCtx ctx, AttributeStackMapTable attribute) throws IOException
+	public static byte[] serialize(SerCtx ctx, AttributeStackMapTable attribute, AttributeCode attributeCode) throws IOException
 	{
 		ByteArrayOutputStream baos = new  ByteArrayOutputStream();
 		
@@ -86,7 +87,7 @@ public class AttributeStackMapTable extends AbstractAttribute
 		
 		for(int i = 0; i < num; i++)
 		{
-			baos.write(StackMapFrame.serialize(ctx, attribute.getStackMapFrameList().get(i)));
+			baos.write(StackMapFrame.serialize(ctx, attribute.getStackMapFrameList().get(i), attributeCode));
 		}
 		
 		return baos.toByteArray();

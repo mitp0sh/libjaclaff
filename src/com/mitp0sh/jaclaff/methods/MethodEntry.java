@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.attributes.Attributes;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
@@ -12,7 +13,7 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
-public class MethodEntry
+public class MethodEntry extends AbstractReference
 {
 	private short                     accessFlags = 0;
 	private int                         nameIndex = 0;
@@ -57,9 +58,15 @@ public class MethodEntry
 		return nameObject;
 	}
 
-	public void setNameObject(ConstantPoolTypeUtf8 nameObject) 
+	public void setNameObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.nameObject = nameObject;
+		this.nameObject = object;
+		
+		if(object != null)
+		{
+			this.setNameIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public ConstantPoolTypeUtf8 getDescriptorObject() 
@@ -67,9 +74,15 @@ public class MethodEntry
 		return descriptorObject;
 	}
 
-	public void setDescriptorObject(ConstantPoolTypeUtf8 descriptorObject) 
+	public void setDescriptorObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.descriptorObject = descriptorObject;
+		this.descriptorObject = object;
+		
+		if(object != null)
+		{
+			this.setDescIndex(0);
+			this.addReference(object);
+		}
 	}
 	
 	public int getAttributeCount()

@@ -25,20 +25,8 @@ public class SameFrame extends AbstractStackMapFrame
 		return sameFrame;
     }
 	
-	public static byte[] serialize(SerCtx ctx, SameFrame sameFrame) throws IOException
-	{	
-		coupleToOffsets(ctx, sameFrame, null);
-		
+	public static byte[] serialize(SerCtx ctx, SameFrame sameFrame, AttributeCode attributeCode) throws IOException
+	{			
 		return new byte[]{};
 	}
 }
-
-// The frame type same_frame is represented by tags in the range [0-63]. If 
-// the frame type is same_frame, it means the frame has exactly the same 
-// locals as the previous stack map frame and that the number of stack items 
-// is zero. The offset_delta value for the frame is the value of the tag item,
-// frame_type.
-
-// same_frame {
-//     u1 frame_type = SAME; /* 0-63 */
-// }

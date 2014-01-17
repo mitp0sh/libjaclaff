@@ -1,4 +1,4 @@
-package com.mitp0sh.jaclaff.attributes.generic;
+package com.mitp0sh.jaclaff.attributes.annotation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -11,11 +11,12 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 /* complete */
-public class EnumConstValue
+public class EnumConstValue extends AbstractValue
 {
 	private int                    typeNameIndex = 0;
-	private ConstantPoolTypeUtf8  typeNameObject = null;
 	private int                   constNameIndex = 0;
+	
+	private ConstantPoolTypeUtf8  typeNameObject = null;
 	private ConstantPoolTypeUtf8 constNameObject = null;
 	
 	public int getTypeNameIndex()
@@ -43,9 +44,15 @@ public class EnumConstValue
 		return typeNameObject;
 	}
 
-	public void setTypeNameObject(ConstantPoolTypeUtf8 typeNameObject) 
+	public void setTypeNameObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.typeNameObject = typeNameObject;
+		this.typeNameObject = object;
+		
+		if(object != null)
+		{
+			this.setTypeNameIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public ConstantPoolTypeUtf8 getConstNameObject()
@@ -53,9 +60,15 @@ public class EnumConstValue
 		return constNameObject;
 	}
 
-	public void setConstNameObject(ConstantPoolTypeUtf8 constNameObject)
+	public void setConstNameObject(ConstantPoolTypeUtf8 object)
 	{
-		this.constNameObject = constNameObject;
+		this.constNameObject = object;
+		
+		if(object != null)
+		{
+			this.setConstNameIndex(0);
+			this.addReference(object);
+		}
 	}
 	
 	public static EnumConstValue deserialize(DesCtx ctx) throws IOException
@@ -87,10 +100,10 @@ public class EnumConstValue
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		short typeNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, enumConstValue.getTypeNameObject());
+		int typeNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, enumConstValue.getTypeNameObject());
 		enumConstValue.setTypeNameIndex(typeNameIndex);
 		
-		short constNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, enumConstValue.getConstNameObject());
+		int constNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, enumConstValue.getConstNameObject());
 		enumConstValue.setConstNameIndex(constNameIndex);
 	}
 	

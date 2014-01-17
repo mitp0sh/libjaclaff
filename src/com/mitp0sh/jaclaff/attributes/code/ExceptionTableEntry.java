@@ -125,7 +125,7 @@ public class ExceptionTableEntry
 	
 	private static void coupleToIndices(SerCtx ctx, ExceptionTableEntry exceptionTableEntry)
 	{
-		short catchType = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), exceptionTableEntry.getCatchTypeObject());
+		int catchType = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), exceptionTableEntry.getCatchTypeObject());
 		exceptionTableEntry.setCatchType(catchType);
 	}
 	

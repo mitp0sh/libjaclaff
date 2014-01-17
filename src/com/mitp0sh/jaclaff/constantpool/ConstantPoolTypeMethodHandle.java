@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolTypeMethodHandleDeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -60,7 +61,8 @@ public class ConstantPoolTypeMethodHandle extends AbstractConstantPoolType
 		this.reference = reference;
 	}
 	
-	public static ConstantPoolTypeMethodHandle deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static ConstantPoolTypeMethodHandle deserialize(DataInputStream dis, ConstantPool constantPool) throws InvalidConstantPoolTypeMethodHandleDeserializationException,
+	                                                                                                              IOException
 	{
 		ConstantPoolTypeMethodHandle handle = new ConstantPoolTypeMethodHandle();
 		
@@ -80,7 +82,7 @@ public class ConstantPoolTypeMethodHandle extends AbstractConstantPoolType
 	
 	public static void coupleToIndices(SerCtx ctx, ConstantPoolTypeMethodHandle handle)
 	{
-		short referenceIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), handle.getReference());
+		int referenceIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), handle.getReference());
 		handle.setReferenceIndex(referenceIndex);
 	}
 	
@@ -111,21 +113,16 @@ public class ConstantPoolTypeMethodHandle extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
-		ConstantPoolTypeMethodHandle handle = null;
 		try
 		{
-			handle = (ConstantPoolTypeMethodHandle)obj;
+			ConstantPoolTypeMethodHandle cpt = (ConstantPoolTypeMethodHandle)obj;
+			boolean b0 = cpt.getReferenceKind() == this.referenceKind;
+			boolean b1 = cpt.getReference().equals(this.reference);
+			return b0 && b1;
 		}
-		catch(ClassCastException e)
-		{
-			return false;
-		}
+		catch(NullPointerException e){}
+		catch(ClassCastException e){}
 		
-		if(handle.getReferenceKind() != this.referenceKind)
-		{
-			return false;
-		}		
-		
-		return handle.getReference().equals(this.reference);
+		return false;
 	}
 }

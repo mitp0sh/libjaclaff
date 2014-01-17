@@ -1,7 +1,9 @@
 package com.mitp0sh.jaclaff.attributes.stackmaptable;
 
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
+
 /* complete */
-public abstract class AbstractVariableInfo
+public abstract class AbstractVariableInfo extends AbstractReference
 {
 	private short   variable_info_tag;
 	private String variable_info_string_representation;

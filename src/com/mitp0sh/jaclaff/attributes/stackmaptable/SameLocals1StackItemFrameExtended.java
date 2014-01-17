@@ -50,10 +50,8 @@ public class SameLocals1StackItemFrameExtended extends AbstractStackMapFrame
 		return sameLocals1StackItemFrameExtended;
     }
 	
-	public static byte[] serialize(SerCtx ctx, SameLocals1StackItemFrameExtended sameLocals1StackItemFrameExtended) throws IOException
+	public static byte[] serialize(SerCtx ctx, SameLocals1StackItemFrameExtended sameLocals1StackItemFrameExtended, AttributeCode attributeCode) throws IOException
 	{	
-		coupleToOffsets(ctx, sameLocals1StackItemFrameExtended, null);
-		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		/* serialize delta offset */

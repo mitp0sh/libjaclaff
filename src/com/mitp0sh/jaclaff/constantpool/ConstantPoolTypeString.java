@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolTypeStringDeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -11,7 +13,7 @@ import com.mitp0sh.jaclaff.util.PNC;
 public class ConstantPoolTypeString extends AbstractConstantPoolType
 {
 	private int                  	stringIndex = 0;
-	private ConstantPoolTypeUtf8      cptString = null;
+	private ConstantPoolTypeUtf8   stringObject = null;
 
 	public ConstantPoolTypeString()
 	{
@@ -24,28 +26,54 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 		return this.stringIndex;
 	}
 
-	public void setStringIndex(int stringIndex) 
+	public void setStringIndex(int index) 
 	{
-		this.stringIndex = stringIndex;
+		this.stringIndex = index;
 	}
 	
-	public ConstantPoolTypeUtf8 getCptString() 
+	public ConstantPoolTypeUtf8 getStringObject() 
 	{
-		return cptString;
+		return stringObject;
 	}
 
-	public void setCptString(ConstantPoolTypeUtf8 cptString)
+	public void setStringObject(ConstantPoolTypeUtf8 object)
 	{
-		this.cptString = cptString;
+		this.stringObject = object;
+		
+		if(object != null)
+		{
+			this.addReference(object);
+			this.setStringIndex(0);
+		}
 	}
 	
-	public static ConstantPoolTypeString deserialize(DataInputStream dis) throws IOException
+	public static ConstantPoolTypeString deserialize(DataInputStream dis) throws IOException,
+	                                                                             InvalidConstantPoolTypeStringDeserializationException
 	{
 		ConstantPoolTypeString cptString = new ConstantPoolTypeString();
 		
 		cptString.setStringIndex(dis.readUnsignedShort());
 		
 		return cptString;
+	}
+	
+	public static void decoupleFromIndices(DesCtx ctx, ConstantPoolTypeString cpt)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		int stringIndex = cpt.getStringIndex();
+		AbstractConstantPoolType acptClass = ConstantPool.getConstantPoolTypeByIndex(cp, stringIndex);
+		ConstantPoolTypeUtf8 stringObject = (ConstantPoolTypeUtf8)acptClass;
+		cpt.setStringObject(stringObject);
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, ConstantPoolTypeString cpt)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		ConstantPoolTypeUtf8 stringObject = cpt.getStringObject();
+		int stringIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, stringObject);
+		cpt.setStringIndex(stringIndex);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, ConstantPoolTypeString elem) throws IOException
@@ -64,7 +92,7 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 		ConstantPoolTypeString clone = (ConstantPoolTypeString)super.clone();
 		
 		/* fill with data */		
-		clone.setCptString(this.getCptString());
+		clone.setStringObject(this.getStringObject());
 		
 		return clone;
 	}
@@ -72,16 +100,14 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
-		ConstantPoolTypeString cptString = null;
 		try
 		{
-			cptString = (ConstantPoolTypeString)obj;
+			ConstantPoolTypeString cpt = (ConstantPoolTypeString)obj;
+			return cpt.stringObject.equals(this.stringObject);
 		}
-		catch(ClassCastException e)
-		{
-			return false;
-		}
+		catch(NullPointerException e){}
+		catch(ClassCastException e){}
 		
-		return cptString.cptString.equals(this.cptString);
+		return false;
 	}
 }

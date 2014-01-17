@@ -46,10 +46,8 @@ public class SameLocals1StackItemFrame extends AbstractStackMapFrame
 		return sameLocals1StackItemFrame;
     }
 	
-	public static byte[] serialize(SerCtx ctx, SameLocals1StackItemFrame sameLocals1StackItemFrame) throws IOException
-	{	
-		coupleToOffsets(ctx, sameLocals1StackItemFrame, null);
-		
+	public static byte[] serialize(SerCtx ctx, SameLocals1StackItemFrame sameLocals1StackItemFrame, AttributeCode attributeCode) throws IOException
+	{			
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		/* serialize single verification type info */

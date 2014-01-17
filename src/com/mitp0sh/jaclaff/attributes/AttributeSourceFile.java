@@ -31,9 +31,15 @@ public class AttributeSourceFile extends AbstractAttribute
 		return sourceFileObject;
 	}
 
-	public void setSourceFileObject(ConstantPoolTypeUtf8 sourceFileObject) 
+	public void setSourceFileObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.sourceFileObject = sourceFileObject;
+		this.sourceFileObject = object;
+	
+		if(object != null)
+		{
+			this.setSourceFileIndex(0);
+			this.addReference(object);
+		}
 	}
 	
 	public static AttributeSourceFile deserialize(DesCtx ctx) throws IOException
@@ -59,7 +65,7 @@ public class AttributeSourceFile extends AbstractAttribute
 	
 	public static void coupleToIndices(SerCtx ctx, AttributeSourceFile attribute)
 	{
-		short sourceFileIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getSourceFileObject());
+		int sourceFileIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getSourceFileObject());
 		attribute.setSourceFileIndex(sourceFileIndex);
 	}
 	

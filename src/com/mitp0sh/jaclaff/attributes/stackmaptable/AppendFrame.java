@@ -57,10 +57,8 @@ public class AppendFrame extends AbstractStackMapFrame
 		return appendFrame;
     }
 	
-	public static byte[] serialize(SerCtx ctx, AppendFrame appendFrame) throws IOException
+	public static byte[] serialize(SerCtx ctx, AppendFrame appendFrame, AttributeCode attributeCode) throws IOException
 	{	
-		coupleToOffsets(ctx, appendFrame, null);
-		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		/* serialize delta offset */
@@ -78,39 +76,3 @@ public class AppendFrame extends AbstractStackMapFrame
 		return baos.toByteArray();
 	}
 }
-
-// The frame type append_frame is represented by tags in the range [252-254]. 
-// If the frame_type is append_frame, it means that the operand stack is empty 
-// and the current locals are the same as the locals in the previous frame, 
-// except that k additional locals are defined. The value of k is given by 
-// the formula frame_type - 251.
-
-// append_frame {
-//     u1 frame_type = APPEND; /* 252-254 */
-//     u2 offset_delta;
-//     verification_type_info locals[frame_type - 251];
-// }
-    
-// The 0th entry in locals represents the type of the first additional local 
-// variable. If locals[M] represents local variable N, then locals[M+1] 
-// represents local variable N+1 if locals[M] is one of:
-
-// Top_variable_info
-
-// Integer_variable_info
-
-// Float_variable_info
-
-// Null_variable_info
-
-// UninitializedThis_variable_info
-
-// Object_variable_info
-
-// Uninitialized_variable_info
-
-// Otherwise locals[M+1] represents local variable N+2.
-
-// It is an error if, for any index i, locals[i] represents a local variable 
-// whose index is greater than the maximum number of local variables for 
-// the method.

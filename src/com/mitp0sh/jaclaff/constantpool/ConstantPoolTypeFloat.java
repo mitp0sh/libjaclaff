@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolTypeFloatDeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -28,7 +29,7 @@ public class ConstantPoolTypeFloat extends AbstractConstantPoolType
 		this.bytes = bytes;
 	}
 	
-	public static ConstantPoolTypeFloat deserialize(DataInputStream dis) throws IOException
+	public static ConstantPoolTypeFloat deserialize(DataInputStream dis) throws InvalidConstantPoolTypeFloatDeserializationException, IOException
 	{
 		ConstantPoolTypeFloat cptFloat = new ConstantPoolTypeFloat();
 		
@@ -61,16 +62,14 @@ public class ConstantPoolTypeFloat extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
-		ConstantPoolTypeFloat cptFloat = null;
 		try
 		{
-			cptFloat = (ConstantPoolTypeFloat)obj;
+			ConstantPoolTypeFloat cpt = (ConstantPoolTypeFloat)obj;
+			return cpt.bytes == this.bytes;
 		}
-		catch(ClassCastException e)
-		{
-			return false;
-		}
+		catch(NullPointerException e){}
+		catch(ClassCastException e){}
 		
-		return cptFloat.bytes == this.bytes;
+		return false;
 	}
 }

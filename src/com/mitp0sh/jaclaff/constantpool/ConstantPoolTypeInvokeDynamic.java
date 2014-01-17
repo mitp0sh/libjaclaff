@@ -7,6 +7,7 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.attributes.AttributeBootstrapMethods;
 import com.mitp0sh.jaclaff.attributes.bootstrapmethods.BootstrapMethodEntry;
 import com.mitp0sh.jaclaff.attributes.bootstrapmethods.BootstrapMethods;
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolTypeInvokeDynamicDeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -64,7 +65,7 @@ public class ConstantPoolTypeInvokeDynamic extends AbstractConstantPoolType
 		this.nameAndType = nameAndType;
 	}
 	
-	public static ConstantPoolTypeInvokeDynamic deserialize(DataInputStream dis, ConstantPool constantPool) throws IOException
+	public static ConstantPoolTypeInvokeDynamic deserialize(DataInputStream dis, ConstantPool constantPool) throws InvalidConstantPoolTypeInvokeDynamicDeserializationException, IOException
 	{
 		ConstantPoolTypeInvokeDynamic cptInvokeDynamic = new ConstantPoolTypeInvokeDynamic();
 		
@@ -79,13 +80,14 @@ public class ConstantPoolTypeInvokeDynamic extends AbstractConstantPoolType
 	{
 		cptid.setBoostrapMethodAttr(entries[cptid.bootstrapMethodAttrIndex]);
 		cptid.setBootstrapMethodAttrIndex(0);
+		
 		cptid.setNameAndType((ConstantPoolTypeNameAndType)(ConstantPool.getConstantPoolTypeByIndex(cp, cptid.getNameAndTypeIndex())));
 		cptid.setNameAndTypeIndex(0);
 	}
 	
 	public static void coupleConstantPoolTypeInvokeDynamicEntries(SerCtx ctx, ConstantPoolTypeInvokeDynamic cptid)
 	{
-		short nameAndTypeIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), cptid.getNameAndType());
+		int nameAndTypeIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), cptid.getNameAndType());
 		cptid.setNameAndTypeIndex(nameAndTypeIndex);
 		
 		/* search bootstrap attribute */
@@ -94,7 +96,7 @@ public class ConstantPoolTypeInvokeDynamic extends AbstractConstantPoolType
 		{
 			try
 			{
-				attribute = (AttributeBootstrapMethods)ctx.getVirtualClassFile().getAttributes().getAttributes()[i];
+				attribute = (AttributeBootstrapMethods)ctx.getVirtualClassFile().getAttributes().getAttributes().get(i);
 				break;
 			}
 			catch(ClassCastException e)
@@ -146,21 +148,16 @@ public class ConstantPoolTypeInvokeDynamic extends AbstractConstantPoolType
 	
 	public boolean equals(ConstantPoolTypeInvokeDynamic obj)
 	{
-		ConstantPoolTypeInvokeDynamic cptid = null;
 		try
 		{
-			cptid = (ConstantPoolTypeInvokeDynamic)obj;
+			ConstantPoolTypeInvokeDynamic cpt = (ConstantPoolTypeInvokeDynamic)obj;
+			boolean b0 = cpt.getBoostrapMethodAttr().equals(obj.getBoostrapMethodAttr());
+			boolean b1 = cpt.getNameAndType().equals(obj.getNameAndType());
+			return b0 && b1;
 		}
-		catch(ClassCastException e)
-		{
-			return false;
-		}
+		catch(NullPointerException e){}
+		catch(ClassCastException e){}
 		
-		if(!cptid.getBoostrapMethodAttr().equals(obj.getBoostrapMethodAttr()))
-		{
-			return false;
-		}		
-		
-		return cptid.getNameAndType().equals(obj.getNameAndType());
+		return false;
 	}
 }

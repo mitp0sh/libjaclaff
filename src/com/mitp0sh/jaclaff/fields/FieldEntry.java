@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.attributes.Attributes;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
@@ -12,15 +13,15 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
-public class FieldEntry
+public class FieldEntry extends AbstractReference
 {
 	private short                     accessFlags = 0;
 	private int                         nameIndex = 0;
-	private ConstantPoolTypeUtf8       nameObject = null;
 	private int                         descIndex = 0;
+	
+	private ConstantPoolTypeUtf8       nameObject = null;
 	private ConstantPoolTypeUtf8 descriptorObject = null;
-	private int                    attributeCount = 0;
-	private Attributes                 attributes = null;
+	private Attributes                 attributes = new Attributes();
 
 	public short getAccessFlags()
 	{
@@ -57,9 +58,15 @@ public class FieldEntry
 		return nameObject;
 	}
 
-	public void setNameObject(ConstantPoolTypeUtf8 nameObject) 
+	public void setNameObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.nameObject = nameObject;
+		this.nameObject = object;
+		
+		if(object != null)
+		{
+			this.setNameIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public ConstantPoolTypeUtf8 getDescriptorObject() 
@@ -67,19 +74,20 @@ public class FieldEntry
 		return descriptorObject;
 	}
 
-	public void setDescriptorObject(ConstantPoolTypeUtf8 descriptorObject) 
+	public void setDescriptorObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.descriptorObject = descriptorObject;
+		this.descriptorObject = object;
+		
+		if(object != null)
+		{
+			this.setDescIndex(0);
+			this.addReference(object);
+		}
 	}
 	
 	public int getAttributeCount()
 	{
-		return attributeCount;
-	}
-	
-	public void setAttributeCount(int attributeCount)
-	{
-		this.attributeCount = attributeCount;
+		return attributes.getAttributesCount();
 	}
 	
 	public Attributes getAttributes()
@@ -100,12 +108,13 @@ public class FieldEntry
 		FieldEntry fieldEntry = new FieldEntry();
 		
 		fieldEntry.setAccessFlags((short)dis.readUnsignedShort());
-		fieldEntry.setNameIndex((short)dis.readUnsignedShort());
-		fieldEntry.setDescIndex((short)dis.readUnsignedShort());
-		fieldEntry.setAttributeCount((short)dis.readUnsignedShort());
-		if(fieldEntry.getAttributeCount() > 0)
+		fieldEntry.setNameIndex(dis.readUnsignedShort());
+		fieldEntry.setDescIndex(dis.readUnsignedShort());
+		
+		int attributeCount = dis.readUnsignedShort();
+		if(attributeCount > 0)
 		{
-			fieldEntry.setAttributes(Attributes.deserialize(ctx, fieldEntry.getAttributeCount(), null));
+			fieldEntry.setAttributes(Attributes.deserialize(ctx, attributeCount, null));
 		}
 		
 		/* decouple indices from object */
@@ -117,16 +126,15 @@ public class FieldEntry
 	public static void decoupleFromIndices(FieldEntry field, ConstantPool constantPool)
 	{
 		field.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getNameIndex()));
-		field.setNameIndex((short)0);
 		field.setDescriptorObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getDescIndex()));
-		field.setDescIndex((short)0);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, FieldEntry field)
 	{
-		short nameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), field.getNameObject());
+		int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), field.getNameObject());
 		field.setNameIndex(nameIndex);
-		short descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), field.getDescriptorObject());
+		
+		int descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), field.getDescriptorObject());
 		field.setDescIndex(descriptorIndex);
 	}
 	

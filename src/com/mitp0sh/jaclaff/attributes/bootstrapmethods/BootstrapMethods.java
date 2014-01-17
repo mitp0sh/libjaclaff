@@ -39,11 +39,11 @@ public class BootstrapMethods
 		}
 		
 		/* late decouple constant pool type invoke dynamics !!! */
-		for(int i = 1; i <= cp.getConstantPoolCount(); i++)
+		for(int i = 0; i < cp.getConstantPoolCount(); i++)
 		{
 			try
 			{
-				ConstantPoolTypeInvokeDynamic cptid = (ConstantPoolTypeInvokeDynamic)cp.getConstantPool()[i];
+				ConstantPoolTypeInvokeDynamic cptid = (ConstantPoolTypeInvokeDynamic)cp.getConstantPool().get(0);
 				ConstantPoolTypeInvokeDynamic.decoupleConstantPoolTypeInvokeDynamicEntries(cptid, bootstrapMethods.bootstrapMethodEntries, cp);
 			}
 			catch(ClassCastException e)

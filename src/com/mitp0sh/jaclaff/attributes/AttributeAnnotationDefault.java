@@ -3,7 +3,7 @@ package com.mitp0sh.jaclaff.attributes;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.attributes.generic.ElementValue;
+import com.mitp0sh.jaclaff.attributes.annotation.ElementValue;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 

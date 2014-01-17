@@ -46,10 +46,8 @@ public class ChopFrame extends AbstractStackMapFrame
 		return chopFrame;
     }
 	
-	public static byte[] serialize(SerCtx ctx, ChopFrame frame) throws IOException
+	public static byte[] serialize(SerCtx ctx, ChopFrame frame, AttributeCode attributeCode) throws IOException
 	{	
-		coupleToOffsets(ctx, frame, null);
-		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		/* serialize delta offset */
@@ -58,14 +56,3 @@ public class ChopFrame extends AbstractStackMapFrame
 		return baos.toByteArray();
 	}
 }
-
-// The frame type chop_frame is represented by tags in the range [248-250]. 
-// If the frame_type is chop_frame, it means that the operand stack is empty 
-// and the current locals are the same as the locals in the previous frame, 
-// except that the k last locals are absent. The value of k is given by the 
-// formula 251 - frame_type.
-
-// chop_frame {
-//     u1 frame_type = CHOP; /* 248-250 */
-//     u2 offset_delta;
-// }

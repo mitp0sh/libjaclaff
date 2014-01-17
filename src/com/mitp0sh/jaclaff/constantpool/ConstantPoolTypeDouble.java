@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.exception.deserialization.InvalidConstantPoolTypeDoubleDeserializationException;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -39,7 +40,7 @@ public class ConstantPoolTypeDouble extends AbstractConstantPoolType
 		this.lowBytes = lowBytes;
 	}
 	
-	public static ConstantPoolTypeDouble deserialize(DataInputStream dis) throws IOException
+	public static ConstantPoolTypeDouble deserialize(DataInputStream dis) throws InvalidConstantPoolTypeDoubleDeserializationException, IOException
 	{
 		ConstantPoolTypeDouble cptDouble = new ConstantPoolTypeDouble();
 		
@@ -75,21 +76,16 @@ public class ConstantPoolTypeDouble extends AbstractConstantPoolType
 	@Override
 	public boolean equals(Object obj)
 	{
-		ConstantPoolTypeDouble cptDouble = null;
 		try
 		{
-			cptDouble = (ConstantPoolTypeDouble)obj;
+			ConstantPoolTypeDouble cpt = (ConstantPoolTypeDouble)obj;
+			boolean b0 = cpt.highBytes == this.highBytes;
+			boolean b1 = cpt.lowBytes  == this.lowBytes; 
+			return b0 && b1;
 		}
-		catch(ClassCastException e)
-		{
-			return false;
-		}
+		catch(NullPointerException e){}
+		catch(ClassCastException e){}
 		
-		if(cptDouble.highBytes != this.highBytes)
-		{
-			return false;
-		}
-		
-		return cptDouble.lowBytes == this.lowBytes;
+		return false;
 	}
 }

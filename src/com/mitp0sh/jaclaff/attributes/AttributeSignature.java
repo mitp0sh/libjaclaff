@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
@@ -31,9 +32,15 @@ public class AttributeSignature extends AbstractAttribute
 		return signatureObject;
 	}
 
-	public void setSignatureObject(ConstantPoolTypeUtf8 signatureObject) 
+	public void setSignatureObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.signatureObject = signatureObject;
+		this.signatureObject = object;
+		
+		if(object != null)
+		{
+			this.setSignatureIndex(0);
+			this.addReference(object);
+		}
 	}
 	
 	public static AttributeSignature deserialize(DesCtx ctx) throws IOException
@@ -51,15 +58,18 @@ public class AttributeSignature extends AbstractAttribute
 	
 	public static void decoupleFromIndices(DesCtx ctx, AttributeSignature attribute)
 	{
-		ConstantPool constantPool = ctx.getConstantPool();
+		ConstantPool cp = ctx.getConstantPool();
 		
-		attribute.setSignatureObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.signatureIndex));
-		attribute.setSignatureIndex(0);
+		int signatureIndex = attribute.getSignatureIndex();
+		AbstractConstantPoolType acpt = ConstantPool.getConstantPoolTypeByIndex(cp, signatureIndex);
+		ConstantPoolTypeUtf8 cpt = (ConstantPoolTypeUtf8)acpt;
+		
+		attribute.setSignatureObject(cpt);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, AttributeSignature attribute)
 	{
-		short signatureIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getSignatureObject());
+		int signatureIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getSignatureObject());
 		attribute.setSignatureIndex(signatureIndex);
 	}
 	
