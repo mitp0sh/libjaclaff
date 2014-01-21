@@ -217,7 +217,7 @@ public class Disassembler
 		while(length > disassembleLength)
 		{
 			SingleInstruction instruction = disassemble(ctx, disassembleLength, hasWidePrefix);
-			instructions.addInstruction(instruction);
+			instructions.getInstructions().add(instruction);
 			
 			if(instruction.getByteCode().getByteCode() == Mnemonics.BC_wide)
 			{

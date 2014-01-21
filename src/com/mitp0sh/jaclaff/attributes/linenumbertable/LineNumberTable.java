@@ -2,6 +2,8 @@ package com.mitp0sh.jaclaff.attributes.linenumbertable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
@@ -10,34 +12,24 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 /* complete */
 public class LineNumberTable
 {
-	private LineNumberTableEntry[] lineNumberTable = new LineNumberTableEntry[0];
-
-	public LineNumberTable(int lineNumberTableLength)
-	{
-		lineNumberTable = new LineNumberTableEntry[lineNumberTableLength];
-	}
+	private ArrayList<LineNumberTableEntry> lineNumberTable = new ArrayList<LineNumberTableEntry>();
 	
 	public int getLineNumberTableLength()
 	{
-		return lineNumberTable.length;
+		return lineNumberTable.size();
 	}
 	
-	public LineNumberTableEntry[] getLineNumberTable()
+	public ArrayList<LineNumberTableEntry> getLineNumberTable()
 	{
 		return lineNumberTable;
-	}
-
-	public void setLineNumberTable(LineNumberTableEntry[] lineNumberTable) 
-	{
-		this.lineNumberTable = lineNumberTable;
 	}
 	
 	public static LineNumberTable deserialize(DesCtx ctx, int length, AttributeCode attributeCode) throws IOException
     {	
-		LineNumberTable lineNumberTable = new LineNumberTable(length);
+		LineNumberTable lineNumberTable = new LineNumberTable();
 		for(int i = 0; i < length; i++)
 		{
-			lineNumberTable.getLineNumberTable()[i] = LineNumberTableEntry.deserialize(ctx, attributeCode);
+			lineNumberTable.getLineNumberTable().add(LineNumberTableEntry.deserialize(ctx, attributeCode));
 		}
 		
 		return lineNumberTable;
@@ -47,9 +39,10 @@ public class LineNumberTable
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		for(int i = 0; i < lineNumberTable.getLineNumberTableLength(); i++)
+		Iterator<LineNumberTableEntry> iter = lineNumberTable.getLineNumberTable().iterator();
+		while(iter.hasNext())
 		{
-			LineNumberTableEntry current = lineNumberTable.getLineNumberTable()[i];
+			LineNumberTableEntry current = iter.next();
 			baos.write(LineNumberTableEntry.serialize(ctx, current, attributeCode));
 		}
 		

@@ -2,50 +2,38 @@ package com.mitp0sh.jaclaff.attributes.code.bytecode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 
 public class MethodInstructions
 {
-	private short               numberOfInstructions = 0;
-	private SingleInstruction[]         instructions = new SingleInstruction[0];
+	private ArrayList<SingleInstruction> instructions = new ArrayList<SingleInstruction>();
 	
-	public short getNumberOfInstructions()
+	public int getNumberOfInstructions()
 	{
-		return (short)this.instructions.length;
+		return this.instructions.size();
 	}
 	
-	public void setNumberOfInstructions(short numberOfInstructions) 
-	{
-		this.numberOfInstructions = numberOfInstructions;
-	}
-	
-	public SingleInstruction[] getInstructions()
+	public ArrayList<SingleInstruction> getInstructions()
 	{
 		return instructions;
 	}
 	
-	public void setInstructions(SingleInstruction[] instructions) 
+	public void setInstructions(ArrayList<SingleInstruction> instructions) 
 	{
-		this.instructions         = instructions;
-	}
-	
-	public void addInstruction(SingleInstruction singleInstruction)
-	{
-		SingleInstruction[] newSingleInstructions  = new SingleInstruction[instructions.length + 1];
-		System.arraycopy(this.instructions, 0, newSingleInstructions, 0, this.instructions.length);
-		newSingleInstructions[this.instructions.length] = singleInstruction;
-		
-		this.numberOfInstructions++;
-		this.instructions = newSingleInstructions;
+		this.instructions = instructions;
 	}
 	
 	public int getPhysicalSizeOfMethodInstructions()
 	{
 		int size = 0;
 		
-		for(int i = 0; i < this.getNumberOfInstructions(); i++)
+		Iterator<SingleInstruction> iter = this.getInstructions().iterator();
+		while(iter.hasNext())
 		{
-			size += this.getInstructions()[i].getPhysicalInstructionLength();
+			SingleInstruction current = iter.next();
+			size += current.getPhysicalInstructionLength();
 		}
 		
 		return size;
@@ -56,10 +44,11 @@ public class MethodInstructions
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		int offset = 0;
-		
-		for(int i = 0; i < methodInstructions.numberOfInstructions; i++)
+		Iterator<SingleInstruction> iter = methodInstructions.getInstructions().iterator();
+		while(iter.hasNext())
 		{
-			byte[] instr = SingleInstruction.serialize(methodInstructions.getInstructions()[i], offset);
+			SingleInstruction current = iter.next();
+			byte[] instr = SingleInstruction.serialize(current, offset);
 			offset += instr.length;
 			baos.write(instr);
 		}
@@ -70,17 +59,16 @@ public class MethodInstructions
 	public static SingleInstruction lookupInstructionByOffset(MethodInstructions disassembly, int offset)
 	{
 		int currentOffset = 0;
-		
-		for(int i = 0; i < disassembly.getInstructions().length; i++)
+		Iterator<SingleInstruction> iter = disassembly.getInstructions().iterator();
+		while(iter.hasNext())
 		{
-			//System.out.println("i = " + (i + 1) + ", offset: " + currentOffset + ", inst: " + disassembly.getInstructions()[i].getByteCode().getByteCodeName());
-			
+			SingleInstruction current = iter.next();
 			if(currentOffset == offset)
 			{
-				return disassembly.getInstructions()[i];
+				return current;
 			}
 			
-			currentOffset += disassembly.getInstructions()[i].getPhysicalInstructionLength();
+			currentOffset += current.getPhysicalInstructionLength();
 		}
 		
 		return null;
@@ -91,12 +79,11 @@ public class MethodInstructions
 		boolean instructionFound = false;
 		int      effectiveOffset = 0;
 		
-		/* iterate over all instructions */
-		for(int i = 0; i < disassembly.getInstructions().length; i++)
+		Iterator<SingleInstruction> iter = disassembly.getInstructions().iterator();
+		while(iter.hasNext())
 		{
-			/* retrieve current instruction */
-			SingleInstruction current = disassembly.getInstructions()[i];
-		
+			SingleInstruction current = iter.next();
+			
 			/* job done !? */
 			if(current == instruction)
 			{

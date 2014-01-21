@@ -21,6 +21,9 @@ public class SingleInstruction extends AbstractReference
 	
 	private AbstractConstantPoolType operand1Object = null;
 	private AbstractConstantPoolType operand2Object = null;
+	
+	private SingleInstruction previousInstruction = null;
+	private SingleInstruction     nextInstruction = null;
 
 	public ByteCode getByteCode() 
 	{
@@ -122,6 +125,26 @@ public class SingleInstruction extends AbstractReference
 			this.setOperand2(0);
 			this.addReference(object);
 		}
+	}
+	
+	public SingleInstruction getPreviousInstruction() 
+	{
+		return previousInstruction;
+	}
+
+	public void setPreviousInstruction(SingleInstruction previousInstruction) 
+	{
+		this.previousInstruction = previousInstruction;
+	}
+
+	public SingleInstruction getNextInstruction() 
+	{
+		return nextInstruction;
+	}
+
+	public void setNextInstruction(SingleInstruction nextInstruction) 
+	{
+		this.nextInstruction = nextInstruction;
 	}
 	
 	public int getPhysicalInstructionLength()

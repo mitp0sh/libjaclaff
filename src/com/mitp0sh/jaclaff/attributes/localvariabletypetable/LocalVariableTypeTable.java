@@ -2,6 +2,8 @@ package com.mitp0sh.jaclaff.attributes.localvariabletypetable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
@@ -10,35 +12,30 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 /* complete */
 public class LocalVariableTypeTable 
 {	
-	private LocalVariableTypeTableEntry[] localVariableTypeTable = new LocalVariableTypeTableEntry[0];
+	private ArrayList<LocalVariableTypeTableEntry> localVariableTypeTable = new ArrayList<LocalVariableTypeTableEntry>();
 	
 	public int getLocalVariableTypeTableLength()
 	{
-		return localVariableTypeTable.length;
-	}
-	
-	public LocalVariableTypeTable(int localVariableTypeTableLength)
-	{
-		this.localVariableTypeTable = new LocalVariableTypeTableEntry[localVariableTypeTableLength];
+		return localVariableTypeTable.size();
 	}
 
-	public LocalVariableTypeTableEntry[] getLocalVariableTypeTable()
+	public ArrayList<LocalVariableTypeTableEntry> getLocalVariableTypeTable()
 	{
 		return localVariableTypeTable;
 	}
 
-	public void setLocalVariableTypeTable(LocalVariableTypeTableEntry[] localVariableTypeTable) 
+	public void setLocalVariableTypeTable(ArrayList<LocalVariableTypeTableEntry> localVariableTypeTable) 
 	{
 		this.localVariableTypeTable = localVariableTypeTable;
 	}
 	
 	public static LocalVariableTypeTable deserialize(DesCtx ctx, int length, AttributeCode attributeCode) throws IOException
     {
-		LocalVariableTypeTable localVariableTypeTable = new LocalVariableTypeTable(length);
+		LocalVariableTypeTable localVariableTypeTable = new LocalVariableTypeTable();
 		
 		for(int i = 0; i < length; i++)
 		{
-			localVariableTypeTable.getLocalVariableTypeTable()[i] = LocalVariableTypeTableEntry.deserialize(ctx, attributeCode);
+			localVariableTypeTable.getLocalVariableTypeTable().add(LocalVariableTypeTableEntry.deserialize(ctx, attributeCode));
 		}
 	    
 		return localVariableTypeTable;
@@ -48,9 +45,10 @@ public class LocalVariableTypeTable
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		for(int i = 0; i < table.getLocalVariableTypeTableLength(); i++)
+		Iterator<LocalVariableTypeTableEntry> iter = table.getLocalVariableTypeTable().iterator();
+		while(iter.hasNext())
 		{
-			LocalVariableTypeTableEntry current = table.getLocalVariableTypeTable()[i];
+			LocalVariableTypeTableEntry current = iter.next();
 			baos.write(LocalVariableTypeTableEntry.serialize(ctx, current, attributeCode));
 		}
 		
