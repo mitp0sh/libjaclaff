@@ -33,7 +33,7 @@ public class MethodInstructions
 		while(iter.hasNext())
 		{
 			SingleInstruction current = iter.next();
-			size += current.getPhysicalInstructionLength();
+			size += current.getPhysicalInstructionLength(this);
 		}
 		
 		return size;
@@ -47,11 +47,15 @@ public class MethodInstructions
 		Iterator<SingleInstruction> iter = methodInstructions.getInstructions().iterator();
 		while(iter.hasNext())
 		{
+			System.err.println("offset: " + offset);
+			
 			SingleInstruction current = iter.next();
-			byte[] instr = SingleInstruction.serialize(current, offset);
+			byte[] instr = SingleInstruction.serialize(methodInstructions, current, offset);
 			offset += instr.length;
 			baos.write(instr);
 		}
+		
+		System.out.println();
 		
 		return baos.toByteArray();
 	}
@@ -68,7 +72,7 @@ public class MethodInstructions
 				return current;
 			}
 			
-			currentOffset += current.getPhysicalInstructionLength();
+			currentOffset += current.getPhysicalInstructionLength(disassembly);
 		}
 		
 		return null;
@@ -93,7 +97,7 @@ public class MethodInstructions
 			}
 			
 			/* add to effective offset */
-			effectiveOffset += current.getPhysicalInstructionLength();
+			effectiveOffset += current.getPhysicalInstructionLength(disassembly);
 		}
 		
 		if(instructionFound == false)

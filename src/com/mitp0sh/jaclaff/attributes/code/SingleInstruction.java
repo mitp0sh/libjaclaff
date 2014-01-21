@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeInteger;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 
 public class SingleInstruction extends AbstractReference
@@ -167,7 +168,7 @@ public class SingleInstruction extends AbstractReference
 		this.nextInstruction = nextInstruction;
 	}
 	
-	public int getPhysicalInstructionLength()
+	public int getPhysicalInstructionLength(MethodInstructions disassembly)
 	{
 		String format;
 		
@@ -239,26 +240,16 @@ public class SingleInstruction extends AbstractReference
 			else
 			if(getByteCode().getByteCode() == Mnemonics.BC_lookupswitch)
 			{
-				try
-				{
-					return LookupSwitch.serialize(getLookupSwitch(), offset).length + 1;
-				}
-				catch(IOException e)
-				{				
-					e.printStackTrace();
-				}
+				int length = 0;
+				length = LookupSwitch.getPhysicalInstructionLength(getLookupSwitch(), offset) + 1;
+				return length;
 			}
 			else
 			if(getByteCode().getByteCode() == Mnemonics.BC_tableswitch)
 			{
-				try
-				{
-					return TableSwitch.serialize(getTableSwitch(), offset).length + 1;
-				}
-				catch(IOException e)
-				{	
-					e.printStackTrace();
-				}
+				int length = 0;
+				length = TableSwitch.getPhysicalInstructionLength(getTableSwitch(), offset) + 1;
+				return length;
 			}
 		}
 		
@@ -350,11 +341,34 @@ public class SingleInstruction extends AbstractReference
 		}
 	}
 	
-	public static byte[] serialize(SingleInstruction instruction, int offset) throws IOException
+	public static void coupleWithOffsets(MethodInstructions disassembly, SingleInstruction instruction)
+	{
+		ByteCode bc = instruction.getByteCode();
+		if(bc.getFormat().equals(ByteCode.FORMAT_BI))
+		{
+			byte bt = bc.getBasicType();
+			if(bt == BasicTypes.T_INT    ||
+			   bt == BasicTypes.T_LONG   ||
+			   bt == BasicTypes.T_FLOAT  ||
+			   bt == BasicTypes.T_DOUBLE ||
+			   bt == BasicTypes.T_VOID)
+			{
+				return;
+			}
+			
+			if(instruction.getOperand1Object().getClass().equals(ConstantPoolTypeInteger.class))
+			{
+				ConstantPoolTypeInteger cpt = (ConstantPoolTypeInteger)instruction.getOperand1Object();
+				instruction.setOperand1(cpt.getBytes());
+			}
+		}
+	}
+	
+	public static byte[] serialize(MethodInstructions disassembly, SingleInstruction instruction, int offset) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(ByteCode.serialize(instruction, offset));
+		baos.write(ByteCode.serialize(disassembly, instruction, offset));
 		
 		return baos.toByteArray();
 	}

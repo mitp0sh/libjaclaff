@@ -65,7 +65,7 @@ public class LineNumberTableEntry
 	
 	protected static void decoupleFromOffsets(DesCtx ctx, LineNumberTableEntry lineNumberTableEntry, MethodInstructions disassembly)
 	{
-		SingleInstruction startPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, lineNumberTableEntry.startPc);
+		SingleInstruction startPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, lineNumberTableEntry.getStartPc());
 		lineNumberTableEntry.setStartPcInstruction(startPcInstruction);
 	}
 	

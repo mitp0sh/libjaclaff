@@ -17,24 +17,24 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class LocalVariableTypeTableEntry extends AbstractReference
 {
-	private int              start_pc = 0;
-	private int                length = 0;
-	private int            nameIndex = 0;
-	private int       signatureIndex = 0;
-	private int                 index = 0;
+	private int             startPC = 0;
+	private int              length = 0;
+	private int           nameIndex = 0;
+	private int      signatureIndex = 0;
+	private int               index = 0;
 	
 	private SingleInstruction startPcInstruction = null;
 	private ConstantPoolTypeUtf8      nameObject = null;
 	private ConstantPoolTypeUtf8 signatureObject = null;
 
-	public int getStart_pc() 
+	public int getStartPC() 
 	{
-		return start_pc;
+		return startPC;
 	}
 
-	public void setStart_pc(int startPc) 
+	public void setStartPC(int startPc) 
 	{
-		start_pc = startPc;
+		this.startPC = startPc;
 	}
 
 	public int getLength() 
@@ -125,7 +125,7 @@ public class LocalVariableTypeTableEntry extends AbstractReference
 		
 		LocalVariableTypeTableEntry localVariableTypeTableEntry = new LocalVariableTypeTableEntry();
 		
-		localVariableTypeTableEntry.setStart_pc(dis.readUnsignedShort());
+		localVariableTypeTableEntry.setStartPC(dis.readUnsignedShort());
 		localVariableTypeTableEntry.setLength(dis.readUnsignedShort());
 		localVariableTypeTableEntry.setNameIndex(dis.readUnsignedShort());
 		localVariableTypeTableEntry.setSignatureIndex(dis.readUnsignedShort());
@@ -166,14 +166,14 @@ public class LocalVariableTypeTableEntry extends AbstractReference
 	
 	protected static void decoupleFromOffsets(DesCtx ctx, LocalVariableTypeTableEntry localVariableTypeTableEntry, MethodInstructions disassembly)
 	{
-		SingleInstruction startPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, localVariableTypeTableEntry.start_pc);
+		SingleInstruction startPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, localVariableTypeTableEntry.startPC);
 		localVariableTypeTableEntry.setStartPcInstruction(startPcInstruction);
 	}
 	
 	protected static void coupleToOffsets(SerCtx ctx, LocalVariableTypeTableEntry localVariableTypeTableEntry, MethodInstructions disassembly)
 	{
 		int startPc = MethodInstructions.getInstructionOffset(localVariableTypeTableEntry.getStartPcInstruction(), disassembly);
-		localVariableTypeTableEntry.setStart_pc(startPc);
+		localVariableTypeTableEntry.setStartPC(startPc);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, LocalVariableTypeTableEntry localVariableTypeTableEntry, AttributeCode attributeCode) throws IOException
@@ -183,11 +183,11 @@ public class LocalVariableTypeTableEntry extends AbstractReference
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getStart_pc(), Short.class));
-		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getLength(), Short.class));
-		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getNameIndex(), Short.class));
+		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getStartPC(),        Short.class));
+		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getLength(),         Short.class));
+		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getNameIndex(),      Short.class));
 		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getSignatureIndex(), Short.class));
-		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getIndex(), Short.class));
+		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getIndex(),          Short.class));
 				
 		return baos.toByteArray();
 	}

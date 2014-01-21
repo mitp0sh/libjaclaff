@@ -34,7 +34,7 @@ public class LocalVariableTableEntry extends AbstractReference
 		return startPc;
 	}
 
-	public void setstartPc(int startPc) 
+	public void setStartPc(int startPc) 
 	{
 		this.startPc = startPc;
 	}
@@ -127,7 +127,7 @@ public class LocalVariableTableEntry extends AbstractReference
 		
 		LocalVariableTableEntry localVariableTableEntry = new LocalVariableTableEntry();
 		
-		localVariableTableEntry.setstartPc(dis.readUnsignedShort());
+		localVariableTableEntry.setStartPc(dis.readUnsignedShort());
 		localVariableTableEntry.setLength(dis.readUnsignedShort());
 		localVariableTableEntry.setNameIndex(dis.readUnsignedShort());
 		localVariableTableEntry.setSignatureIndex(dis.readUnsignedShort());
@@ -179,7 +179,7 @@ public class LocalVariableTableEntry extends AbstractReference
 	protected static void coupleToOffsets(SerCtx ctx, LocalVariableTableEntry localVariableTableEntry, MethodInstructions disassembly)
 	{
 		int startPc = MethodInstructions.getInstructionOffset(localVariableTableEntry.getStartPcInstruction(), disassembly);
-		localVariableTableEntry.setstartPc(startPc);
+		localVariableTableEntry.setStartPc(startPc);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, LocalVariableTableEntry localVariableTableEntry, AttributeCode attributeCode) throws IOException

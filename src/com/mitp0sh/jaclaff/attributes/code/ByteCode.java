@@ -104,7 +104,7 @@ public class ByteCode
 		this.physicalLength = physicalLength;
 	}
 	
-	public static byte[] serialize(SingleInstruction instruction, int offset) throws IOException
+	public static byte[] serialize(MethodInstructions disassembly, SingleInstruction instruction, int offset) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -127,6 +127,8 @@ public class ByteCode
 		if(format.equals(FORMAT_BC) ||
 		   format.equals(FORMAT_BI))
 		{
+			SingleInstruction.coupleWithOffsets(disassembly, instruction);
+			
 			baos.write(new byte[]{instruction.getByteCode().getByteCode()});
 			baos.write(new byte[]{(byte)instruction.getOperand1()});
 		}
@@ -186,19 +188,19 @@ public class ByteCode
 		{
 			baos.write(new byte[]{instruction.getByteCode().getByteCode()});
 			
-			if(instruction.getByteCode().byteCode == Mnemonics.BC_wide)
-			{
-				/* nothing to do here */
-			}
-			else
 			if(instruction.getByteCode().byteCode == Mnemonics.BC_lookupswitch)
 			{
-				baos.write(LookupSwitch.serialize(instruction.getLookupSwitch(), offset));
+				baos.write(LookupSwitch.serialize(disassembly, instruction.getLookupSwitch(), offset));
 			}
 			else
 			if(instruction.getByteCode().byteCode == Mnemonics.BC_tableswitch)
 			{
-				baos.write(TableSwitch.serialize(instruction.getTableSwitch(), offset));
+				baos.write(TableSwitch.serialize(disassembly, instruction.getTableSwitch(), offset));
+			}
+			else
+			if(instruction.getByteCode().byteCode == Mnemonics.BC_wide)
+			{
+				/* nothing to do here */
 			}
 			else
 			{

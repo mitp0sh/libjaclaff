@@ -166,7 +166,7 @@ public class Disassembler
 					for(int i = 0; i < npairs; i++)
 					{
 						lookupSwitch.getMatch().add(dis.readInt());
-						lookupSwitch.getOffset().add(dis.readInt());
+						lookupSwitch.getOffsets().add(dis.readInt());
 					}
 					
 					instruction.getByteCode().setPhysicalLength((short)(1 + padding + 8 + npairs * 8));
@@ -218,6 +218,8 @@ public class Disassembler
 		SingleInstruction previousInstr = null;
 		while(length > disassembleLength)
 		{
+			System.out.println("offset: " + disassembleLength);
+			
 			SingleInstruction instruction = disassemble(ctx, disassembleLength, hasWidePrefix);
 			instructions.getInstructions().add(instruction);
 			
@@ -244,8 +246,13 @@ public class Disassembler
 			disassembleLength += instruction.getByteCode().getPhysicalLength();
 		}
 		
+		System.out.println();
+		
 		/* decouple from offsets */
 		decoupleFromOffsets(instructions);
+		
+		/* kill offsets - no longer needed */
+		killOffsets(instructions);
 		
 		return instructions;
 	}
@@ -264,6 +271,41 @@ public class Disassembler
 			{
 				SingleInstruction.decoupleFromOffsets(disassembly, current);
 			}
+			else
+			if(bc.getByteCode() == Mnemonics.BC_tableswitch)
+			{
+				TableSwitch.decoupleFromOffsets(disassembly, current);
+			}
+			else
+			if(bc.getByteCode() == Mnemonics.BC_lookupswitch)
+			{
+				LookupSwitch.decoupleFromOffsets(disassembly, current);
+			}
+		}
+	}
+	
+	public static void killOffsets(MethodInstructions disassembly)
+	{
+		Iterator<SingleInstruction> iter = disassembly.getInstructions().iterator();
+		while(iter.hasNext())
+		{
+			/* retrieve current instruction */
+			SingleInstruction current = iter.next();
+			ByteCode bc = current.getByteCode();
+			
+			current.seOffset(0);
+			
+			if(bc.getByteCode() == Mnemonics.BC_tableswitch)
+			{
+				TableSwitch.killOffsets(current);
+			}
+			else
+			if(bc.getByteCode() == Mnemonics.BC_lookupswitch)
+			{
+				LookupSwitch.killOffsets(current);
+			}
+			
+			
 		}
 	}
 }
