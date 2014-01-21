@@ -1,6 +1,5 @@
 package com.mitp0sh.jaclaff.attributes.code.bytecode;
 
-import com.mitp0sh.jaclaff.attributes.code.bytecode.defs.BasicTypes;
 
 public class Mnemonics
 {

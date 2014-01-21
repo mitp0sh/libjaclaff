@@ -2,6 +2,7 @@ package com.mitp0sh.jaclaff.attributes.code.bytecode;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Iterator;
 
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 
@@ -158,14 +159,14 @@ public class Disassembler
 					int defaultByte = dis.readInt();
 					int      npairs = dis.readInt();
 					
-					LookupSwitch lookupSwitch = new LookupSwitch(npairs);
+					LookupSwitch lookupSwitch = new LookupSwitch();
 					lookupSwitch.setDefaultByte(defaultByte);
 					instruction.setLookupSwitch(lookupSwitch);
 					
 					for(int i = 0; i < npairs; i++)
 					{
-						lookupSwitch.getMatch()[i]  = dis.readInt();
-						lookupSwitch.getOffset()[i] = dis.readInt();
+						lookupSwitch.getMatch().add(dis.readInt());
+						lookupSwitch.getOffset().add(dis.readInt());
 					}
 					
 					instruction.getByteCode().setPhysicalLength((short)(1 + padding + 8 + npairs * 8));
@@ -176,13 +177,13 @@ public class Disassembler
 					int lowbyte         = dis.readInt();
 					int highbyte        = dis.readInt();
 					int numberOfOffsets = highbyte - lowbyte + 1;
-					TableSwitch tableSwitch = new TableSwitch(numberOfOffsets);
+					TableSwitch tableSwitch = new TableSwitch();
 					instruction.setTableSwitch(tableSwitch);
 					tableSwitch.setDefaultByte(defaultByte);
 					
 					for(int i = 0; i < numberOfOffsets; i++)
 					{
-						tableSwitch.getOffsets()[i] = dis.readInt();
+						tableSwitch.getOffsets().add(dis.readInt());
 					}
 					
 					instruction.getByteCode().setPhysicalLength((short)(1 + padding + 12 + numberOfOffsets * 4));
@@ -214,10 +215,19 @@ public class Disassembler
 		int disassembleLength = 0;
 		Boolean hasWidePrefix = false;
 		
+		SingleInstruction previousInstr = null;
 		while(length > disassembleLength)
 		{
 			SingleInstruction instruction = disassemble(ctx, disassembleLength, hasWidePrefix);
 			instructions.getInstructions().add(instruction);
+			
+			if(previousInstr != null)
+			{
+				/* set next instruction for previous instruction */
+				previousInstr.setNextInstruction(instruction);
+			}
+			/* set previous instruction for current intruction */
+			instruction.setPreviousInstruction(previousInstr);
 			
 			if(instruction.getByteCode().getByteCode() == Mnemonics.BC_wide)
 			{
@@ -228,10 +238,32 @@ public class Disassembler
 				hasWidePrefix = false;
 			}
 			
+			/* set instruction as previous instructions */
+			previousInstr = instruction;
+			
 			disassembleLength += instruction.getByteCode().getPhysicalLength();
 		}
+		
+		/* decouple from offsets */
+		decoupleFromOffsets(instructions);
 		
 		return instructions;
 	}
 	
+	public static void decoupleFromOffsets(MethodInstructions disassembly)
+	{
+		Iterator<SingleInstruction> iter = disassembly.getInstructions().iterator();
+		while(iter.hasNext())
+		{
+			/* retrieve current instruction */
+			SingleInstruction current = iter.next();
+			ByteCode bc = current.getByteCode();
+			
+			if(bc.getFormat().equals(ByteCode.FORMAT_BOO) ||
+			   bc.getFormat().equals(ByteCode.FORMAT_BOOOO))
+			{
+				SingleInstruction.decoupleFromOffsets(disassembly, current);
+			}
+		}
+	}
 }

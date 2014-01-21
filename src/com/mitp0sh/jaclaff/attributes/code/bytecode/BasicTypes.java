@@ -1,4 +1,4 @@
-package com.mitp0sh.jaclaff.attributes.code.bytecode.defs;
+package com.mitp0sh.jaclaff.attributes.code.bytecode;
 
 public class BasicTypes
 {

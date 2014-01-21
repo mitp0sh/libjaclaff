@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.abstraction.AbstractReference;
-import com.mitp0sh.jaclaff.attributes.code.bytecode.defs.BasicTypes;
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
@@ -21,9 +20,10 @@ public class SingleInstruction extends AbstractReference
 	
 	private AbstractConstantPoolType operand1Object = null;
 	private AbstractConstantPoolType operand2Object = null;
-	
-	private SingleInstruction previousInstruction = null;
-	private SingleInstruction     nextInstruction = null;
+	private SingleInstruction   operand1Instruction = null;
+	private SingleInstruction   operand2Instruction = null;
+	private SingleInstruction   previousInstruction = null;
+	private SingleInstruction       nextInstruction = null;
 
 	public ByteCode getByteCode() 
 	{
@@ -125,6 +125,26 @@ public class SingleInstruction extends AbstractReference
 			this.setOperand2(0);
 			this.addReference(object);
 		}
+	}
+	
+	public SingleInstruction getOperand1Instruction() 
+	{
+		return operand1Instruction;
+	}
+
+	public void setOperand1Instruction(SingleInstruction operand1Instruction) 
+	{
+		this.operand1Instruction = operand1Instruction;
+	}
+
+	public SingleInstruction getOperand2Instruction()
+	{
+		return operand2Instruction;
+	}
+
+	public void setOperand2Instruction(SingleInstruction operand2Instruction)
+	{
+		this.operand2Instruction = operand2Instruction;
 	}
 	
 	public SingleInstruction getPreviousInstruction() 
@@ -308,7 +328,26 @@ public class SingleInstruction extends AbstractReference
 			AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, instruction.getOperand1());
 			instruction.setOperand1Object(acpt);
 		}
-		
+	}
+	
+	public static void decoupleFromOffsets(MethodInstructions disassembly, SingleInstruction instruction)
+	{
+		ByteCode bc = instruction.getByteCode();
+		if(bc.getFormat().equals(ByteCode.FORMAT_BOO) ||
+		   bc.getFormat().equals(ByteCode.FORMAT_BOOOO))
+		{
+			int targetOffset = instruction.getOffset() + instruction.getOperand1();
+			SingleInstruction targetInstruction = null;
+			targetInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, targetOffset);
+			if(targetInstruction == null)
+			{
+				System.err.println("error - unable to lookup instruction by offset !!!");
+				System.exit(-1);
+			}
+			
+			instruction.setOperand1Instruction(targetInstruction);
+			instruction.setOperand1(0);
+		}
 	}
 	
 	public static byte[] serialize(SingleInstruction instruction, int offset) throws IOException

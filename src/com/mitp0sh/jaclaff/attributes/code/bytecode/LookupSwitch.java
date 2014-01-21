@@ -2,21 +2,18 @@ package com.mitp0sh.jaclaff.attributes.code.bytecode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import com.mitp0sh.jaclaff.util.PNC;
 
 
 public class LookupSwitch
 {
-	private int      defaultByte = 0;
-	private int[]          match = new int[0];
-	private int[]         offset = new int[0];
+	private int           defaultByte = 0;
+	private ArrayList<Integer>  match = new ArrayList<Integer>();
+	private ArrayList<Integer> offset = new ArrayList<Integer>();
 	
-	public LookupSwitch(int npairs)
-	{
-		 match = new int[npairs];
-		offset = new int[npairs];
-	}
+	private ArrayList<SingleInstruction> offsetInstructions = new ArrayList<SingleInstruction>();
 
 	public int getDefaultByte() 
 	{
@@ -28,25 +25,20 @@ public class LookupSwitch
 		this.defaultByte = defaultByte;
 	}
 
-	public int[] getMatch() 
+	public ArrayList<Integer> getMatch() 
 	{
 		return match;
 	}
 
-	public void setMatch(int[] match) 
-	{
-		this.match = match;
-	}
-
-	public int[] getOffset() 
+	public ArrayList<Integer> getOffset() 
 	{
 		return offset;
 	}
-
-	public void setOffset(int[] offset) 
+	
+	public ArrayList<SingleInstruction> getOffsetInstructions()
 	{
-		this.offset = offset;
-	}	
+		return offsetInstructions;
+	}
 	
 	public static byte[] serialize(LookupSwitch lookupSwitch, int offset) throws IOException
 	{
@@ -65,12 +57,12 @@ public class LookupSwitch
 		
 		baos.write(new byte[padding]);
 		baos.write(PNC.toByteArray(lookupSwitch.getDefaultByte(), Integer.class));
-		baos.write(PNC.toByteArray(lookupSwitch.getMatch().length, Integer.class));
+		baos.write(PNC.toByteArray(lookupSwitch.getMatch().size(), Integer.class));
 		
-		for(int i = 0; i < lookupSwitch.getMatch().length; i++)
+		for(int i = 0; i < lookupSwitch.getMatch().size(); i++)
 		{
-			baos.write(PNC.toByteArray(lookupSwitch.getMatch()[i], Integer.class));
-			baos.write(PNC.toByteArray(lookupSwitch.getOffset()[i], Integer.class));
+			baos.write(PNC.toByteArray(lookupSwitch.getMatch().get(i), Integer.class));
+			baos.write(PNC.toByteArray(lookupSwitch.getOffset().get(i), Integer.class));
 		}
 		
 		return baos.toByteArray();

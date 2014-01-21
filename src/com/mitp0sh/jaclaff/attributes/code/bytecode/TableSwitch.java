@@ -2,6 +2,7 @@ package com.mitp0sh.jaclaff.attributes.code.bytecode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import com.mitp0sh.jaclaff.util.PNC;
 
@@ -9,12 +10,9 @@ import com.mitp0sh.jaclaff.util.PNC;
 public class TableSwitch
 {
 	private int    defaultByte = 0;
-	private int[]      offsets = new int[0];
+	private ArrayList<Integer> offsets = new ArrayList<Integer>();
 	
-	public TableSwitch(int numberOfOffsets)
-	{
-		offsets = new int[numberOfOffsets];
-	}
+	private ArrayList<SingleInstruction> offsetsInstructions = new ArrayList<SingleInstruction>();
 
 	public int getDefaultByte() 
 	{
@@ -26,14 +24,24 @@ public class TableSwitch
 		this.defaultByte = defaultByte;
 	}
 
-	public int[] getOffsets() 
+	public ArrayList<Integer> getOffsets() 
 	{
 		return offsets;
 	}
 
-	public void setOffsets(int[] offsets)
+	public void setOffsets(ArrayList<Integer> offsets)
 	{
 		this.offsets = offsets;
+	}
+	
+	public ArrayList<SingleInstruction> getOffsetsInstructions()
+	{
+		return offsetsInstructions;
+	}
+
+	public void setOffsetsInstructions(ArrayList<SingleInstruction> offsetsInstructions) 
+	{
+		this.offsetsInstructions = offsetsInstructions;
 	}
 	
 	public static byte[] serialize(TableSwitch tableSwitch, int offset) throws IOException
@@ -52,16 +60,16 @@ public class TableSwitch
 		}
 		
 		int lowBytes  = 0;
-		int highBytes = tableSwitch.getOffsets().length + lowBytes - 1;
+		int highBytes = tableSwitch.getOffsets().size() + lowBytes - 1;
 		
 		baos.write(new byte[padding]);
 		baos.write(PNC.toByteArray(tableSwitch.getDefaultByte(), Integer.class));
-		baos.write(PNC.toByteArray(lowBytes, Integer.class));
-		baos.write(PNC.toByteArray(highBytes, Integer.class));
+		baos.write(PNC.toByteArray(lowBytes,                     Integer.class));
+		baos.write(PNC.toByteArray(highBytes,                    Integer.class));
 		
-		for(int i = 0; i < tableSwitch.getOffsets().length; i++)
+		for(int i = 0; i < tableSwitch.getOffsets().size(); i++)
 		{
-			baos.write(PNC.toByteArray(tableSwitch.getOffsets()[i], Integer.class));
+			baos.write(PNC.toByteArray(tableSwitch.getOffsets().get(i), Integer.class));
 		}
 		
 		return baos.toByteArray();
