@@ -1,8 +1,8 @@
 package com.mitp0sh.jaclaff.attributes.stackmaptable;
 
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
-import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
-import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
+import com.mitp0sh.jaclaff.attributes.code.MethodInstructions;
+import com.mitp0sh.jaclaff.attributes.code.SingleInstruction;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 

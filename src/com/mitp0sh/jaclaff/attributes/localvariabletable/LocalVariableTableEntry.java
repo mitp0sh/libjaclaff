@@ -6,8 +6,8 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
-import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
-import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
+import com.mitp0sh.jaclaff.attributes.code.MethodInstructions;
+import com.mitp0sh.jaclaff.attributes.code.SingleInstruction;
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;

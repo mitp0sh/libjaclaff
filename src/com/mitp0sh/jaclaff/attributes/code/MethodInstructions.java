@@ -1,4 +1,4 @@
-package com.mitp0sh.jaclaff.attributes.code.bytecode;
+package com.mitp0sh.jaclaff.attributes.code;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

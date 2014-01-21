@@ -4,9 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.code.Disassembler;
 import com.mitp0sh.jaclaff.attributes.code.ExceptionTable;
-import com.mitp0sh.jaclaff.attributes.code.bytecode.Disassembler;
-import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
+import com.mitp0sh.jaclaff.attributes.code.MethodInstructions;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;

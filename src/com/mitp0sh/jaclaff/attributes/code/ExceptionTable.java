@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 

@@ -4,8 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
-import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
