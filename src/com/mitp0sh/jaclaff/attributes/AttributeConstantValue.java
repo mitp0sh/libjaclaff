@@ -64,7 +64,7 @@ public class AttributeConstantValue extends AbstractAttribute
 	{
 		ConstantPool constantPool = ctx.getConstantPool();
 		
-		attribute.setConstantValueObject(ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.constantValueIndex));
+		attribute.setConstantValueObject(ConstantPool.cpeByIndex(constantPool, attribute.constantValueIndex));
 		attribute.setConstantValueIndex(0);
 	}
 	
@@ -72,7 +72,7 @@ public class AttributeConstantValue extends AbstractAttribute
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		int constantValueIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, attribute.constantValueObject);
+		int constantValueIndex = ConstantPool.indexByCPE(cp, attribute.constantValueObject);
 		attribute.setConstantValueIndex(constantValueIndex);
 	}
 	

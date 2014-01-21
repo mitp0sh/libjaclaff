@@ -60,13 +60,13 @@ public class ObjectVariableInfo extends AbstractVariableInfo
 	
 	public static void decoupleFromIndices(ObjectVariableInfo objectVariableInfo, ConstantPool constantPool)
 	{
-		objectVariableInfo.setCPoolIndexObject(((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, objectVariableInfo.getCPoolIndex())));
+		objectVariableInfo.setCPoolIndexObject(((ConstantPoolTypeClass)ConstantPool.cpeByIndex(constantPool, objectVariableInfo.getCPoolIndex())));
 		objectVariableInfo.setCPoolIndex((short)0);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, ObjectVariableInfo objectVariableInfo)
 	{
-		int cpoolIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), objectVariableInfo.getCPoolIndexObject());
+		int cpoolIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), objectVariableInfo.getCPoolIndexObject());
 		objectVariableInfo.setCPoolIndex(cpoolIndex);
 	}
 	

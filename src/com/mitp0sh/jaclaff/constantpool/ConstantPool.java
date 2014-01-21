@@ -89,16 +89,22 @@ public class ConstantPool
 				{	 					
 					current = ConstantPoolTypeLong.deserialize(dis);	
 					constantPool.getConstantPool().add(current);
+					AbstractConstantPoolType previous = current;
 					current = new ConstantPoolTypeLong();
 					i++;
+					
+					previous.addReference(current); // fix for decoupling - special case
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_DOUBLE:
 				{	 				
 					current = ConstantPoolTypeDouble.deserialize(dis);	
 					constantPool.getConstantPool().add(current);
+					AbstractConstantPoolType previous = current;
 					current = new ConstantPoolTypeDouble();
 					i++;
+					
+					previous.addReference(current); // fix for decoupling - special case
 					break;
 				}
 				case AbstractConstantPoolType.CONSTANT_POOL_TAG_NAMEANDTYPE:
@@ -253,8 +259,13 @@ public class ConstantPool
 		}
 	}
 	
-	public static AbstractConstantPoolType getConstantPoolTypeByIndex(ConstantPool constantPool, int index)
+	public static AbstractConstantPoolType cpeByIndex(ConstantPool constantPool, int index)
 	{
+		if(index == 0)
+		{
+			return null;
+		}
+		
 		return constantPool.getConstantPool().get(index - 1);
 	}
 	
@@ -346,7 +357,7 @@ public class ConstantPool
 		return baos.toByteArray();
 	}
 	
-	public static int getIndexFromConstantPoolEntry(ConstantPool constantPool, AbstractConstantPoolType cpt)
+	public static int indexByCPE(ConstantPool constantPool, AbstractConstantPoolType cpt)
 	{
 		if(cpt == null)
 		{
@@ -373,5 +384,26 @@ public class ConstantPool
 		}
 		
 		return 0;
+	}
+	
+	public static boolean hasOrphanedConstantPoolEntry(ConstantPool cp)
+	{
+		int i = 0;
+		boolean result = false;
+		Iterator<AbstractConstantPoolType> iter = cp.getConstantPool().iterator();
+		while(iter.hasNext())
+		{
+			AbstractConstantPoolType acpt = iter.next();
+			if(!acpt.isReferenced())
+			{
+				System.out.println("index = " + i);
+				result = true;
+				//break;
+			}
+			
+			i++;
+		}
+		
+		return result;
 	}
 }

@@ -4,9 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
@@ -14,7 +16,7 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 /* complete */
-public class LocalVariableTableEntry 
+public class LocalVariableTableEntry extends AbstractReference
 {
 	private int        startPc = 0;
 	private int         length = 0;
@@ -23,6 +25,7 @@ public class LocalVariableTableEntry
 	private int          index = 0;
 	
 	private SingleInstruction startPcInstruction = null;
+	
 	private ConstantPoolTypeUtf8      nameObject = null;
 	private ConstantPoolTypeUtf8 signatureObject = null;
 
@@ -91,9 +94,15 @@ public class LocalVariableTableEntry
 		return nameObject;
 	}
 
-	public void setNameObject(ConstantPoolTypeUtf8 nameObject) 
+	public void setNameObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.nameObject = nameObject;
+		this.nameObject = object;
+		
+		if(object != null)
+		{
+			this.setNameIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public ConstantPoolTypeUtf8 getSignatureObject() 
@@ -101,9 +110,15 @@ public class LocalVariableTableEntry
 		return signatureObject;
 	}
 
-	public void setSignatureObject(ConstantPoolTypeUtf8 signatureObject) 
+	public void setSignatureObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.signatureObject = signatureObject;
+		this.signatureObject = object;
+		
+		if(object != null)
+		{
+			this.setSignatureIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public static LocalVariableTableEntry deserialize(DesCtx ctx, AttributeCode attributeCode) throws IOException
@@ -124,31 +139,35 @@ public class LocalVariableTableEntry
 		return localVariableTableEntry;
     }
 	
-	private static void decoupleFromIndices(DesCtx ctx, LocalVariableTableEntry entry)
+	private static void decoupleFromIndices(DesCtx ctx, LocalVariableTableEntry e)
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		entry.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(cp, entry.nameIndex));
-		entry.setNameIndex(0);
+		int nameIndex = e.getNameIndex();
+		AbstractConstantPoolType acptNameObject = ConstantPool.cpeByIndex(cp, nameIndex);
+		ConstantPoolTypeUtf8 nameObject = (ConstantPoolTypeUtf8)acptNameObject; 
+		e.setNameObject(nameObject);		
 		
-		entry.setSignatureObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(cp, entry.signatureIndex));
-		entry.setSignatureIndex(0);
+		int signatureIndex = e.getSignatureIndex();
+		AbstractConstantPoolType acptSignatureObject = ConstantPool.cpeByIndex(cp, signatureIndex);
+		ConstantPoolTypeUtf8 signatureObject = (ConstantPoolTypeUtf8)acptSignatureObject;
+		e.setSignatureObject(signatureObject);
 	}
 	
-	private static void coupleToIndices(SerCtx ctx, LocalVariableTableEntry entry)
+	private static void coupleWithIndices(SerCtx ctx, LocalVariableTableEntry e)
 	{
 		/* retrieve constant pool */
 		ConstantPool cp = ctx.getConstantPool();
 		
 		/* get objects */
-		ConstantPoolTypeUtf8 nameObject      = entry.getNameObject();
-		ConstantPoolTypeUtf8 signatureObject = entry.getSignatureObject();
+		ConstantPoolTypeUtf8 nameObject      = e.getNameObject();
+		ConstantPoolTypeUtf8 signatureObject = e.getSignatureObject();
 		
-	    int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, nameObject);
-	    entry.setNameIndex(nameIndex);
+	    int nameIndex = ConstantPool.indexByCPE(cp, nameObject);
+	    e.setNameIndex(nameIndex);
 	    
-	    int signatureIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, signatureObject);
-	    entry.setSignatureIndex(signatureIndex);
+	    int signatureIndex = ConstantPool.indexByCPE(cp, signatureObject);
+	    e.setSignatureIndex(signatureIndex);
 	}
 	
 	protected static void decoupleFromOffsets(DesCtx ctx, LocalVariableTableEntry localVariableTableEntry, MethodInstructions disassembly)
@@ -165,7 +184,7 @@ public class LocalVariableTableEntry
 	
 	public static byte[] serialize(SerCtx ctx, LocalVariableTableEntry localVariableTableEntry, AttributeCode attributeCode) throws IOException
 	{
-		coupleToIndices(ctx, localVariableTableEntry);
+		coupleWithIndices(ctx, localVariableTableEntry);
 		coupleToOffsets(ctx, localVariableTableEntry, attributeCode.getCode());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

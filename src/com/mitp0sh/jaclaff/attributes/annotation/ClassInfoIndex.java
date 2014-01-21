@@ -59,7 +59,7 @@ public class ClassInfoIndex extends AbstractValue
 	{
 		ConstantPool constantPool = ctx.getConstantPool();
 		
-		AbstractConstantPoolType acpt = ConstantPool.getConstantPoolTypeByIndex(constantPool, value.getClassInfoIndex());
+		AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(constantPool, value.getClassInfoIndex());
 		ConstantPoolTypeUtf8 cpt = (ConstantPoolTypeUtf8)acpt;
 		value.setClassInfoObject(cpt);
     	value.setClassInfoIndex(0);
@@ -69,7 +69,7 @@ public class ClassInfoIndex extends AbstractValue
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		int classInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, value.getClassInfoObject());
+		int classInfoIndex = ConstantPool.indexByCPE(cp, value.getClassInfoObject());
     	value.setClassInfoIndex(classInfoIndex);
 	}
 	

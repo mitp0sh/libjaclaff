@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.abstraction.AbstractReference;
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
@@ -132,9 +133,17 @@ public class ClassEntry extends AbstractReference
 	{
 		ConstantPool constantPool = ctx.getConstantPool();
 		
-		classEntry.setInnerClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerClassInfoIndex));
-		classEntry.setOuterClassInfoObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.outerClassInfoIndex));	
-		classEntry.setInnerNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, classEntry.innerNameIndex));
+		int innerClassInfoIndex = classEntry.getInnerClassInfoIndex();
+		int outerClassInfoIndex = classEntry.getOuterClassInfoIndex();
+		int      innerNameIndex = classEntry.getInnerNameIndex();
+		
+		AbstractConstantPoolType acptInnerClassInfoObject = ConstantPool.cpeByIndex(constantPool, innerClassInfoIndex);
+		AbstractConstantPoolType acptOuterClassInfoObject = ConstantPool.cpeByIndex(constantPool, outerClassInfoIndex);
+		AbstractConstantPoolType acptInnerNameObject      = ConstantPool.cpeByIndex(constantPool, innerNameIndex);
+		
+		classEntry.setInnerClassInfoObject((ConstantPoolTypeClass)acptInnerClassInfoObject);
+		classEntry.setOuterClassInfoObject((ConstantPoolTypeClass)acptOuterClassInfoObject);	
+		classEntry.setInnerNameObject((ConstantPoolTypeUtf8)acptInnerNameObject);
 	}
 	
 	private static void coupleToIndices(SerCtx ctx, ClassEntry classEntry)
@@ -147,13 +156,13 @@ public class ClassEntry extends AbstractReference
 		ConstantPoolTypeClass outerClassInfoObject = classEntry.getOuterClassInfoObject();
 		ConstantPoolTypeUtf8  innerClassNameObject = classEntry.getInnerNameObject();
 		
-	    int innerClassInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, innerClassInfoObject);
+	    int innerClassInfoIndex = ConstantPool.indexByCPE(cp, innerClassInfoObject);
 	    classEntry.setInnerClassInfoIndex(innerClassInfoIndex);
 	    
-	    int outerClassInfoIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, outerClassInfoObject);
+	    int outerClassInfoIndex = ConstantPool.indexByCPE(cp, outerClassInfoObject);
 	    classEntry.setOuterClassInfoIndex(outerClassInfoIndex);
 	    
-	    int innerClassNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, innerClassNameObject);
+	    int innerClassNameIndex = ConstantPool.indexByCPE(cp, innerClassNameObject);
 	    classEntry.setInnerNameIndex(innerClassNameIndex);
 	}
 	

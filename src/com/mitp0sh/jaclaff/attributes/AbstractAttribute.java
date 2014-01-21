@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.abstraction.AbstractReference;
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
@@ -55,9 +56,15 @@ public abstract class AbstractAttribute extends AbstractReference
 		return attributeNameObject;
 	}
 
-	public void setAttributeNameObject(ConstantPoolTypeUtf8 attributeNameObject)
+	public void setAttributeNameObject(ConstantPoolTypeUtf8 object)
 	{
-		this.attributeNameObject = attributeNameObject;
+		this.attributeNameObject = object;
+		
+		if(object != null)
+		{
+			this.setAttributeNameIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public long getAttributeLength() 
@@ -204,24 +211,28 @@ public abstract class AbstractAttribute extends AbstractReference
 		return attribute;
     }
 	
-	public static void decoupleFromIndices(AbstractAttribute attribute, ConstantPool constantPool)
+	public static void decoupleFromIndices(AbstractAttribute attribute, ConstantPool cp)
 	{
-		attribute.setAttributeNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.getAttributeNameIndex()));
-		attribute.setAttributeNameIndex((short)0);
+		/* decouple from name index */
+		int nameIndex = attribute.getAttributeNameIndex();
+		AbstractConstantPoolType acptNameObject = ConstantPool.cpeByIndex(cp, nameIndex);
+		ConstantPoolTypeUtf8 nameObject = (ConstantPoolTypeUtf8)acptNameObject;
+		attribute.setAttributeNameObject(nameObject);
 	}
 	
-	public static void coupleToIndices(SerCtx ctx, AbstractAttribute attribute)
+	public static void coupleWithIndices(SerCtx ctx, AbstractAttribute attribute)
 	{
-		int attributeNameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getAttributeNameObject());
+		/* couple with name index */
+		ConstantPoolTypeUtf8 nameObject = attribute.getAttributeNameObject();
+		int attributeNameIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), nameObject);
 		attribute.setAttributeNameIndex(attributeNameIndex);
 	}
-	
 	
 	public static byte[] serialize(SerCtx ctx, AbstractAttribute attribute, Object reference0) throws IOException
 	{
 		byte[] attributePayLoad = null;
 		
-		coupleToIndices(ctx, attribute);
+		coupleWithIndices(ctx, attribute);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		

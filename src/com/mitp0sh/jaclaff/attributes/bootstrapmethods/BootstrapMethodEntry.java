@@ -102,13 +102,13 @@ public class BootstrapMethodEntry extends AbstractReference
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		bootstrapMethodEntry.setBootstrapMethodRefObject((ConstantPoolTypeMethodHandle)ConstantPool.getConstantPoolTypeByIndex(cp, bootstrapMethodEntry.getBootstrapMethodRefIndex()));
+		bootstrapMethodEntry.setBootstrapMethodRefObject((ConstantPoolTypeMethodHandle)ConstantPool.cpeByIndex(cp, bootstrapMethodEntry.getBootstrapMethodRefIndex()));
 		bootstrapMethodEntry.setBootstrapMethodRefIndex(0);
 		
 		int num = bootstrapMethodEntry.getNumBootstrapArguments();
 		for(int i = 0; i < num; i++)
 		{
-			AbstractConstantPoolType acpt = ConstantPool.getConstantPoolTypeByIndex(cp, bootstrapMethodEntry.getBootstrapArguments()[i]);
+			AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, bootstrapMethodEntry.getBootstrapArguments()[i]);
 			bootstrapMethodEntry.getBootstrapArgumentsObjects().add(acpt);
 			
 			// TODO - Find a proper place to do that - refactor whole class, maybe even split class !!!
@@ -128,12 +128,12 @@ public class BootstrapMethodEntry extends AbstractReference
 		/* get objects */
 		ConstantPoolTypeMethodHandle methodRef = bootstrapMethodEntry.getBootstrapMethodRefObject();
 		
-	    int methodRefIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, methodRef);
+	    int methodRefIndex = ConstantPool.indexByCPE(cp, methodRef);
 	    bootstrapMethodEntry.setBootstrapMethodRefIndex(methodRefIndex);
 	    
 		for(int i = 0; i < bootstrapMethodEntry.getNumBootstrapArguments(); i++)
 		{
-			int currentBootstrapArgument = ConstantPool.getIndexFromConstantPoolEntry(cp, bootstrapMethodEntry.getBootstrapArgumentsObjects().get(i));
+			int currentBootstrapArgument = ConstantPool.indexByCPE(cp, bootstrapMethodEntry.getBootstrapArgumentsObjects().get(i));
 			bootstrapMethodEntry.getBootstrapArguments()[i] = currentBootstrapArgument;
 		}
 	}

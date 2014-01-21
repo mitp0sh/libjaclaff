@@ -59,17 +59,17 @@ public class ConstantPoolTypeFloat extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	@Override
-	public boolean equals(Object obj)
-	{
-		try
-		{
-			ConstantPoolTypeFloat cpt = (ConstantPoolTypeFloat)obj;
-			return cpt.bytes == this.bytes;
-		}
-		catch(NullPointerException e){}
-		catch(ClassCastException e){}
-		
-		return false;
-	}
+//	@Override
+//	public boolean equals(Object obj)
+//	{
+//		try
+//		{
+//			ConstantPoolTypeFloat cpt = (ConstantPoolTypeFloat)obj;
+//			return cpt.bytes == this.bytes;
+//		}
+//		catch(NullPointerException e){}
+//		catch(ClassCastException e){}
+//		
+//		return false;
+//	}
 }

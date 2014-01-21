@@ -91,12 +91,12 @@ public class ConstantPoolTypeMethodref extends AbstractConstantPoolType
 		ConstantPool cp = ctx.getConstantPool();
 		
 		int classIndex = cpt.getClassIndex();
-		AbstractConstantPoolType acptClass = ConstantPool.getConstantPoolTypeByIndex(cp, classIndex);
+		AbstractConstantPoolType acptClass = ConstantPool.cpeByIndex(cp, classIndex);
 		ConstantPoolTypeClass classObject = (ConstantPoolTypeClass)acptClass;
 		cpt.setClassObject(classObject);
 
 		int NameAndTypeIndex= cpt.getNameAndTypeIndex();
-		AbstractConstantPoolType acptNameAndType = ConstantPool.getConstantPoolTypeByIndex(cp, NameAndTypeIndex);
+		AbstractConstantPoolType acptNameAndType = ConstantPool.cpeByIndex(cp, NameAndTypeIndex);
 		ConstantPoolTypeNameAndType nameAndTypeObject =  (ConstantPoolTypeNameAndType)acptNameAndType;
 		cpt.setNameAndTypeObject(nameAndTypeObject);
 	}
@@ -106,11 +106,11 @@ public class ConstantPoolTypeMethodref extends AbstractConstantPoolType
 		ConstantPool cp = ctx.getConstantPool();
 		
 		ConstantPoolTypeClass classObject = cpt.getClassObject();
-		int classIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, classObject);
+		int classIndex = ConstantPool.indexByCPE(cp, classObject);
 		cpt.setClassIndex(classIndex);
 		
 		ConstantPoolTypeNameAndType nameAndTypeObject = cpt.getNameAndTypeObject();
-		int nameAndTypeIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, nameAndTypeObject); 
+		int nameAndTypeIndex = ConstantPool.indexByCPE(cp, nameAndTypeObject); 
 		cpt.setNameAndTypeIndex(nameAndTypeIndex);
 	}
 	
@@ -137,19 +137,19 @@ public class ConstantPoolTypeMethodref extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	@Override
-	public boolean equals(Object obj)
-	{
-		try
-		{
-			ConstantPoolTypeMethodref cpt = (ConstantPoolTypeMethodref)obj;
-			boolean b0 = cpt.classObject.equals(this.classObject);
-			boolean b1 = cpt.nameAndTypeObject.equals(this.nameAndTypeObject);
-			return b0 && b1;
-		}
-		catch(NullPointerException e){}
-		catch(ClassCastException e){}
-		
-		return false;
-	}
+	//@Override
+	//public boolean equals(Object obj)
+	//{
+	//	try
+	//	{
+	//		ConstantPoolTypeMethodref cpt = (ConstantPoolTypeMethodref)obj;
+	//		boolean b0 = cpt.classObject.equals(this.classObject);
+	//		boolean b1 = cpt.nameAndTypeObject.equals(this.nameAndTypeObject);
+	//		return b0 && b1;
+	//	}
+    //  catch(NullPointerException e){}
+	//	catch(ClassCastException e){}
+	//	
+	//	return false;
+	//}
 }

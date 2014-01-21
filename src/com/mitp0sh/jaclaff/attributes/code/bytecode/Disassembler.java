@@ -3,10 +3,14 @@ package com.mitp0sh.jaclaff.attributes.code.bytecode;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+
 public class Disassembler
 {
-	public static SingleInstruction disassemble(DataInputStream dis, int offset, Boolean hasWidePrefix) throws IOException
+	public static SingleInstruction disassemble(DesCtx ctx, int offset, Boolean hasWidePrefix) throws IOException
 	{
+		DataInputStream dis = ctx.getDataInputStream();
+		
 		SingleInstruction instruction = new SingleInstruction();
 		
 		byte byteCode = (byte)(dis.readUnsignedByte() & 0xFF);
@@ -34,6 +38,8 @@ public class Disassembler
 		{
 			instruction.setOperand1(dis.readByte());
 			instruction.getByteCode().setPhysicalLength((short)format.length());
+			
+			SingleInstruction.decoupleFromIndices(ctx, instruction);
 		}
 		else
 		if(format.equals("bcc"))
@@ -55,12 +61,16 @@ public class Disassembler
 				instruction.setOperand1(dis.readUnsignedByte());
 				instruction.getByteCode().setPhysicalLength((short)format.length());
 			}
+			
+			SingleInstruction.decoupleFromIndices(ctx, instruction);
 		}		
 		else
 		if(format.equals("bii"))
 		{
 			instruction.setOperand1(dis.readUnsignedShort());
 			instruction.getByteCode().setPhysicalLength((short)format.length());
+			
+			SingleInstruction.decoupleFromIndices(ctx, instruction);
 		}
 		else
 		if(format.equals("bic") || format.equals("wbiicc"))
@@ -85,6 +95,8 @@ public class Disassembler
 			instruction.setOperand1(dis.readUnsignedShort());
 			instruction.setOperand2(dis.readByte());
 			instruction.getByteCode().setPhysicalLength((short)format.length());
+			
+			SingleInstruction.decoupleFromIndices(ctx, instruction);
 		}
 		else
 		if(format.equals("boo"))
@@ -103,6 +115,8 @@ public class Disassembler
 		{
 			instruction.setOperand1(dis.readUnsignedShort());
 			instruction.getByteCode().setPhysicalLength((short)format.length());
+			
+			SingleInstruction.decoupleFromIndices(ctx, instruction);
 		}
 		else
 		if(format.equals("bjj__"))
@@ -110,12 +124,16 @@ public class Disassembler
 			instruction.setOperand1(dis.readUnsignedShort());
 			dis.skipBytes(2);
 			instruction.getByteCode().setPhysicalLength((short)format.length());
+			
+			SingleInstruction.decoupleFromIndices(ctx, instruction);
 		}
 		else
 		if(format.equals("bjjjj"))
 		{
 			instruction.setOperand1(dis.readInt());
 			instruction.getByteCode().setPhysicalLength((short)format.length());
+			
+			SingleInstruction.decoupleFromIndices(ctx, instruction);
 		}
 		else
 		if(format.equals(""))
@@ -189,7 +207,7 @@ public class Disassembler
 		return instruction;
 	}
 	
-	public static MethodInstructions disassemble(DataInputStream dis, long length) throws IOException
+	public static MethodInstructions disassemble(DesCtx ctx, long length) throws IOException
 	{
 		MethodInstructions instructions = new MethodInstructions();
 		
@@ -198,7 +216,7 @@ public class Disassembler
 		
 		while(length > disassembleLength)
 		{
-			SingleInstruction instruction = disassemble(dis, disassembleLength, hasWidePrefix);
+			SingleInstruction instruction = disassemble(ctx, disassembleLength, hasWidePrefix);
 			instructions.addInstruction(instruction);
 			
 			if(instruction.getByteCode().getByteCode() == Mnemonics.BC_wide)

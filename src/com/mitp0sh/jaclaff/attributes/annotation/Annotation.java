@@ -77,14 +77,14 @@ public class Annotation extends AbstractValue
 	{
 		ConstantPool constantPool = ctx.getConstantPool();
 		
-		annotation.setTypeObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, annotation.typeIndex));
+		annotation.setTypeObject((ConstantPoolTypeUtf8)ConstantPool.cpeByIndex(constantPool, annotation.typeIndex));
 		annotation.setTypeIndex(0);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, Annotation annotation)
 	{
 		ConstantPool cp = ctx.getConstantPool();
-		int typeIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, annotation.getTypeObject());
+		int typeIndex = ConstantPool.indexByCPE(cp, annotation.getTypeObject());
 		annotation.setTypeIndex(typeIndex);
 	}
 	

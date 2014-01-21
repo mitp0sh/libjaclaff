@@ -8,13 +8,14 @@ public abstract class AbstractReference implements Referenceable
 	
 	@Override
 	public void addReference(AbstractReference reference)
-	{
+	{			
 		if(references.contains(reference))
 		{
 			return;
 		}
 		
 		references.add(reference);
+		reference.addReference(this);
 	}
 
 	@Override

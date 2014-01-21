@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.MethodInstructions;
 import com.mitp0sh.jaclaff.attributes.code.bytecode.SingleInstruction;
@@ -14,12 +15,12 @@ import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
-public class LocalVariableTypeTableEntry 
+public class LocalVariableTypeTableEntry extends AbstractReference
 {
 	private int              start_pc = 0;
 	private int                length = 0;
-	private int            name_index = 0;
-	private int       signature_index = 0;
+	private int            nameIndex = 0;
+	private int       signatureIndex = 0;
 	private int                 index = 0;
 	
 	private SingleInstruction startPcInstruction = null;
@@ -46,24 +47,24 @@ public class LocalVariableTypeTableEntry
 		this.length = length;
 	}
 
-	public int getName_index() 
+	public int getNameIndex() 
 	{
-		return name_index;
+		return nameIndex;
 	}
 
-	public void setName_index(int nameIndex) 
+	public void setNameIndex(int nameIndex) 
 	{
-		name_index = nameIndex;
+		this.nameIndex = nameIndex;
 	}
 
-	public int getSignature_index() 
+	public int getSignatureIndex() 
 	{
-		return signature_index;
+		return signatureIndex;
 	}
 
-	public void setSignature_index(int signatureIndex) 
+	public void setSignatureIndex(int signatureIndex) 
 	{
-		signature_index = signatureIndex;
+		this.signatureIndex = signatureIndex;
 	}
 	
 	public int getIndex() 
@@ -91,9 +92,15 @@ public class LocalVariableTypeTableEntry
 		return nameObject;
 	}
 
-	public void setNameObject(ConstantPoolTypeUtf8 nameObject) 
+	public void setNameObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.nameObject = nameObject;
+		this.nameObject = object;
+		
+		if(object != null)
+		{
+			this.setNameIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public ConstantPoolTypeUtf8 getSignatureObject() 
@@ -101,9 +108,15 @@ public class LocalVariableTypeTableEntry
 		return signatureObject;
 	}
 
-	public void setSignatureObject(ConstantPoolTypeUtf8 signatureObject) 
+	public void setSignatureObject(ConstantPoolTypeUtf8 object) 
 	{
-		this.signatureObject = signatureObject;
+		this.signatureObject = object;
+		
+		if(object != null)
+		{
+			this.setSignatureIndex(0);
+			this.addReference(object);
+		}
 	}
 
 	public static LocalVariableTypeTableEntry deserialize(DesCtx ctx, AttributeCode attributeCode) throws IOException
@@ -114,8 +127,8 @@ public class LocalVariableTypeTableEntry
 		
 		localVariableTypeTableEntry.setStart_pc(dis.readUnsignedShort());
 		localVariableTypeTableEntry.setLength(dis.readUnsignedShort());
-		localVariableTypeTableEntry.setName_index(dis.readUnsignedShort());
-		localVariableTypeTableEntry.setSignature_index(dis.readUnsignedShort());
+		localVariableTypeTableEntry.setNameIndex(dis.readUnsignedShort());
+		localVariableTypeTableEntry.setSignatureIndex(dis.readUnsignedShort());
 		localVariableTypeTableEntry.setIndex(dis.readUnsignedShort());
 		
 		decoupleFromIndices(ctx, localVariableTypeTableEntry);
@@ -128,11 +141,11 @@ public class LocalVariableTypeTableEntry
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		entry.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(cp, entry.name_index));
-		entry.setName_index(0);
+		entry.setNameObject((ConstantPoolTypeUtf8)ConstantPool.cpeByIndex(cp, entry.nameIndex));
+		entry.setNameIndex(0);
 		
-		entry.setSignatureObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(cp, entry.signature_index));
-		entry.setSignature_index(0);
+		entry.setSignatureObject((ConstantPoolTypeUtf8)ConstantPool.cpeByIndex(cp, entry.signatureIndex));
+		entry.setSignatureIndex(0);
 	}
 	
 	private static void coupleToIndices(SerCtx ctx, LocalVariableTypeTableEntry entry)
@@ -144,11 +157,11 @@ public class LocalVariableTypeTableEntry
 		ConstantPoolTypeUtf8 nameObject      = entry.getNameObject();
 		ConstantPoolTypeUtf8 signatureObject = entry.getSignatureObject();
 		
-	    int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, nameObject);
-	    entry.setName_index(nameIndex);
+	    int nameIndex = ConstantPool.indexByCPE(cp, nameObject);
+	    entry.setNameIndex(nameIndex);
 	    
-	    int signatureIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, signatureObject);
-	    entry.setSignature_index(signatureIndex);
+	    int signatureIndex = ConstantPool.indexByCPE(cp, signatureObject);
+	    entry.setSignatureIndex(signatureIndex);
 	}
 	
 	protected static void decoupleFromOffsets(DesCtx ctx, LocalVariableTypeTableEntry localVariableTypeTableEntry, MethodInstructions disassembly)
@@ -172,8 +185,8 @@ public class LocalVariableTypeTableEntry
 		
 		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getStart_pc(), Short.class));
 		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getLength(), Short.class));
-		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getName_index(), Short.class));
-		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getSignature_index(), Short.class));
+		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getNameIndex(), Short.class));
+		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getSignatureIndex(), Short.class));
 		baos.write(PNC.toByteArray(localVariableTypeTableEntry.getIndex(), Short.class));
 				
 		return baos.toByteArray();

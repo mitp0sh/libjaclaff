@@ -58,7 +58,7 @@ public class ConstValueIndex extends AbstractValue
 	{
 		ConstantPool constantPool = ctx.getConstantPool();
 		
-		AbstractConstantPoolType cpt = ConstantPool.getConstantPoolTypeByIndex(constantPool, value.getConstValueIndex());
+		AbstractConstantPoolType cpt = ConstantPool.cpeByIndex(constantPool, value.getConstValueIndex());
     	value.setConstValueObject(cpt);
     	value.setConstValueIndex(0);
 	}
@@ -67,7 +67,7 @@ public class ConstValueIndex extends AbstractValue
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		int constValueIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, value.getConstValueObject());
+		int constValueIndex = ConstantPool.indexByCPE(cp, value.getConstValueObject());
     	value.setConstValueIndex(constValueIndex);
 	}
 	

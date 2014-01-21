@@ -92,12 +92,12 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		ConstantPool cp = ctx.getConstantPool();
 		
 		int nameIndex = cpt.getNameIndex();
-		AbstractConstantPoolType acptName = ConstantPool.getConstantPoolTypeByIndex(cp, nameIndex);
+		AbstractConstantPoolType acptName = ConstantPool.cpeByIndex(cp, nameIndex);
 		ConstantPoolTypeUtf8 nameObject = (ConstantPoolTypeUtf8)acptName;
 		cpt.setNameObject(nameObject);
 
 		int descriptorIndex = cpt.getDescriptorIndex();
-		AbstractConstantPoolType acptDescriptor = ConstantPool.getConstantPoolTypeByIndex(cp, descriptorIndex);
+		AbstractConstantPoolType acptDescriptor = ConstantPool.cpeByIndex(cp, descriptorIndex);
 		ConstantPoolTypeUtf8 descriptorObject =  (ConstantPoolTypeUtf8)acptDescriptor;
 		cpt.setDescriptorObject(descriptorObject);
 	}
@@ -107,11 +107,11 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		ConstantPool cp = ctx.getConstantPool();
 		
 		ConstantPoolTypeUtf8 nameObject = cpt.getNameObject();
-		int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, nameObject);
+		int nameIndex = ConstantPool.indexByCPE(cp, nameObject);
 		cpt.setNameIndex(nameIndex);
 		
 		ConstantPoolTypeUtf8 descriptorObject = cpt.getDescriptorObject();
-		int descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, descriptorObject); 
+		int descriptorIndex = ConstantPool.indexByCPE(cp, descriptorObject); 
 		cpt.setDescriptorIndex(descriptorIndex);
 	}
 	
@@ -138,19 +138,22 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	@Override
-	public boolean equals(Object obj)
-	{
-		try
-		{
-			ConstantPoolTypeNameAndType cpt = (ConstantPoolTypeNameAndType)obj;
-			boolean b0 = cpt.nameObject.equals(this.nameObject);
-			boolean b1 = cpt.descriptorObject.equals(this.descriptorObject);
-			return b0 && b1;
-		}
-		catch(NullPointerException e){}
-		catch(ClassCastException e){}
-		
-		return false;
-	}
+//	@Override
+//	public boolean equals(Object obj)
+//	{
+//		try
+//		{
+//			ConstantPoolTypeNameAndType cpt = (ConstantPoolTypeNameAndType)obj;
+//			boolean b0 = cpt.nameObject.equals(this.nameObject);
+//			boolean b1 = cpt.descriptorObject.equals(this.descriptorObject);
+//			return b0 && b1;
+//		}
+//		catch(NullPointerException e)
+//		{
+//			
+//		}
+//		catch(ClassCastException e){}
+//		
+//		return false;
+//	}
 }

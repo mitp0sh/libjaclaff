@@ -3,7 +3,13 @@ package com.mitp0sh.jaclaff.attributes.code.bytecode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class SingleInstruction
+import com.mitp0sh.jaclaff.abstraction.AbstractReference;
+import com.mitp0sh.jaclaff.attributes.code.bytecode.defs.BasicTypes;
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
+import com.mitp0sh.jaclaff.constantpool.ConstantPool;
+import com.mitp0sh.jaclaff.deserialization.DesCtx;
+
+public class SingleInstruction extends AbstractReference
 {
 	private ByteCode         byteCode = null;
 	private int                offset = 0;
@@ -12,6 +18,9 @@ public class SingleInstruction
 	private LookupSwitch lookupSwitch = null;
 	private TableSwitch   tableSwitch = null;
 	private Boolean      isWidePrefix = false;
+	
+	private AbstractConstantPoolType operand1Object = null;
+	private AbstractConstantPoolType operand2Object = null;
 
 	public ByteCode getByteCode() 
 	{
@@ -81,6 +90,38 @@ public class SingleInstruction
 	public void setWidePrefix(Boolean isWidePrefix) 
 	{
 		this.isWidePrefix = isWidePrefix;
+	}
+	
+	public AbstractConstantPoolType getOperand1Object()
+	{
+		return operand1Object;
+	}
+
+	public void setOperand1Object(AbstractConstantPoolType object) 
+	{
+		this.operand1Object = object;
+		
+		if(object != null)
+		{
+			this.setOperand1(0);
+			this.addReference(object);
+		}
+	}
+
+	public AbstractConstantPoolType getOperand2Object() 
+	{
+		return operand2Object;
+	}
+
+	public void setOperand2Object(AbstractConstantPoolType object) 
+	{
+		this.operand2Object = object;
+		
+		if(object != null)
+		{
+			this.setOperand2(0);
+			this.addReference(object);
+		}
 	}
 	
 	public int getPhysicalInstructionLength()
@@ -179,6 +220,72 @@ public class SingleInstruction
 		}
 		
 		return 0;
+	}
+	
+	public static void decoupleFromIndices(DesCtx ctx, SingleInstruction instruction)
+	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		ByteCode byteCode = instruction.getByteCode();
+		if(byteCode.getFormat().equals(ByteCode.FORMAT_BJJ))
+		{
+			AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, instruction.getOperand1());
+			instruction.setOperand1Object(acpt);
+		}
+		else
+		if(byteCode.getFormat().equals(ByteCode.FORMAT_BI) ||
+		   byteCode.getFormat().equals(ByteCode.FORMAT_WBII))
+		{
+			byte bt = byteCode.getBasicType();
+			if(bt == BasicTypes.T_INT    ||
+			   bt == BasicTypes.T_LONG   ||
+			   bt == BasicTypes.T_FLOAT  ||
+			   bt == BasicTypes.T_DOUBLE ||
+			   bt == BasicTypes.T_VOID)
+			{
+				return;
+			}
+			
+			AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, instruction.getOperand1());
+			instruction.setOperand1Object(acpt);
+		}
+		else
+		if(byteCode.getFormat().equals(ByteCode.FORMAT_BII))
+		{
+			AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, instruction.getOperand1());
+			instruction.setOperand1Object(acpt);
+		}
+		else
+		if(byteCode.getFormat().equals(ByteCode.FORMAT_BC))
+		{
+			byte bt = byteCode.getBasicType();
+			if(bt != BasicTypes.T_OBJECT)
+			{
+				return;
+			}
+			
+			AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, instruction.getOperand1());
+			instruction.setOperand1Object(acpt);
+		}
+		else
+		if(byteCode.getFormat().equals(ByteCode.FORMAT_BIIC))
+		{
+			AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, instruction.getOperand1());
+			instruction.setOperand1Object(acpt);
+		}
+		else
+		if(byteCode.getFormat().equals(ByteCode.FORMAT_BJJ__))
+		{
+			AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, instruction.getOperand1());
+			instruction.setOperand1Object(acpt);
+		}
+		else
+		if(byteCode.getFormat().equals(ByteCode.FORMAT_BJJJJ))
+		{
+			AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, instruction.getOperand1());
+			instruction.setOperand1Object(acpt);
+		}
+		
 	}
 	
 	public static byte[] serialize(SingleInstruction instruction, int offset) throws IOException

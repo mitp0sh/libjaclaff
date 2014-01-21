@@ -59,13 +59,13 @@ public class AttributeSourceFile extends AbstractAttribute
 	{
 		ConstantPool constantPool = ctx.getConstantPool();
 		
-		attribute.setSourceFileObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, attribute.sourceFileIndex));
+		attribute.setSourceFileObject((ConstantPoolTypeUtf8)ConstantPool.cpeByIndex(constantPool, attribute.sourceFileIndex));
 		attribute.setSourceFileIndex(0);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, AttributeSourceFile attribute)
 	{
-		int sourceFileIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getSourceFileObject());
+		int sourceFileIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), attribute.getSourceFileObject());
 		attribute.setSourceFileIndex(sourceFileIndex);
 	}
 	

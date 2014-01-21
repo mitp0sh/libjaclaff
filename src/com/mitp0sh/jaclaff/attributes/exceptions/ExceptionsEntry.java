@@ -62,7 +62,7 @@ public class ExceptionsEntry extends AbstractReference
 		ConstantPool constantPool = ctx.getConstantPool();
 		
 		int exceptionIndex = exceptionsEntry.getExceptionIndex();
-		AbstractConstantPoolType acpt = ConstantPool.getConstantPoolTypeByIndex(constantPool, exceptionIndex);
+		AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(constantPool, exceptionIndex);
 		ConstantPoolTypeClass cpt = (ConstantPoolTypeClass)acpt;
 		exceptionsEntry.setExceptionObject(cpt);
 	}
@@ -71,7 +71,7 @@ public class ExceptionsEntry extends AbstractReference
 	{
 		ConstantPool constantPool = ctx.getConstantPool();
 		ConstantPoolTypeClass cpt = exceptionsEntry.getExceptionObject();
-		int exceptionIndex = ConstantPool.getIndexFromConstantPoolEntry(constantPool, cpt);		
+		int exceptionIndex = ConstantPool.indexByCPE(constantPool, cpt);		
 		exceptionsEntry.setExceptionIndex(exceptionIndex);
 	}
 	

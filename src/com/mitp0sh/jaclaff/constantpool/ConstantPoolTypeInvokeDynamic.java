@@ -81,13 +81,13 @@ public class ConstantPoolTypeInvokeDynamic extends AbstractConstantPoolType
 		cptid.setBoostrapMethodAttr(entries[cptid.bootstrapMethodAttrIndex]);
 		cptid.setBootstrapMethodAttrIndex(0);
 		
-		cptid.setNameAndType((ConstantPoolTypeNameAndType)(ConstantPool.getConstantPoolTypeByIndex(cp, cptid.getNameAndTypeIndex())));
+		cptid.setNameAndType((ConstantPoolTypeNameAndType)(ConstantPool.cpeByIndex(cp, cptid.getNameAndTypeIndex())));
 		cptid.setNameAndTypeIndex(0);
 	}
 	
 	public static void coupleConstantPoolTypeInvokeDynamicEntries(SerCtx ctx, ConstantPoolTypeInvokeDynamic cptid)
 	{
-		int nameAndTypeIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), cptid.getNameAndType());
+		int nameAndTypeIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), cptid.getNameAndType());
 		cptid.setNameAndTypeIndex(nameAndTypeIndex);
 		
 		/* search bootstrap attribute */
@@ -146,18 +146,18 @@ public class ConstantPoolTypeInvokeDynamic extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	public boolean equals(ConstantPoolTypeInvokeDynamic obj)
-	{
-		try
-		{
-			ConstantPoolTypeInvokeDynamic cpt = (ConstantPoolTypeInvokeDynamic)obj;
-			boolean b0 = cpt.getBoostrapMethodAttr().equals(obj.getBoostrapMethodAttr());
-			boolean b1 = cpt.getNameAndType().equals(obj.getNameAndType());
-			return b0 && b1;
-		}
-		catch(NullPointerException e){}
-		catch(ClassCastException e){}
-		
-		return false;
-	}
+//	public boolean equals(ConstantPoolTypeInvokeDynamic obj)
+//	{
+//		try
+//		{
+//			ConstantPoolTypeInvokeDynamic cpt = (ConstantPoolTypeInvokeDynamic)obj;
+//			boolean b0 = cpt.getBoostrapMethodAttr().equals(obj.getBoostrapMethodAttr());
+//			boolean b1 = cpt.getNameAndType().equals(obj.getNameAndType());
+//			return b0 && b1;
+//		}
+//		catch(NullPointerException e){}
+//		catch(ClassCastException e){}
+//		
+//		return false;
+//	}
 }

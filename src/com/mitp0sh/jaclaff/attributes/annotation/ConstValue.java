@@ -88,10 +88,10 @@ public class ConstValue extends AbstractValue
 	{
 		ConstantPool constantPool = ctx.getConstantPool();
 		
-		enumConstValue.setTypeNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, enumConstValue.typeNameIndex));
+		enumConstValue.setTypeNameObject((ConstantPoolTypeUtf8)ConstantPool.cpeByIndex(constantPool, enumConstValue.typeNameIndex));
 		enumConstValue.setTypeNameIndex(0);
 		
-		enumConstValue.setConstNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, enumConstValue.constNameIndex));
+		enumConstValue.setConstNameObject((ConstantPoolTypeUtf8)ConstantPool.cpeByIndex(constantPool, enumConstValue.constNameIndex));
 		enumConstValue.setConstNameIndex(0);
 	}
 	
@@ -99,10 +99,10 @@ public class ConstValue extends AbstractValue
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		int typeNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, enumConstValue.getTypeNameObject());
+		int typeNameIndex = ConstantPool.indexByCPE(cp, enumConstValue.getTypeNameObject());
 		enumConstValue.setTypeNameIndex(typeNameIndex);
 		
-		int constNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, enumConstValue.getConstNameObject());
+		int constNameIndex = ConstantPool.indexByCPE(cp, enumConstValue.getConstNameObject());
 		enumConstValue.setConstNameIndex(constNameIndex);
 	}
 	

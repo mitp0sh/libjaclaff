@@ -73,19 +73,19 @@ public class ConstantPoolTypeDouble extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	@Override
-	public boolean equals(Object obj)
-	{
-		try
-		{
-			ConstantPoolTypeDouble cpt = (ConstantPoolTypeDouble)obj;
-			boolean b0 = cpt.highBytes == this.highBytes;
-			boolean b1 = cpt.lowBytes  == this.lowBytes; 
-			return b0 && b1;
-		}
-		catch(NullPointerException e){}
-		catch(ClassCastException e){}
-		
-		return false;
-	}
+//	@Override
+//	public boolean equals(Object obj)
+//	{
+//		try
+//		{
+//			ConstantPoolTypeDouble cpt = (ConstantPoolTypeDouble)obj;
+//			boolean b0 = cpt.highBytes == this.highBytes;
+//			boolean b1 = cpt.lowBytes  == this.lowBytes; 
+//			return b0 && b1;
+//		}
+//		catch(NullPointerException e){}
+//		catch(ClassCastException e){}
+//		
+//		return false;
+//	}
 }

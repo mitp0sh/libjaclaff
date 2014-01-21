@@ -53,13 +53,13 @@ public class ConstantPoolTypeMethodType extends AbstractConstantPoolType
 	
 	public static void decoupleFromIndices(ConstantPoolTypeMethodType type, ConstantPool constantPool)
 	{
-		type.setDescriptorObject((ConstantPoolTypeUtf8)(ConstantPool.getConstantPoolTypeByIndex(constantPool, type.getDescriptorIndex())));
+		type.setDescriptorObject((ConstantPoolTypeUtf8)(ConstantPool.cpeByIndex(constantPool, type.getDescriptorIndex())));
 		type.setDescriptorIndex(0);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, ConstantPoolTypeMethodType type)
 	{
-		int descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), type.getDescriptorObject());
+		int descriptorIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), type.getDescriptorObject());
 		type.setDescriptorIndex(descriptorIndex);
 	}
 	
@@ -85,17 +85,17 @@ public class ConstantPoolTypeMethodType extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	@Override
-	public boolean equals(Object obj)
-	{
-		try
-		{
-			ConstantPoolTypeMethodType cpt = (ConstantPoolTypeMethodType)obj;
-			return cpt.getDescriptorObject().equals(this.descriptorObject);
-		}
-		catch(NullPointerException e){}
-		catch(ClassCastException e){}
-		
-		return false;
-	}
+//	@Override
+//	public boolean equals(Object obj)
+//	{
+//		try
+//		{
+//			ConstantPoolTypeMethodType cpt = (ConstantPoolTypeMethodType)obj;
+//			return cpt.getDescriptorObject().equals(this.descriptorObject);
+//		}
+//		catch(NullPointerException e){}
+//		catch(ClassCastException e){}
+//		
+//		return false;
+//	}
 }

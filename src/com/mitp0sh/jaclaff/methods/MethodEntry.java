@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.attributes.Attributes;
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
@@ -130,37 +131,52 @@ public class MethodEntry extends AbstractReference
 		return methodEntry;
     }
 	
-	public static void decoupleFromIndices(MethodEntry method, ConstantPool constantPool)
+	public static void decoupleFromIndices(MethodEntry m, ConstantPool cp)
 	{
-		method.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, method.getNameIndex()));
-		method.setNameIndex(0);
+		/* decouple from name index */
+		int nameIndex = m.getNameIndex();
+		AbstractConstantPoolType acptNameObject = ConstantPool.cpeByIndex(cp, nameIndex);
+		ConstantPoolTypeUtf8 nameObject = (ConstantPoolTypeUtf8)acptNameObject;
+		m.setNameObject(nameObject);
 		
-		method.setDescriptorObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, method.getDescIndex()));
-		method.setDescIndex(0);
+		/* decouple from descriptor index */
+		int descriptorIndex = m.getDescIndex();
+		AbstractConstantPoolType acptDescriptorObject = ConstantPool.cpeByIndex(cp, descriptorIndex);
+		ConstantPoolTypeUtf8 descriptorObject = (ConstantPoolTypeUtf8)acptDescriptorObject;
+		m.setDescriptorObject(descriptorObject);
 	}
 	
-	public static void coupleToIndices(SerCtx ctx, MethodEntry method)
+	public static void coupleWithIndices(SerCtx ctx, MethodEntry m)
 	{
-		int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), method.getNameObject());
-		method.setNameIndex(nameIndex);
+		ConstantPool cp = ctx.getConstantPool();
 		
-		int descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), method.getDescriptorObject());
-		method.setDescIndex(descriptorIndex);
+		/* couple name object with index */
+		ConstantPoolTypeUtf8 nameObject = m.getNameObject();
+		int nameIndex = ConstantPool.indexByCPE(cp, nameObject);
+		m.setNameIndex(nameIndex);
+		
+		/* couple descriptor object with index */
+		ConstantPoolTypeUtf8 descriptorObject = m.getDescriptorObject();
+		int descriptorIndex = ConstantPool.indexByCPE(cp, descriptorObject);
+		m.setDescIndex(descriptorIndex);
 	}
 	
-	public static byte[] serialize(SerCtx ctx, MethodEntry methodEntry) throws IOException
+	public static byte[] serialize(SerCtx ctx, MethodEntry m) throws IOException
 	{
-		coupleToIndices(ctx, methodEntry);
+		/* couple before serialization */
+		coupleWithIndices(ctx, m);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(PNC.toByteArray(methodEntry.getAccessFlags(),    Short.class));
-		baos.write(PNC.toByteArray(methodEntry.getNameIndex(),      Short.class));
-		baos.write(PNC.toByteArray(methodEntry.getDescIndex(),      Short.class));
-		baos.write(PNC.toByteArray(methodEntry.getAttributeCount(), Short.class));
-		if(methodEntry.getAttributeCount() > 0)
+		baos.write(PNC.toByteArray(m.getAccessFlags(),    Short.class));
+		baos.write(PNC.toByteArray(m.getNameIndex(),      Short.class));
+		baos.write(PNC.toByteArray(m.getDescIndex(),      Short.class));
+		baos.write(PNC.toByteArray(m.getAttributeCount(), Short.class));
+		
+		int num = m.getAttributeCount(); 
+		if(num > 0)
 		{
-			baos.write(Attributes.serialize(ctx, methodEntry.getAttributes(), null));
+			baos.write(Attributes.serialize(ctx, m.getAttributes(), null));
 		}
 		
 		return baos.toByteArray();

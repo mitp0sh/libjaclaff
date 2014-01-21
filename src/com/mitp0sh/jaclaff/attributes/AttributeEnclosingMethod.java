@@ -91,11 +91,11 @@ public class AttributeEnclosingMethod extends AbstractAttribute
 		ConstantPool cp = ctx.getConstantPool();
 		
 		ConstantPoolTypeClass classObject = null;
-		classObject = (ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(cp, attribute.classIndex);
+		classObject = (ConstantPoolTypeClass)ConstantPool.cpeByIndex(cp, attribute.classIndex);
 		attribute.setClassObject(classObject);
 		
 		ConstantPoolTypeNameAndType methodObject = null;
-		methodObject = (ConstantPoolTypeNameAndType)ConstantPool.getConstantPoolTypeByIndex(cp, attribute.methodIndex);
+		methodObject = (ConstantPoolTypeNameAndType)ConstantPool.cpeByIndex(cp, attribute.methodIndex);
 		attribute.setMethodObject(methodObject);
 	}
 	
@@ -103,10 +103,10 @@ public class AttributeEnclosingMethod extends AbstractAttribute
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		int classIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, attribute.getClassObject());
+		int classIndex = ConstantPool.indexByCPE(cp, attribute.getClassObject());
 		attribute.setClassIndex(classIndex);
 		
-		int methodIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, attribute.getMethodObject());
+		int methodIndex = ConstantPool.indexByCPE(cp, attribute.getMethodObject());
 		attribute.setMethodIndex(methodIndex);
 	}
 	

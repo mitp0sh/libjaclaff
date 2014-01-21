@@ -60,14 +60,14 @@ public class InterfacesEntry extends AbstractReference
 	private static void decoupleFromIndices(ConstantPool cp, InterfacesEntry iface)
 	{			
 		int interfaceIndex = iface.getInterfaceIndex();
-		AbstractConstantPoolType acpt = ConstantPool.getConstantPoolTypeByIndex(cp, interfaceIndex);
+		AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, interfaceIndex);
 		ConstantPoolTypeClass cpt = (ConstantPoolTypeClass)acpt;
 		iface.setInterfaceObject(cpt);
 	}
 	
 	private static void coupleInterfacesToIndices(SerCtx ctx, InterfacesEntry entry)
 	{
-		int interfaceIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), entry.interfaceObject);
+		int interfaceIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), entry.interfaceObject);
 		entry.setInterfaceIndex(interfaceIndex);
 	}
 	

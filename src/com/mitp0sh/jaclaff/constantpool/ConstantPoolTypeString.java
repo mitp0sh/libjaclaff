@@ -62,7 +62,7 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 		ConstantPool cp = ctx.getConstantPool();
 		
 		int stringIndex = cpt.getStringIndex();
-		AbstractConstantPoolType acptClass = ConstantPool.getConstantPoolTypeByIndex(cp, stringIndex);
+		AbstractConstantPoolType acptClass = ConstantPool.cpeByIndex(cp, stringIndex);
 		ConstantPoolTypeUtf8 stringObject = (ConstantPoolTypeUtf8)acptClass;
 		cpt.setStringObject(stringObject);
 	}
@@ -72,7 +72,7 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 		ConstantPool cp = ctx.getConstantPool();
 		
 		ConstantPoolTypeUtf8 stringObject = cpt.getStringObject();
-		int stringIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, stringObject);
+		int stringIndex = ConstantPool.indexByCPE(cp, stringObject);
 		cpt.setStringIndex(stringIndex);
 	}
 	
@@ -97,17 +97,17 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	@Override
-	public boolean equals(Object obj)
-	{
-		try
-		{
-			ConstantPoolTypeString cpt = (ConstantPoolTypeString)obj;
-			return cpt.stringObject.equals(this.stringObject);
-		}
-		catch(NullPointerException e){}
-		catch(ClassCastException e){}
-		
-		return false;
-	}
+//	@Override
+//	public boolean equals(Object obj)
+//	{
+//		try
+//		{
+//			ConstantPoolTypeString cpt = (ConstantPoolTypeString)obj;
+//			return cpt.stringObject.equals(this.stringObject);
+//		}
+//		catch(NullPointerException e){}
+//		catch(ClassCastException e){}
+//		
+//		return false;
+//	}
 }

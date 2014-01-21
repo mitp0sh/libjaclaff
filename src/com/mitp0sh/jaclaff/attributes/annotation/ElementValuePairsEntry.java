@@ -73,14 +73,14 @@ public class ElementValuePairsEntry extends AbstractReference
 	{
 		ConstantPool constantPool = ctx.getConstantPool();
 		
-		evpe.setElementNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, evpe.elementNameIndex));
+		evpe.setElementNameObject((ConstantPoolTypeUtf8)ConstantPool.cpeByIndex(constantPool, evpe.elementNameIndex));
 		evpe.setElementNameIndex(0);		
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, ElementValuePairsEntry elementValuePairsEntry)
 	{
 		ConstantPool cp = ctx.getConstantPool();
-		int elementNameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, elementValuePairsEntry.getElementNameObject());
+		int elementNameIndex = ConstantPool.indexByCPE(cp, elementValuePairsEntry.getElementNameObject());
 		elementValuePairsEntry.setElementNameIndex(elementNameIndex);
 	}
 	

@@ -76,13 +76,13 @@ public class ConstantPoolTypeMethodHandle extends AbstractConstantPoolType
 	
 	public static void decoupleFromIndices(ConstantPoolTypeMethodHandle handle, ConstantPool constantPool)
 	{
-		handle.setReference(ConstantPool.getConstantPoolTypeByIndex(constantPool, handle.getReferenceIndex()));
+		handle.setReference(ConstantPool.cpeByIndex(constantPool, handle.getReferenceIndex()));
 		handle.setReferenceIndex(0);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, ConstantPoolTypeMethodHandle handle)
 	{
-		int referenceIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), handle.getReference());
+		int referenceIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), handle.getReference());
 		handle.setReferenceIndex(referenceIndex);
 	}
 	
@@ -110,19 +110,19 @@ public class ConstantPoolTypeMethodHandle extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	@Override
-	public boolean equals(Object obj)
-	{
-		try
-		{
-			ConstantPoolTypeMethodHandle cpt = (ConstantPoolTypeMethodHandle)obj;
-			boolean b0 = cpt.getReferenceKind() == this.referenceKind;
-			boolean b1 = cpt.getReference().equals(this.reference);
-			return b0 && b1;
-		}
-		catch(NullPointerException e){}
-		catch(ClassCastException e){}
-		
-		return false;
-	}
+//	@Override
+//	public boolean equals(Object obj)
+//	{
+//		try
+//		{
+//			ConstantPoolTypeMethodHandle cpt = (ConstantPoolTypeMethodHandle)obj;
+//			boolean b0 = cpt.getReferenceKind() == this.referenceKind;
+//			boolean b1 = cpt.getReference().equals(this.reference);
+//			return b0 && b1;
+//		}
+//		catch(NullPointerException e){}
+//		catch(ClassCastException e){}
+//		
+//		return false;
+//	}
 }

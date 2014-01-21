@@ -42,7 +42,7 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 		
 		if(object != null)
 		{
-			this.setNameIndex(0);
+			this.setNameIndex(0);			
 			this.addReference(object);
 		}
 	}
@@ -61,7 +61,7 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 		ConstantPool cp = ctx.getConstantPool();
 		
 		int nameIndex = cpt.getNameIndex();
-		AbstractConstantPoolType acptNameIndex = ConstantPool.getConstantPoolTypeByIndex(cp, nameIndex);
+		AbstractConstantPoolType acptNameIndex = ConstantPool.cpeByIndex(cp, nameIndex);
 		ConstantPoolTypeUtf8 nameObject = (ConstantPoolTypeUtf8)acptNameIndex;
 		cpt.setNameObject(nameObject);
 	}
@@ -70,7 +70,7 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 	{
 		ConstantPool cp = ctx.getConstantPool();
 		
-		int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(cp, cpt.getNameObject());
+		int nameIndex = ConstantPool.indexByCPE(cp, cpt.getNameObject());
 		cpt.setNameIndex(nameIndex);
 	}
 	
@@ -95,19 +95,28 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	@Override
-	public boolean equals(Object obj)
-	{
-		try
-		{
-			ConstantPoolTypeClass cpt = (ConstantPoolTypeClass)obj;
-			return cpt.nameObject.equals(this.nameObject);
-		}
-		catch(NullPointerException e){}
-		catch(ClassCastException e){}
-		
-		return false;
-	}
+//	@Override
+//	public boolean equals(Object obj)
+//	{
+//		try
+//		{
+//			ConstantPoolTypeClass cpt = (ConstantPoolTypeClass)obj;
+//			return cpt.getNameObject().equals(this.getNameObject());
+//		}
+//		catch(NullPointerException e)
+//		{
+//			ConstantPoolTypeClass cpt = (ConstantPoolTypeClass)obj;
+//			
+//			if(cpt.getNameObject()  == null && 
+//			   this.getNameObject() == null)
+//			{
+//				return cpt.getNameIndex() == this.getNameIndex();
+//			}
+//		}
+//		catch(ClassCastException e){}
+//		
+//		return false;
+//	}
 	
 	public String getNonQualifiedClassName()
 	{
@@ -146,6 +155,7 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 	@Override
 	public String toString()
 	{	
-		return getFullQualifiedClassName();
+		//return getFullQualifiedClassName();
+		return super.toString();
 	}
 }

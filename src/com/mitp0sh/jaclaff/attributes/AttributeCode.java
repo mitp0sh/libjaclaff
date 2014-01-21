@@ -120,7 +120,7 @@ public class AttributeCode extends AbstractAttribute
 	    attribute.setMaxLocals(dis.readUnsignedShort());	    
 	    
 	    attribute.setCodeLength(dis.readInt());
-	    attribute.setCode(Disassembler.disassemble(dis, attribute.getCodeLength()));
+	    attribute.setCode(Disassembler.disassemble(ctx, attribute.getCodeLength()));
 	    
 	    attribute.setExceptionTableLength(dis.readUnsignedShort());
 	    if(attribute.getExceptionTableLength() > 0)

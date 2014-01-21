@@ -312,20 +312,20 @@ public class VirtualClassFile
 		ConstantPool constantPool = ctx.getConstantPool();
 		
 		ConstantPoolTypeClass thisFieldObject = null;
-		thisFieldObject = (ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, vcf.getThisField());
+		thisFieldObject = (ConstantPoolTypeClass)ConstantPool.cpeByIndex(constantPool, vcf.getThisField());
 		vcf.setThisFieldObject(thisFieldObject);
 		
 		ConstantPoolTypeClass superFieldObject = null;
-		superFieldObject = (ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, vcf.getSuperField());
+		superFieldObject = (ConstantPoolTypeClass)ConstantPool.cpeByIndex(constantPool, vcf.getSuperField());
 		vcf.setSuperFieldObject(superFieldObject);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, VirtualClassFile vcf)
 	{
-		int thisFieldIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), vcf.getThisFieldObject());
+		int thisFieldIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), vcf.getThisFieldObject());
 		vcf.setThisField(thisFieldIndex);
 		
-		int superFieldIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), vcf.getSuperFieldObject());
+		int superFieldIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), vcf.getSuperFieldObject());
 		vcf.setSuperField(superFieldIndex);
 	}
 	

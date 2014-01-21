@@ -119,13 +119,13 @@ public class ExceptionTableEntry
 	
 	private static void decoupleFromIndices(ExceptionTableEntry ete, ConstantPool constantPool)
 	{
-		ete.setCatchTypeObject((ConstantPoolTypeClass)ConstantPool.getConstantPoolTypeByIndex(constantPool, ete.catchType));
+		ete.setCatchTypeObject((ConstantPoolTypeClass)ConstantPool.cpeByIndex(constantPool, ete.catchType));
 		ete.setCatchType(0);
 	}
 	
 	private static void coupleToIndices(SerCtx ctx, ExceptionTableEntry exceptionTableEntry)
 	{
-		int catchType = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), exceptionTableEntry.getCatchTypeObject());
+		int catchType = ConstantPool.indexByCPE(ctx.getConstantPool(), exceptionTableEntry.getCatchTypeObject());
 		exceptionTableEntry.setCatchType(catchType);
 	}
 	

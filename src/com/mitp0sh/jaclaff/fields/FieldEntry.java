@@ -125,16 +125,16 @@ public class FieldEntry extends AbstractReference
 	
 	public static void decoupleFromIndices(FieldEntry field, ConstantPool constantPool)
 	{
-		field.setNameObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getNameIndex()));
-		field.setDescriptorObject((ConstantPoolTypeUtf8)ConstantPool.getConstantPoolTypeByIndex(constantPool, field.getDescIndex()));
+		field.setNameObject((ConstantPoolTypeUtf8)ConstantPool.cpeByIndex(constantPool, field.getNameIndex()));
+		field.setDescriptorObject((ConstantPoolTypeUtf8)ConstantPool.cpeByIndex(constantPool, field.getDescIndex()));
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, FieldEntry field)
 	{
-		int nameIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), field.getNameObject());
+		int nameIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), field.getNameObject());
 		field.setNameIndex(nameIndex);
 		
-		int descriptorIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), field.getDescriptorObject());
+		int descriptorIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), field.getDescriptorObject());
 		field.setDescIndex(descriptorIndex);
 	}
 	
@@ -144,9 +144,9 @@ public class FieldEntry extends AbstractReference
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(PNC.toByteArray(fieldEntry.getAccessFlags(), Short.class));
-		baos.write(PNC.toByteArray(fieldEntry.getNameIndex(), Short.class));
-		baos.write(PNC.toByteArray(fieldEntry.getDescIndex(), Short.class));
+		baos.write(PNC.toByteArray(fieldEntry.getAccessFlags(),    Short.class));
+		baos.write(PNC.toByteArray(fieldEntry.getNameIndex(),      Short.class));
+		baos.write(PNC.toByteArray(fieldEntry.getDescIndex(),      Short.class));
 		baos.write(PNC.toByteArray(fieldEntry.getAttributeCount(), Short.class));
 		if(fieldEntry.getAttributeCount() > 0)
 		{

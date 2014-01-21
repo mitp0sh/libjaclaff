@@ -61,7 +61,7 @@ public class AttributeSignature extends AbstractAttribute
 		ConstantPool cp = ctx.getConstantPool();
 		
 		int signatureIndex = attribute.getSignatureIndex();
-		AbstractConstantPoolType acpt = ConstantPool.getConstantPoolTypeByIndex(cp, signatureIndex);
+		AbstractConstantPoolType acpt = ConstantPool.cpeByIndex(cp, signatureIndex);
 		ConstantPoolTypeUtf8 cpt = (ConstantPoolTypeUtf8)acpt;
 		
 		attribute.setSignatureObject(cpt);
@@ -69,7 +69,7 @@ public class AttributeSignature extends AbstractAttribute
 	
 	public static void coupleToIndices(SerCtx ctx, AttributeSignature attribute)
 	{
-		int signatureIndex = ConstantPool.getIndexFromConstantPoolEntry(ctx.getConstantPool(), attribute.getSignatureObject());
+		int signatureIndex = ConstantPool.indexByCPE(ctx.getConstantPool(), attribute.getSignatureObject());
 		attribute.setSignatureIndex(signatureIndex);
 	}
 	
