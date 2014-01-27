@@ -138,22 +138,16 @@ public class ConstantPoolTypeNameAndType extends AbstractConstantPoolType
 		return clone;
 	}
 	
-//	@Override
-//	public boolean equals(Object obj)
-//	{
-//		try
-//		{
-//			ConstantPoolTypeNameAndType cpt = (ConstantPoolTypeNameAndType)obj;
-//			boolean b0 = cpt.nameObject.equals(this.nameObject);
-//			boolean b1 = cpt.descriptorObject.equals(this.descriptorObject);
-//			return b0 && b1;
-//		}
-//		catch(NullPointerException e)
-//		{
-//			
-//		}
-//		catch(ClassCastException e){}
-//		
-//		return false;
-//	}
+	@Override
+	public String toString()
+	{	
+		String text = "";
+		
+		String nameObjectStr = getNameObject().toString();
+		String descObjectStr = getDescriptorObject().toString();
+		
+		text = nameObjectStr + "::" + descObjectStr;
+		
+		return text;
+	}
 }

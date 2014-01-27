@@ -155,7 +155,10 @@ public class ConstantPoolTypeClass extends AbstractConstantPoolType
 	@Override
 	public String toString()
 	{	
-		//return getFullQualifiedClassName();
-		return super.toString();
+		String text = "";
+		
+		text = getNameObject().toString();
+		
+		return text;
 	}
 }

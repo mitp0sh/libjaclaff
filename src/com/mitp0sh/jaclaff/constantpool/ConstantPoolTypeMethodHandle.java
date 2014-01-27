@@ -110,19 +110,9 @@ public class ConstantPoolTypeMethodHandle extends AbstractConstantPoolType
 		return clone;
 	}
 	
-//	@Override
-//	public boolean equals(Object obj)
-//	{
-//		try
-//		{
-//			ConstantPoolTypeMethodHandle cpt = (ConstantPoolTypeMethodHandle)obj;
-//			boolean b0 = cpt.getReferenceKind() == this.referenceKind;
-//			boolean b1 = cpt.getReference().equals(this.reference);
-//			return b0 && b1;
-//		}
-//		catch(NullPointerException e){}
-//		catch(ClassCastException e){}
-//		
-//		return false;
-//	}
+	@Override
+	public String toString()
+	{	
+		return "TODO - NOT YET IMPELEMENTED !!!";
+	}
 }

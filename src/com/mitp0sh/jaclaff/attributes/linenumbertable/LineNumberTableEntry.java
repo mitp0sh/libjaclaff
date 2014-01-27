@@ -5,8 +5,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
-import com.mitp0sh.jaclaff.attributes.code.MethodInstructions;
-import com.mitp0sh.jaclaff.attributes.code.SingleInstruction;
+import com.mitp0sh.jaclaff.attributes.code.AbstractInstruction;
+import com.mitp0sh.jaclaff.attributes.code.Disassembly;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
@@ -17,7 +17,7 @@ public class LineNumberTableEntry
 	private int           startPc = 0;
 	private int        lineNumber = 0;
 	
-	private SingleInstruction startPcInstruction = null;
+	private AbstractInstruction startPcInstruction = null;
 	
 	public int getStartPc()
 	{
@@ -39,12 +39,12 @@ public class LineNumberTableEntry
 		this.lineNumber = lineNumber;
 	}
 	
-	public SingleInstruction getStartPcInstruction() 
+	public AbstractInstruction getStartPcInstruction() 
 	{
 		return startPcInstruction;
 	}
 
-	public void setStartPcInstruction(SingleInstruction startPcInstruction) 
+	public void setStartPcInstruction(AbstractInstruction startPcInstruction) 
 	{
 		this.startPcInstruction = startPcInstruction;
 	}
@@ -63,15 +63,15 @@ public class LineNumberTableEntry
 		return lineNumberTableEntry;
     }
 	
-	protected static void decoupleFromOffsets(DesCtx ctx, LineNumberTableEntry lineNumberTableEntry, MethodInstructions disassembly)
+	protected static void decoupleFromOffsets(DesCtx ctx, LineNumberTableEntry lineNumberTableEntry, Disassembly disassembly)
 	{
-		SingleInstruction startPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, lineNumberTableEntry.getStartPc());
+		AbstractInstruction startPcInstruction = disassembly.getInstruction(lineNumberTableEntry.getStartPc());
 		lineNumberTableEntry.setStartPcInstruction(startPcInstruction);
 	}
 	
-	protected static void coupleToOffsets(SerCtx ctx, LineNumberTableEntry lineNumberTableEntry, MethodInstructions disassembly)
+	protected static void coupleToOffsets(SerCtx ctx, LineNumberTableEntry lineNumberTableEntry, Disassembly disassembly)
 	{
-		int startPc = MethodInstructions.getInstructionOffset(lineNumberTableEntry.getStartPcInstruction(), disassembly);
+		int startPc = disassembly.getInstructionOffset(lineNumberTableEntry.getStartPcInstruction());
 		lineNumberTableEntry.setStartPc(startPc);
 	}
 	

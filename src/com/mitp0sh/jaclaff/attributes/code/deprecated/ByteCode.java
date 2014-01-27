@@ -1,8 +1,10 @@
-package com.mitp0sh.jaclaff.attributes.code;
+package com.mitp0sh.jaclaff.attributes.code.deprecated;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.code.Mnemonics;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
@@ -104,7 +106,7 @@ public class ByteCode
 		this.physicalLength = physicalLength;
 	}
 	
-	public static byte[] serialize(MethodInstructions disassembly, SingleInstruction instruction, int offset) throws IOException
+	public static byte[] serialize(SerCtx ctx, MethodInstructions disassembly, SingleInstruction instruction, int offset) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -127,7 +129,7 @@ public class ByteCode
 		if(format.equals(FORMAT_BC) ||
 		   format.equals(FORMAT_BI))
 		{
-			SingleInstruction.coupleWithOffsets(disassembly, instruction);
+			SingleInstruction.coupleWithOffsets(ctx, disassembly, instruction);
 			
 			baos.write(new byte[]{instruction.getByteCode().getByteCode()});
 			baos.write(new byte[]{(byte)instruction.getOperand1()});

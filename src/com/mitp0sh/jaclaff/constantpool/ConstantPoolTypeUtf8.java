@@ -72,17 +72,9 @@ public class ConstantPoolTypeUtf8 extends AbstractConstantPoolType
 		return clone;
 	}
 	
-//	@Override
-//	public boolean equals(Object obj)
-//	{
-//		try
-//		{
-//			ConstantPoolTypeUtf8 cpt = (ConstantPoolTypeUtf8)obj;
-//			return cpt.bytes.equals(this.bytes);
-//		}
-//		catch(NullPointerException e){}
-//		catch(ClassCastException e){}
-//		
-//		return false;
-//	}
+	@Override
+	public String toString()
+	{	
+		return getBytes();
+	}
 }

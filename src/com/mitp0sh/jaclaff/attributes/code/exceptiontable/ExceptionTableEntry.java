@@ -1,9 +1,11 @@
-package com.mitp0sh.jaclaff.attributes.code;
+package com.mitp0sh.jaclaff.attributes.code.exceptiontable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.attributes.code.AbstractInstruction;
+import com.mitp0sh.jaclaff.attributes.code.Disassembly;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeClass;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
@@ -11,15 +13,14 @@ import com.mitp0sh.jaclaff.util.PNC;
 
 public class ExceptionTableEntry 
 {
-	private int                            startPc = 0;
-	private int                              endPc = 0;
-	private int                          handlerPc = 0;
-	private int                          catchType = 0;
-	
-	private ConstantPoolTypeClass  catchTypeObject = null;
-	private SingleInstruction   startPcInstruction = null;
-	private SingleInstruction     endPcInstruction = null;
-	private SingleInstruction handlerPcInstruction = null;
+	private int                              startPc = 0;
+	private int                                endPc = 0;
+	private int                            handlerPc = 0;
+	private int                            catchType = 0;
+	private ConstantPoolTypeClass    catchTypeObject = null;
+	private AbstractInstruction   startPcInstruction = null;
+	private AbstractInstruction     endPcInstruction = null;
+	private AbstractInstruction handlerPcInstruction = null;
 	
 	public int getStartPc()
 	{
@@ -70,37 +71,37 @@ public class ExceptionTableEntry
 		this.catchTypeObject = catchTypeObject;
 	}
 	
-	public SingleInstruction getStartPcInstruction()
+	public AbstractInstruction getStartPcInstruction()
 	{
 		return startPcInstruction;
 	}
 
-	public void setStartPcInstruction(SingleInstruction startPcInstruction) 
+	public void setStartPcInstruction(AbstractInstruction startPcInstruction) 
 	{
 		this.startPcInstruction = startPcInstruction;
 	}
 
-	public SingleInstruction getEndPcInstruction()
+	public AbstractInstruction getEndPcInstruction()
 	{
 		return endPcInstruction;
 	}
 
-	public void setEndPcInstruction(SingleInstruction endPcInstruction)
+	public void setEndPcInstruction(AbstractInstruction endPcInstruction)
 	{
 		this.endPcInstruction = endPcInstruction;
 	}
 
-	public SingleInstruction getHandlerPcInstruction() 
+	public AbstractInstruction getHandlerPcInstruction() 
 	{
 		return handlerPcInstruction;
 	}
 
-	public void setHandlerPcInstruction(SingleInstruction handlerPcInstruction) 
+	public void setHandlerPcInstruction(AbstractInstruction handlerPcInstruction) 
 	{
 		this.handlerPcInstruction = handlerPcInstruction;
 	}
 
-	public static ExceptionTableEntry deserialize(DataInputStream dis, ConstantPool constantPool, MethodInstructions disassembly) throws IOException
+	public static ExceptionTableEntry deserialize(DataInputStream dis, ConstantPool constantPool, Disassembly disassembly) throws IOException
     {
 		ExceptionTableEntry exceptionTableEntry = new ExceptionTableEntry();
 		
@@ -127,31 +128,31 @@ public class ExceptionTableEntry
 		exceptionTableEntry.setCatchType(catchType);
 	}
 	
-	protected static void decoupleFromOffsets(ExceptionTableEntry exceptionTableEntry, MethodInstructions disassembly)
+	protected static void decoupleFromOffsets(ExceptionTableEntry exceptionTableEntry, Disassembly disassembly)
 	{
-		SingleInstruction startPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, exceptionTableEntry.startPc);
+		AbstractInstruction startPcInstruction = disassembly.getInstruction(exceptionTableEntry.getStartPc());
 		exceptionTableEntry.setStartPcInstruction(startPcInstruction);
 		
-		SingleInstruction endPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, exceptionTableEntry.endPc);
+		AbstractInstruction endPcInstruction = disassembly.getInstruction(exceptionTableEntry.getEndPc());
 		exceptionTableEntry.setEndPcInstruction(endPcInstruction);
 		
-		SingleInstruction handlerPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, exceptionTableEntry.handlerPc);
+		AbstractInstruction handlerPcInstruction = disassembly.getInstruction(exceptionTableEntry.getHandlerPc());
 		exceptionTableEntry.setHandlerPcInstruction(handlerPcInstruction);
 	}
 	
-	protected static void coupleToOffsets(SerCtx ctx, ExceptionTableEntry exceptionTableEntry, MethodInstructions disassembly)
+	protected static void coupleToOffsets(SerCtx ctx, ExceptionTableEntry exceptionTableEntry, Disassembly disassembly)
 	{
-		int startPc = MethodInstructions.getInstructionOffset(exceptionTableEntry.getStartPcInstruction(), disassembly);
+		int startPc = disassembly.getInstructionOffset(exceptionTableEntry.getStartPcInstruction());
 		exceptionTableEntry.setStartPc(startPc);
 		
-		int endPc = MethodInstructions.getInstructionOffset(exceptionTableEntry.getEndPcInstruction(), disassembly);
+		int endPc = disassembly.getInstructionOffset(exceptionTableEntry.getEndPcInstruction());
 		exceptionTableEntry.setEndPc(endPc);
 		
-		int handlerPc = MethodInstructions.getInstructionOffset(exceptionTableEntry.getHandlerPcInstruction(), disassembly);
+		int handlerPc = disassembly.getInstructionOffset(exceptionTableEntry.getHandlerPcInstruction());
 		exceptionTableEntry.setHandlerPc(handlerPc);
 	}
 	
-	public static byte[] serialize(SerCtx ctx, ExceptionTableEntry exceptionTableEntry, MethodInstructions disassembly) throws IOException
+	public static byte[] serialize(SerCtx ctx, ExceptionTableEntry exceptionTableEntry, Disassembly disassembly) throws IOException
 	{
 		coupleToIndices(ctx, exceptionTableEntry);
 		coupleToOffsets(ctx, exceptionTableEntry, disassembly);

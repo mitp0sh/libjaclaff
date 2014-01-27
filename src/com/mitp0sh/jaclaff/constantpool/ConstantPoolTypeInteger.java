@@ -59,17 +59,9 @@ public class ConstantPoolTypeInteger extends AbstractConstantPoolType
 		return clone;
 	}
 	
-//	@Override
-//	public boolean equals(Object obj)
-//	{
-//		try
-//		{
-//			ConstantPoolTypeInteger cpt = (ConstantPoolTypeInteger)obj;
-//			return cpt.bytes == this.bytes;
-//		}
-//		catch(NullPointerException e){}
-//		catch(ClassCastException e){}
-//		
-//		return false;
-//	}
+	@Override
+	public String toString()
+	{	
+		return "TODO - NOT YET IMPELEMENTED !!!";
+	}
 }

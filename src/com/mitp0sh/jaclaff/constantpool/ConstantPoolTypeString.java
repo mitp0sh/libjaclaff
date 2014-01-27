@@ -97,17 +97,9 @@ public class ConstantPoolTypeString extends AbstractConstantPoolType
 		return clone;
 	}
 	
-//	@Override
-//	public boolean equals(Object obj)
-//	{
-//		try
-//		{
-//			ConstantPoolTypeString cpt = (ConstantPoolTypeString)obj;
-//			return cpt.stringObject.equals(this.stringObject);
-//		}
-//		catch(NullPointerException e){}
-//		catch(ClassCastException e){}
-//		
-//		return false;
-//	}
+	@Override
+	public String toString()
+	{	
+		return "TODO - NOT YET IMPELEMENTED !!!";
+	}
 }

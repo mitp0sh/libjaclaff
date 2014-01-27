@@ -85,17 +85,9 @@ public class ConstantPoolTypeMethodType extends AbstractConstantPoolType
 		return clone;
 	}
 	
-//	@Override
-//	public boolean equals(Object obj)
-//	{
-//		try
-//		{
-//			ConstantPoolTypeMethodType cpt = (ConstantPoolTypeMethodType)obj;
-//			return cpt.getDescriptorObject().equals(this.descriptorObject);
-//		}
-//		catch(NullPointerException e){}
-//		catch(ClassCastException e){}
-//		
-//		return false;
-//	}
+	@Override
+	public String toString()
+	{	
+		return "TODO - NOT YET IMPELEMENTED !!!";
+	}
 }

@@ -1,4 +1,4 @@
-package com.mitp0sh.jaclaff.attributes.code;
+package com.mitp0sh.jaclaff.attributes.code.deprecated;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,9 +8,10 @@ import java.util.Iterator;
 import com.mitp0sh.jaclaff.util.PNC;
 
 
-public class TableSwitch
+public class LookupSwitch
 {
 	private int            defaultByte = 0;
+	private ArrayList<Integer>   match = new ArrayList<Integer>();
 	private ArrayList<Integer> offsets = new ArrayList<Integer>();
 	
 	private SingleInstruction         defaultByteInstruction = null;
@@ -26,12 +27,17 @@ public class TableSwitch
 		this.defaultByte = defaultByte;
 	}
 
+	public ArrayList<Integer> getMatch() 
+	{
+		return match;
+	}
+
 	public ArrayList<Integer> getOffsets() 
 	{
 		return offsets;
 	}
 	
-	public void setOffsets(ArrayList<Integer> offsets) 
+	public void setOffsets(ArrayList<Integer> offsets)
 	{
 		this.offsets = offsets;
 	}
@@ -53,9 +59,9 @@ public class TableSwitch
 	
 	public static void decoupleFromOffsets(MethodInstructions disassembly, SingleInstruction instruction)
 	{
-		TableSwitch tableSwitch = instruction.getTableSwitch();
+		LookupSwitch lookupSwitch = instruction.getLookupSwitch();
 		
-		Iterator<Integer> iterOffsets = tableSwitch.getOffsets().iterator();
+		Iterator<Integer> iterOffsets = lookupSwitch.getOffsets().iterator();
 		while(iterOffsets.hasNext())
 		{
 			/* retrieve current offset */
@@ -69,10 +75,10 @@ public class TableSwitch
 				System.exit(-1);
 			}
 			
-			tableSwitch.offsetsInstructions.add(targetInstruction);
+			lookupSwitch.offsetsInstructions.add(targetInstruction);
 		}
 		
-		int targetOffset = instruction.getOffset() + tableSwitch.getDefaultByte();
+		int targetOffset = instruction.getOffset() + lookupSwitch.getDefaultByte();
 		SingleInstruction targetInstruction = null;
 		targetInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, targetOffset);
 		if(targetInstruction == null)
@@ -81,23 +87,22 @@ public class TableSwitch
 			System.exit(-1);
 		}
 		
-		tableSwitch.setDefaultByteInstruction(targetInstruction);
+		lookupSwitch.setDefaultByteInstruction(targetInstruction);
 	}
 	
 	public static void killOffsets(SingleInstruction instruction)
 	{
-		TableSwitch tableSwitch = instruction.getTableSwitch();
-	
-		tableSwitch.setOffsets(new ArrayList<Integer>());
-		tableSwitch.setDefaultByte(0);
+		LookupSwitch lookupSwitch = instruction.getLookupSwitch();
+		
+		lookupSwitch.setOffsets(new ArrayList<Integer>());
+		lookupSwitch.setDefaultByte(0);
 	}
 	
-	public static byte[] serialize(MethodInstructions disassembly, TableSwitch tableSwitch, int offset) throws IOException
+	public static byte[] serialize(MethodInstructions disassembly, LookupSwitch lookupSwitch, int offset) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		int padding = 0;
-		
 		if(((offset + 1) % 4) == 0)
 		{
 			padding = 0;
@@ -107,30 +112,28 @@ public class TableSwitch
 			padding = 4 - ((offset + 1) % 4);
 		}
 		
-		SingleInstruction defaultByteInstruction = tableSwitch.getDefaultByteInstruction();
+		baos.write(new byte[padding]);
+		
+		SingleInstruction defaultByteInstruction = lookupSwitch.getDefaultByteInstruction();
 		int defaultByteOffset = MethodInstructions.getInstructionOffset(defaultByteInstruction, disassembly) - offset;
 		
-		int lowBytes  = 0;
-		int highBytes = tableSwitch.getOffsetsInstructions().size() + lowBytes - 1;
-		
-		baos.write(new byte[padding]);
 		baos.write(PNC.toByteArray(defaultByteOffset, Integer.class));
-		baos.write(PNC.toByteArray(lowBytes,          Integer.class));
-		baos.write(PNC.toByteArray(highBytes,         Integer.class));
+		baos.write(PNC.toByteArray(lookupSwitch.getMatch().size(), Integer.class));
 		
-		for(int i = 0; i < tableSwitch.getOffsetsInstructions().size(); i++)
+		for(int i = 0; i < lookupSwitch.getMatch().size(); i++)
 		{
 			SingleInstruction currentOffsetInstruction = null;
-			currentOffsetInstruction = tableSwitch.getOffsetsInstructions().get(i);
+			currentOffsetInstruction = lookupSwitch.getOffsetsInstructions().get(i);
 			int currentOffset = MethodInstructions.getInstructionOffset(currentOffsetInstruction, disassembly) - offset;
 			
+			baos.write(PNC.toByteArray(lookupSwitch.getMatch().get(i),   Integer.class));
 			baos.write(PNC.toByteArray(currentOffset, Integer.class));
 		}
 		
 		return baos.toByteArray();
 	}
 	
-	public static int getPhysicalInstructionLength(TableSwitch tableSwitch, int offset)
+	public static int getPhysicalInstructionLength(LookupSwitch lookupSwitch, int offset)
 	{
 		int length = 0;
 		
@@ -146,9 +149,8 @@ public class TableSwitch
 		
 		length += padding;
 		length += 4; // default byte
-		length += 4; // low bytes
-		length += 4; // high bytes
-		length += (tableSwitch.getOffsetsInstructions().size() * 4); // all offsets
+		length += 4; // num matches
+		length += (lookupSwitch.getMatch().size() * 8); // all matches and offsets
 		
 		return length;
 	}

@@ -6,8 +6,8 @@ import java.io.IOException;
 
 import com.mitp0sh.jaclaff.abstraction.AbstractReference;
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
-import com.mitp0sh.jaclaff.attributes.code.MethodInstructions;
-import com.mitp0sh.jaclaff.attributes.code.SingleInstruction;
+import com.mitp0sh.jaclaff.attributes.code.AbstractInstruction;
+import com.mitp0sh.jaclaff.attributes.code.Disassembly;
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeUtf8;
@@ -24,7 +24,7 @@ public class LocalVariableTableEntry extends AbstractReference
 	private int signatureIndex = 0;
 	private int          index = 0;
 	
-	private SingleInstruction startPcInstruction = null;
+	private AbstractInstruction startPcInstruction = null;
 	
 	private ConstantPoolTypeUtf8      nameObject = null;
 	private ConstantPoolTypeUtf8 signatureObject = null;
@@ -79,12 +79,12 @@ public class LocalVariableTableEntry extends AbstractReference
 		this.index = index;
 	}
 	
-	public SingleInstruction getStartPcInstruction() 
+	public AbstractInstruction getStartPcInstruction() 
 	{
 		return startPcInstruction;
 	}
 
-	public void setStartPcInstruction(SingleInstruction startPcInstruction) 
+	public void setStartPcInstruction(AbstractInstruction startPcInstruction) 
 	{
 		this.startPcInstruction = startPcInstruction;
 	}
@@ -170,15 +170,15 @@ public class LocalVariableTableEntry extends AbstractReference
 	    e.setSignatureIndex(signatureIndex);
 	}
 	
-	protected static void decoupleFromOffsets(DesCtx ctx, LocalVariableTableEntry localVariableTableEntry, MethodInstructions disassembly)
+	protected static void decoupleFromOffsets(DesCtx ctx, LocalVariableTableEntry localVariableTableEntry, Disassembly disassembly)
 	{
-		SingleInstruction startPcInstruction = MethodInstructions.lookupInstructionByOffset(disassembly, localVariableTableEntry.startPc);
+		AbstractInstruction startPcInstruction = disassembly.getInstruction(localVariableTableEntry.getStartPc());
 		localVariableTableEntry.setStartPcInstruction(startPcInstruction);
 	}
 	
-	protected static void coupleToOffsets(SerCtx ctx, LocalVariableTableEntry localVariableTableEntry, MethodInstructions disassembly)
+	protected static void coupleToOffsets(SerCtx ctx, LocalVariableTableEntry localVariableTableEntry, Disassembly disassembly)
 	{
-		int startPc = MethodInstructions.getInstructionOffset(localVariableTableEntry.getStartPcInstruction(), disassembly);
+		int startPc = disassembly.getInstructionOffset(localVariableTableEntry.getStartPcInstruction());
 		localVariableTableEntry.setStartPc(startPc);
 	}
 	

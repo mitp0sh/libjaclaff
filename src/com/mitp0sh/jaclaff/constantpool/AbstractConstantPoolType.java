@@ -110,4 +110,7 @@ public abstract class AbstractConstantPoolType extends AbstractReference
 		
 		return acpt;
 	}
+	
+	@Override
+	public abstract String toString();
 }

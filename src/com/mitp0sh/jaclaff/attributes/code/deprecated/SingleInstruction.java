@@ -1,13 +1,15 @@
-package com.mitp0sh.jaclaff.attributes.code;
+package com.mitp0sh.jaclaff.attributes.code.deprecated;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.mitp0sh.jaclaff.abstraction.AbstractReference;
+import com.mitp0sh.jaclaff.attributes.code.BasicTypes;
+import com.mitp0sh.jaclaff.attributes.code.Mnemonics;
 import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
-import com.mitp0sh.jaclaff.constantpool.ConstantPoolTypeInteger;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 public class SingleInstruction extends AbstractReference
 {
@@ -41,7 +43,7 @@ public class SingleInstruction extends AbstractReference
 		return offset;
 	}
 
-	public void seOffset(int offset)
+	public void setOffset(int offset)
 	{
 		this.offset = offset;
 	}
@@ -341,8 +343,12 @@ public class SingleInstruction extends AbstractReference
 		}
 	}
 	
-	public static void coupleWithOffsets(MethodInstructions disassembly, SingleInstruction instruction)
+	public static void coupleWithOffsets(SerCtx ctx, MethodInstructions disassembly, SingleInstruction instruction)
 	{
+		ConstantPool cp = ctx.getConstantPool();
+		
+		System.out.println(instruction.getByteCode().getByteCodeName());
+		
 		ByteCode bc = instruction.getByteCode();
 		if(bc.getFormat().equals(ByteCode.FORMAT_BI))
 		{
@@ -356,19 +362,18 @@ public class SingleInstruction extends AbstractReference
 				return;
 			}
 			
-			if(instruction.getOperand1Object().getClass().equals(ConstantPoolTypeInteger.class))
-			{
-				ConstantPoolTypeInteger cpt = (ConstantPoolTypeInteger)instruction.getOperand1Object();
-				instruction.setOperand1(cpt.getBytes());
-			}
+			AbstractConstantPoolType acpt = instruction.getOperand1Object();
+			
+			int acptIndex = ConstantPool.indexByCPE(cp, acpt);
+			instruction.setOperand1(acptIndex);
 		}
 	}
 	
-	public static byte[] serialize(MethodInstructions disassembly, SingleInstruction instruction, int offset) throws IOException
+	public static byte[] serialize(SerCtx ctx, MethodInstructions disassembly, SingleInstruction instruction, int offset) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		baos.write(ByteCode.serialize(disassembly, instruction, offset));
+		baos.write(ByteCode.serialize(ctx, disassembly, instruction, offset));
 		
 		return baos.toByteArray();
 	}

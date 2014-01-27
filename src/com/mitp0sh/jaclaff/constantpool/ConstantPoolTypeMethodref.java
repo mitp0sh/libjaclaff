@@ -137,19 +137,17 @@ public class ConstantPoolTypeMethodref extends AbstractConstantPoolType
 		return clone;
 	}
 	
-	//@Override
-	//public boolean equals(Object obj)
-	//{
-	//	try
-	//	{
-	//		ConstantPoolTypeMethodref cpt = (ConstantPoolTypeMethodref)obj;
-	//		boolean b0 = cpt.classObject.equals(this.classObject);
-	//		boolean b1 = cpt.nameAndTypeObject.equals(this.nameAndTypeObject);
-	//		return b0 && b1;
-	//	}
-    //  catch(NullPointerException e){}
-	//	catch(ClassCastException e){}
-	//	
-	//	return false;
-	//}
+	@Override
+	public String toString()
+	{	
+		String text = "";
+		
+		String classStr = getClassObject().toString();
+		
+		String nameAndTypeStr = getNameAndTypeObject().toString();
+		
+		text = classStr + "." + nameAndTypeStr;
+		
+		return text;
+	}
 }

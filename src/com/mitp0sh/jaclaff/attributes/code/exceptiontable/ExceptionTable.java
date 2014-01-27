@@ -1,4 +1,4 @@
-package com.mitp0sh.jaclaff.attributes.code;
+package com.mitp0sh.jaclaff.attributes.code.exceptiontable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.mitp0sh.jaclaff.attributes.code.Disassembly;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
@@ -24,7 +25,7 @@ public class ExceptionTable
 		return exceptionTable;
 	}
 	
-	public static ExceptionTable deserialize(DataInputStream dis, int exceptionTableLength, ConstantPool constantPool, MethodInstructions disassembly) throws IOException
+	public static ExceptionTable deserialize(DataInputStream dis, int exceptionTableLength, ConstantPool constantPool, Disassembly disassembly) throws IOException
     {	
 		ExceptionTable attribute = new ExceptionTable();
 		
@@ -36,7 +37,7 @@ public class ExceptionTable
 		return attribute;
     }
 	
-	public static byte[] serialize(SerCtx ctx, ExceptionTable exceptionTable, MethodInstructions disassembly) throws IOException
+	public static byte[] serialize(SerCtx ctx, ExceptionTable exceptionTable, Disassembly disassembly) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		

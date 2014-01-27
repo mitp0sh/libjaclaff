@@ -1,9 +1,10 @@
-package com.mitp0sh.jaclaff.attributes.code;
+package com.mitp0sh.jaclaff.attributes.code.deprecated;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.mitp0sh.jaclaff.attributes.code.Mnemonics;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 
 public class Disassembler
@@ -16,7 +17,7 @@ public class Disassembler
 		
 		byte byteCode = (byte)(dis.readUnsignedByte() & 0xFF);
 		instruction.setByteCode(Mnemonics.getJBC()[byteCode & 0xFF]);
-		instruction.seOffset(offset);
+		instruction.setOffset(offset);
 		
 		String format = "";
 		
@@ -293,7 +294,7 @@ public class Disassembler
 			SingleInstruction current = iter.next();
 			ByteCode bc = current.getByteCode();
 			
-			current.seOffset(0);
+			current.setOffset(0);
 			
 			if(bc.getByteCode() == Mnemonics.BC_tableswitch)
 			{

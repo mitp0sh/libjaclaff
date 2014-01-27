@@ -4,9 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.mitp0sh.jaclaff.attributes.code.Disassembler;
-import com.mitp0sh.jaclaff.attributes.code.ExceptionTable;
-import com.mitp0sh.jaclaff.attributes.code.MethodInstructions;
+import com.mitp0sh.jaclaff.attributes.code.Disassembly;
+import com.mitp0sh.jaclaff.attributes.code.exceptiontable.ExceptionTable;
 import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
@@ -17,8 +16,7 @@ public class AttributeCode extends AbstractAttribute
 {
 	private int                         maxStack = 0;
 	private int                        maxLocals = 0;
-	private long                      codeLength = 0;
-	private MethodInstructions              code = null;
+	private Disassembly                     code = null;
 	private int             exceptionTableLength = 0;
 	private ExceptionTable        exceptionTable = null;
 	private int                  attributesCount = 0;
@@ -51,20 +49,15 @@ public class AttributeCode extends AbstractAttribute
 
 	public long getCodeLength()
 	{
-		return this.codeLength;
+		return code.getPhysicalDisassemblySize();
 	}
 
-	public void setCodeLength(long codeLength)
-	{
-		this.codeLength = codeLength;
-	}
-
-	public MethodInstructions getCode()
+	public Disassembly getCode()
 	{
 		return this.code;
 	}
 
-	public void setCode(MethodInstructions code)
+	public void setCode(Disassembly code) 
 	{
 		this.code = code;
 	}
@@ -119,8 +112,8 @@ public class AttributeCode extends AbstractAttribute
 	    attribute.setMaxStack(dis.readUnsignedShort());	    
 	    attribute.setMaxLocals(dis.readUnsignedShort());	    
 	    
-	    attribute.setCodeLength(dis.readInt());
-	    attribute.setCode(Disassembler.disassemble(ctx, attribute.getCodeLength()));
+	    long length = dis.readInt();
+	    attribute.setCode(Disassembly.deserialize(ctx, length));
 	    
 	    attribute.setExceptionTableLength(dis.readUnsignedShort());
 	    if(attribute.getExceptionTableLength() > 0)
@@ -144,7 +137,7 @@ public class AttributeCode extends AbstractAttribute
 		baos.write(PNC.toByteArray(attribute.getMaxStack(), Short.class));
 		baos.write(PNC.toByteArray(attribute.getMaxLocals(), Short.class));
 		baos.write(PNC.toByteArray(attribute.getCodeLength(), Integer.class));
-		baos.write(MethodInstructions.serialize(attribute.getCode()));
+		baos.write(Disassembly.serialize(ctx, attribute.getCode()));
 		baos.write(PNC.toByteArray(attribute.getExceptionTableLength(), Short.class));
 		if(attribute.getExceptionTableLength() > 0)
 	    {

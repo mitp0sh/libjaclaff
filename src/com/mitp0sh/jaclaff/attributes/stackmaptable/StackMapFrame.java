@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
-import com.mitp0sh.jaclaff.attributes.code.MethodInstructions;
-import com.mitp0sh.jaclaff.attributes.code.SingleInstruction;
+import com.mitp0sh.jaclaff.attributes.code.AbstractInstruction;
+import com.mitp0sh.jaclaff.attributes.code.Disassembly;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
@@ -207,7 +207,7 @@ public class StackMapFrame
 		return baos.toByteArray();
 	}
 	
-	public static SingleInstruction getDeltaOffsetInstructionFromFrame(MethodInstructions disassembly, AbstractStackMapFrame frame)
+	public static AbstractInstruction getDeltaOffsetInstructionFromFrame(Disassembly disassembly, AbstractStackMapFrame frame)
 	{
 		int                  byteCodeOffset = 0;
 		int     byteCodeOffsetPreviousFrame = 0;
@@ -229,7 +229,7 @@ public class StackMapFrame
 
 		frame.setStack_map_frame_bytecode_offset(byteCodeOffset);
 		
-		SingleInstruction instruction = MethodInstructions.lookupInstructionByOffset(disassembly, byteCodeOffset);
+		AbstractInstruction instruction = disassembly.getInstruction(byteCodeOffset);
 		if(instruction == null)
 		{
 			System.err.println("error - unable to couple delta offset with instruction object !!!");

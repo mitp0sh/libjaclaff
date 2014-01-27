@@ -146,18 +146,9 @@ public class ConstantPoolTypeInvokeDynamic extends AbstractConstantPoolType
 		return clone;
 	}
 	
-//	public boolean equals(ConstantPoolTypeInvokeDynamic obj)
-//	{
-//		try
-//		{
-//			ConstantPoolTypeInvokeDynamic cpt = (ConstantPoolTypeInvokeDynamic)obj;
-//			boolean b0 = cpt.getBoostrapMethodAttr().equals(obj.getBoostrapMethodAttr());
-//			boolean b1 = cpt.getNameAndType().equals(obj.getNameAndType());
-//			return b0 && b1;
-//		}
-//		catch(NullPointerException e){}
-//		catch(ClassCastException e){}
-//		
-//		return false;
-//	}
+	@Override
+	public String toString()
+	{	
+		return "TODO - NOT YET IMPELEMENTED !!!";
+	}
 }

@@ -1,8 +1,8 @@
 package com.mitp0sh.jaclaff.attributes.stackmaptable;
 
 import com.mitp0sh.jaclaff.attributes.AttributeCode;
-import com.mitp0sh.jaclaff.attributes.code.MethodInstructions;
-import com.mitp0sh.jaclaff.attributes.code.SingleInstruction;
+import com.mitp0sh.jaclaff.attributes.code.AbstractInstruction;
+import com.mitp0sh.jaclaff.attributes.code.Disassembly;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
@@ -16,7 +16,7 @@ public abstract class AbstractStackMapFrame
 	public int                               offsetDelta = 0;
 	private AbstractStackMapFrame          previousFrame = null;
 	private AbstractStackMapFrame              nextFrame = null;
-	private SingleInstruction     offsetDeltaInstruction = null;
+	private AbstractInstruction   offsetDeltaInstruction = null;
 	
 	public short getStack_map_frame_type() 
 	{
@@ -68,12 +68,12 @@ public abstract class AbstractStackMapFrame
 		this.offsetDelta = offsetDelta;
 	}
 	
-	public SingleInstruction getOffsetDeltaInstruction()
+	public AbstractInstruction getOffsetDeltaInstruction()
 	{
 		return offsetDeltaInstruction;
 	}
 
-	public void setOffsetDeltaInstruction(SingleInstruction offsetDeltaInstruction) 
+	public void setOffsetDeltaInstruction(AbstractInstruction offsetDeltaInstruction) 
 	{
 		this.offsetDeltaInstruction = offsetDeltaInstruction;
 	}
@@ -190,19 +190,19 @@ public abstract class AbstractStackMapFrame
 	
 	public static void decoupleFromOffsets(DesCtx ctx, AbstractStackMapFrame frame, AttributeCode attributeCode)
 	{
-		SingleInstruction offsetDeltaInstruction = null;
+		AbstractInstruction offsetDeltaInstruction = null;
 		offsetDeltaInstruction = StackMapFrame.getDeltaOffsetInstructionFromFrame(attributeCode.getCode(), frame);
 		frame.setOffsetDeltaInstruction(offsetDeltaInstruction);
 	}
 	
 	public static void coupleToOffsets(SerCtx ctx, AbstractStackMapFrame frame, AttributeCode attributeCode)
 	{
-		MethodInstructions methodInstructions = attributeCode.getCode();
-		SingleInstruction odiPrev = frame.getPreviousFrame() == null ? null : frame.getPreviousFrame().getOffsetDeltaInstruction();
-		SingleInstruction     odi = frame == null ? null : frame.getOffsetDeltaInstruction();
+		Disassembly diassembly = attributeCode.getCode();
+		AbstractInstruction odiPrev = frame.getPreviousFrame() == null ? null : frame.getPreviousFrame().getOffsetDeltaInstruction();
+		AbstractInstruction     odi = frame == null ? null : frame.getOffsetDeltaInstruction();
 		
-		int   offsetDeltaPrevious = odiPrev == null ? 0 : MethodInstructions.getInstructionOffset(odiPrev, methodInstructions);
-		int           offsetDelta = odi == null ? 0 : MethodInstructions.getInstructionOffset(odi, methodInstructions);
+		int   offsetDeltaPrevious = odiPrev == null ? 0 : diassembly.getInstructionOffset(odiPrev);
+		int           offsetDelta = odi == null ? 0 : diassembly.getInstructionOffset(odi);
 		
 		offsetDelta -= offsetDeltaPrevious;
 		if(frame.isStack_map_frame_is_explicit() && frame.getPreviousFrame() != null)

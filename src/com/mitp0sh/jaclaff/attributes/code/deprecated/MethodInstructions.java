@@ -1,9 +1,11 @@
-package com.mitp0sh.jaclaff.attributes.code;
+package com.mitp0sh.jaclaff.attributes.code.deprecated;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import com.mitp0sh.jaclaff.serialization.SerCtx;
 
 
 public class MethodInstructions
@@ -39,7 +41,7 @@ public class MethodInstructions
 		return size;
 	}
 	
-	public static byte[] serialize(MethodInstructions methodInstructions) throws IOException
+	public static byte[] serialize(SerCtx ctx, MethodInstructions methodInstructions) throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -50,7 +52,7 @@ public class MethodInstructions
 			System.err.println("offset: " + offset);
 			
 			SingleInstruction current = iter.next();
-			byte[] instr = SingleInstruction.serialize(methodInstructions, current, offset);
+			byte[] instr = SingleInstruction.serialize(ctx, methodInstructions, current, offset);
 			offset += instr.length;
 			baos.write(instr);
 		}
