@@ -155,11 +155,28 @@ public class Disassembly
 			offset += current.getPhysicalSize();
 		}
 		
+		decoupleFromOffsets(ctx, disassembly);
+		
 		System.out.println();
 		System.out.println(disassembly);
 		System.out.println();
 		
 		return disassembly;
+	}
+	
+	public static void decoupleFromOffsets(DesCtx ctx, Disassembly disassembly)
+	{
+		Iterator<AbstractInstruction> iter = disassembly.getInstructions().iterator();
+		while(iter.hasNext())
+		{
+			AbstractInstruction current = iter.next();
+			int byteCodeValue = current.getByteCodeValue();
+			
+			if(InstructionTypeBOO.isOfType(byteCodeValue))
+			{
+				InstructionTypeBOO.decoupleFromOffsets(ctx, (InstructionTypeBOO) current);
+			}
+		}
 	}
 	
 	public static byte[] serialize(SerCtx ctx, Disassembly disassembly) throws IOException
@@ -375,8 +392,6 @@ public class Disassembly
 			{
 				line += " ";
 			}
-			
-			
 			
 			line += offset;
 			line += "  ";

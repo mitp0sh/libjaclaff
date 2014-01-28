@@ -221,6 +221,7 @@ public class InstructionTypeBOO extends AbstractInstruction
 	{				
 		Disassembly disassembly = instruction.getDisassembly();
 		int instructionOffset = instruction.getOperand();
+		instructionOffset += disassembly.getInstructionOffset(instruction);
 		AbstractInstruction operandInstruction = disassembly.getInstruction(instructionOffset);
 		instruction.setOperandInstruction(operandInstruction);
 	}
@@ -230,6 +231,7 @@ public class InstructionTypeBOO extends AbstractInstruction
 		Disassembly disassembly = instruction.getDisassembly();
 		AbstractInstruction operandInstruction = instruction.getOperandInstruction();
 		int instructionOffset = disassembly.getInstructionOffset(operandInstruction);
+		instructionOffset -= disassembly.getInstructionOffset(instruction);
 		instruction.setOperand((short)instructionOffset);
 	}
 	
@@ -251,8 +253,10 @@ public class InstructionTypeBOO extends AbstractInstruction
 	{
 		String text = "";
 		
+		int offset = getDisassembly().getInstructionOffset(this.getOperandInstruction());
 		text += " jump -> ";
 		text += getOperandInstruction().getLiteral();
+		text += " ( @offset: " + offset + " )";
 		
 		return super.toString() + text;
 	}
