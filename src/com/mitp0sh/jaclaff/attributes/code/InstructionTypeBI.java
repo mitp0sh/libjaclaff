@@ -4,13 +4,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
+import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class InstructionTypeBI extends AbstractInstruction
 {
-	private int operand = 0;
+	private int operand                            = 0;
+	private AbstractConstantPoolType operandObject = null;
 
 	public InstructionTypeBI(int byteCodeValue, AbstractInstruction previousInstruction, Disassembly disassembly) 
 	{
@@ -159,6 +163,16 @@ public class InstructionTypeBI extends AbstractInstruction
 		this.operand = operand;
 	}
 	
+	public AbstractConstantPoolType getOperandObject() 
+	{
+		return operandObject;
+	}
+
+	public void setOperandObject(AbstractConstantPoolType operandObject) 
+	{
+		this.operandObject = operandObject;
+	}
+	
 	public static InstructionTypeBI deserialize(DesCtx ctx, int byteCodeValue, boolean isWide, AbstractInstruction previousInstruction, Disassembly disassembly) throws IOException
 	{
 		InstructionTypeBI instruction = new InstructionTypeBI(byteCodeValue, previousInstruction, disassembly);
@@ -169,19 +183,55 @@ public class InstructionTypeBI extends AbstractInstruction
 		int operand = 0;
 		if(instruction.isWide())
 		{
-			dis.readShort();
+			operand = dis.readUnsignedShort();
 		}
 		else
 		{
-			dis.readByte();
+			operand = dis.readUnsignedByte();
 		}		
 		instruction.setOperand(operand);
+		
+		decoupleFromIndices(ctx, instruction);
 		
 		return instruction;
 	}
 	
+	public static void decoupleFromIndices(DesCtx ctx, InstructionTypeBI instruction)
+	{
+		if(instruction.getLiteral().equals("fload") ||
+		   instruction.getLiteral().equals("fstore"))
+		{
+			return;
+		}
+		
+		ConstantPool cp = ctx.getConstantPool();
+		
+		int operandIndex = instruction.getOperand();
+		AbstractConstantPoolType acptOperandObject = null;
+		acptOperandObject = ConstantPool.cpeByIndex(cp, operandIndex);
+		instruction.setOperandObject(acptOperandObject);
+	}
+	
+	public static void coupleToIndices(SerCtx ctx, InstructionTypeBI instruction)
+	{
+		if(instruction.getLiteral().equals("fload") ||
+		   instruction.getLiteral().equals("fstore"))
+		{
+			return;
+		}
+		
+		ConstantPool cp = ctx.getConstantPool();
+	
+		AbstractConstantPoolType acptOperandObject = null;
+		acptOperandObject = instruction.getOperandObject();
+	    int operandIndex = ConstantPool.indexByCPE(cp, acptOperandObject);
+	    instruction.setOperand(operandIndex);
+	}
+	
 	public static byte[] serialize(SerCtx ctx, InstructionTypeBI instruction) throws IOException
 	{
+		coupleToIndices(ctx, instruction);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(new byte[]{(byte)instruction.getByteCodeValue()});

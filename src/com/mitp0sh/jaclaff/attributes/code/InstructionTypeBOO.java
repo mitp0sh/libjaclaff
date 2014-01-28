@@ -8,6 +8,7 @@ import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class InstructionTypeBOO extends AbstractInstruction
 {
 	private short operand                          = 0;
@@ -220,6 +221,7 @@ public class InstructionTypeBOO extends AbstractInstruction
 	public static void decoupleFromOffsets(DesCtx ctx, InstructionTypeBOO instruction)
 	{				
 		Disassembly disassembly = instruction.getDisassembly();
+		
 		int instructionOffset = instruction.getOperand();
 		instructionOffset += disassembly.getInstructionOffset(instruction);
 		AbstractInstruction operandInstruction = disassembly.getInstruction(instructionOffset);
@@ -229,6 +231,7 @@ public class InstructionTypeBOO extends AbstractInstruction
 	public static void coupleWithOffsets(SerCtx ctx, InstructionTypeBOO instruction)
 	{	
 		Disassembly disassembly = instruction.getDisassembly();
+		
 		AbstractInstruction operandInstruction = instruction.getOperandInstruction();
 		int instructionOffset = disassembly.getInstructionOffset(operandInstruction);
 		instructionOffset -= disassembly.getInstructionOffset(instruction);
@@ -251,14 +254,16 @@ public class InstructionTypeBOO extends AbstractInstruction
 	@Override
 	public String toString()
 	{
-		String text = "";
-		
 		int offset = getDisassembly().getInstructionOffset(this.getOperandInstruction());
-		text += " jump -> ";
-		text += getOperandInstruction().getLiteral();
-		text += " ( @offset: " + offset + " )";
 		
-		return super.toString() + text;
+        String text = "";
+		
+		text += super.toString() + "\n";
+		text += "                     target -> ";
+		text += getOperandInstruction().getLiteral();
+		text += " @ offset " + offset;
+		
+		return text;
 	}
 
 	@Override

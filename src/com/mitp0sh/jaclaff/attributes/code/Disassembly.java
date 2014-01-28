@@ -9,6 +9,7 @@ import java.util.Iterator;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
+/* complete */
 public class Disassembly
 {
 	private ArrayList<AbstractInstruction> instructions = new ArrayList<AbstractInstruction>();
@@ -157,10 +158,6 @@ public class Disassembly
 		
 		decoupleFromOffsets(ctx, disassembly);
 		
-		System.out.println();
-		System.out.println(disassembly);
-		System.out.println();
-		
 		return disassembly;
 	}
 	
@@ -175,6 +172,21 @@ public class Disassembly
 			if(InstructionTypeBOO.isOfType(byteCodeValue))
 			{
 				InstructionTypeBOO.decoupleFromOffsets(ctx, (InstructionTypeBOO) current);
+			}
+			else
+			if(InstructionTypeBOOOO.isOfType(byteCodeValue))
+			{
+				InstructionTypeBOOOO.decoupleFromOffsets(ctx, (InstructionTypeBOOOO) current);
+			}
+			else
+			if(InstructionTypeLookupSwitch.isOfType(byteCodeValue))
+			{
+				InstructionTypeLookupSwitch.decoupleFromOffsets(ctx,  (InstructionTypeLookupSwitch) current);
+			}
+			else
+			if(InstructionTypeTableSwitch.isOfType(byteCodeValue))
+			{
+				InstructionTypeTableSwitch.decoupleFromOffsets(ctx,  (InstructionTypeTableSwitch) current);
 			}
 		}
 	}

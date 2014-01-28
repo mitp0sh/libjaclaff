@@ -4,14 +4,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
+import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class InstructionTypeBJJJJ extends AbstractInstruction
 {
 	private int operand                            = 0;
-	private AbstractInstruction operandInstruction = null;
+	private AbstractConstantPoolType operandObject = null;
 
 	public InstructionTypeBJJJJ(int byteCodeValue, AbstractInstruction previousInstruction, Disassembly disassembly) 
 	{
@@ -61,15 +64,14 @@ public class InstructionTypeBJJJJ extends AbstractInstruction
 		this.operand = operand;
 	}
 	
-	
-	public AbstractInstruction getOperandInstruction() 
+	public AbstractConstantPoolType getOperandObject() 
 	{
-		return operandInstruction;
+		return operandObject;
 	}
 
-	public void setOperandInstruction(AbstractInstruction operandInstruction) 
+	public void setOperandObject(AbstractConstantPoolType operandObject) 
 	{
-		this.operandInstruction = operandInstruction;
+		this.operandObject = operandObject;
 	}
 	
 	public static InstructionTypeBJJJJ deserialize(DesCtx ctx, int byteCodeValue, AbstractInstruction previousInstruction, Disassembly disassembly) throws IOException
@@ -88,27 +90,23 @@ public class InstructionTypeBJJJJ extends AbstractInstruction
 	}
 	
 	public static void decoupleFromIndices(DesCtx ctx, InstructionTypeBJJJJ instruction)
-	{
-		// TODO - NOT YET IMPLEMENTED !!!
+	{		
+		ConstantPool cp = ctx.getConstantPool();
 		
-		//ConstantPool cp = ctx.getConstantPool();
-		
-		//int operandIndex = instruction.getOperand();
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = ConstantPool.cpeByIndex(cp, operandIndex);
-		//instruction.setOperandObject(acptOperandObject);
+		int operandIndex = instruction.getOperand();
+		AbstractConstantPoolType acptOperandObject = null;
+		acptOperandObject = ConstantPool.cpeByIndex(cp, operandIndex);
+		instruction.setOperandObject(acptOperandObject);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, InstructionTypeBJJJJ instruction)
-	{
-		// TODO - NOT YET IMPLEMENTED !!!
-		
-		//ConstantPool cp = ctx.getConstantPool();
+	{		
+		ConstantPool cp = ctx.getConstantPool();
 	
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = instruction.getOperandObject();
-	    //int operandIndex = ConstantPool.indexByCPE(cp, acptOperandObject);
-	    //instruction.setOperand(operandIndex);
+		AbstractConstantPoolType acptOperandObject = null;
+		acptOperandObject = instruction.getOperandObject();
+	    int operandIndex = ConstantPool.indexByCPE(cp, acptOperandObject);
+	    instruction.setOperand(operandIndex);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, InstructionTypeBJJJJ instruction) throws IOException
@@ -127,7 +125,12 @@ public class InstructionTypeBJJJJ extends AbstractInstruction
 	@Override
 	public String toString()
 	{
-		return "NOT YET IMPLEMENTED !!!";
+		String text = "";
+		
+		text += super.toString() + "\n";
+		text += "                     operand = " + getOperandObject().toString();
+		
+		return text;
 	}
 
 	@Override

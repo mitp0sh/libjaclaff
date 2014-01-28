@@ -10,6 +10,7 @@ import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class InstructionTypeBJJ extends AbstractInstruction
 {
 	private int operand                            = 0;

@@ -112,7 +112,7 @@ public class InstructionTypeTableSwitch extends AbstractInstruction
 		int num      = highbyte - lowbyte + 1;
 		for(int i = 0; i < num; i++)
 		{
-			instruction.getPairs().add(TableSwitchPair.deserialize(ctx));
+			instruction.getPairs().add(TableSwitchPair.deserialize(ctx, offset, disassembly));
 		}
 		
 		decoupleFromOffsets(ctx, instruction);
@@ -122,12 +122,29 @@ public class InstructionTypeTableSwitch extends AbstractInstruction
 	
 	public static void decoupleFromOffsets(DesCtx ctx, InstructionTypeTableSwitch instruction)
 	{
-		// TODO - NOT IMPLEMENTED YET !!!
+		Disassembly disassembly = instruction.getDisassembly();
+		int offset = disassembly.getInstructionOffset(instruction);
+		
+		int targetOffset = instruction.getDefaultByte() + offset;
+		AbstractInstruction offsetInstruction = disassembly.getInstruction(targetOffset);
+		instruction.setDefaultByteInstruction(offsetInstruction);
+		
+		Iterator<TableSwitchPair> iter = instruction.getPairs().iterator();
+		while(iter.hasNext())
+		{
+			TableSwitchPair pair = iter.next();
+			TableSwitchPair.decoupleFromOffsets(ctx, pair, offset, disassembly);
+		}
 	}
 	
 	public static void coupleWithOffsets(SerCtx ctx, InstructionTypeTableSwitch instruction)
 	{
-		// TODO - NOT IMPLEMENTED YET !!!
+		int offset = instruction.getDisassembly().getInstructionOffset(instruction);
+		
+		AbstractInstruction operandInstruction = instruction.getDefaultByteInstruction();
+		int instructionOffset = instruction.getDisassembly().getInstructionOffset(operandInstruction);
+		instructionOffset -= offset;
+		instruction.setOffset(instructionOffset);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, InstructionTypeTableSwitch instruction, Disassembly disassembly) throws IOException
@@ -163,7 +180,7 @@ public class InstructionTypeTableSwitch extends AbstractInstruction
 		while(iter.hasNext())
 		{
 			TableSwitchPair pair = iter.next();
-			TableSwitchPair.serialize(ctx, pair);
+			TableSwitchPair.serialize(ctx, pair, offset, disassembly);
 		}
 		
 		return baos.toByteArray();
@@ -172,7 +189,23 @@ public class InstructionTypeTableSwitch extends AbstractInstruction
 	@Override
 	public String toString()
 	{
-		return super.toString() + "InstructionTypeLookupSwitch - NOT YET IMPLEMETED !!!";
+		String text = super.toString() + "\n";
+		
+		int index = 0;
+		
+		Iterator<TableSwitchPair> iter = getPairs().iterator();
+		while(iter.hasNext())
+		{
+			TableSwitchPair pair = iter.next();
+			text += "                     index " + index + pair.toString() + "\n";
+		}
+		
+		AbstractInstruction defaultInstruction = getDefaultByteInstruction();
+		int defOffset = getDisassembly().getInstructionOffset(defaultInstruction);
+		
+		text += "                     default: jump @ offset " + defOffset + " -> " + defaultInstruction.getLiteral();
+		
+		return text;
 	}
 
 	@Override
@@ -181,9 +214,7 @@ public class InstructionTypeTableSwitch extends AbstractInstruction
 		int physicalSize = 0;
 		int offset       = 0;
 		
-		// TODO - 
-		// TODO - NOT YET IMPLEMENTED !!! - calculate offset here !!!!
-		// TODO - 
+		offset = getDisassembly().getInstructionOffset(this);
 		
 		physicalSize += 1;
 		

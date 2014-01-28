@@ -110,22 +110,37 @@ public class InstructionTypeLookupSwitch extends AbstractInstruction
 		int npairs = dis.readInt();
 		for(int i = 0; i< npairs; i++)
 		{
-			instruction.getPairs().add(LookupSwitchPair.deserialize(ctx));
+			instruction.getPairs().add(LookupSwitchPair.deserialize(ctx, offset, disassembly));
 		}
-		
-		decoupleFromOffsets(ctx, instruction);
 		
 		return instruction;
 	}
 	
 	public static void decoupleFromOffsets(DesCtx ctx, InstructionTypeLookupSwitch instruction)
 	{
-		// TODO - NOT IMPLEMENTED YET !!!
+		Disassembly disassembly = instruction.getDisassembly();
+		int offset = disassembly.getInstructionOffset(instruction);
+		
+		int targetOffset = instruction.getDefaultByte() + offset;
+		AbstractInstruction offsetInstruction = disassembly.getInstruction(targetOffset);
+		instruction.setDefaultByteInstruction(offsetInstruction);
+		
+		Iterator<LookupSwitchPair> iter = instruction.getPairs().iterator();
+		while(iter.hasNext())
+		{
+			LookupSwitchPair pair = iter.next();
+			LookupSwitchPair.decoupleFromOffsets(ctx, pair, offset, disassembly);
+		}
 	}
 	
 	public static void coupleWithOffsets(SerCtx ctx, InstructionTypeLookupSwitch instruction)
 	{
-		// TODO - NOT IMPLEMENTED YET !!!
+		int offset = instruction.getDisassembly().getInstructionOffset(instruction);
+		
+		AbstractInstruction operandInstruction = instruction.getDefaultByteInstruction();
+		int instructionOffset = instruction.getDisassembly().getInstructionOffset(operandInstruction);
+		instructionOffset -= offset;
+		instruction.setOffset(instructionOffset);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, InstructionTypeLookupSwitch instruction, Disassembly disassembly) throws IOException
@@ -157,7 +172,7 @@ public class InstructionTypeLookupSwitch extends AbstractInstruction
 		while(iter.hasNext())
 		{
 			LookupSwitchPair pair = iter.next();
-			LookupSwitchPair.serialize(ctx, pair);
+			LookupSwitchPair.serialize(ctx, pair, offset, disassembly);
 		}
 		
 		return baos.toByteArray();
@@ -166,7 +181,21 @@ public class InstructionTypeLookupSwitch extends AbstractInstruction
 	@Override
 	public String toString()
 	{
-		return super.toString() + "InstructionTypeLookupSwitch - NOT YET IMPLEMETED !!!";
+		String text = super.toString() + "\n";
+		
+		Iterator<LookupSwitchPair> iter = getPairs().iterator();
+		while(iter.hasNext())
+		{
+			LookupSwitchPair pair = iter.next();
+			text += "                     " + pair.toString() + "\n";
+		}
+		
+		AbstractInstruction defaultInstruction = getDefaultByteInstruction();
+		int defOffset = getDisassembly().getInstructionOffset(defaultInstruction);
+		
+		text += "                     default: jump @ offset " + defOffset + " -> " + defaultInstruction.getLiteral();
+		
+		return text;
 	}
 
 	@Override
@@ -175,9 +204,7 @@ public class InstructionTypeLookupSwitch extends AbstractInstruction
 		int physicalSize = 0;
 		int offset       = 0;
 		
-		// TODO - 
-		// TODO - NOT YET IMPLEMENTED !!! - calculate offset here !!!!
-		// TODO - 
+		offset = getDisassembly().getInstructionOffset(this);
 		
 		physicalSize += 1;
 		

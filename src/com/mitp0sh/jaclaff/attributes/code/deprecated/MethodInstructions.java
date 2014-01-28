@@ -48,16 +48,12 @@ public class MethodInstructions
 		int offset = 0;
 		Iterator<SingleInstruction> iter = methodInstructions.getInstructions().iterator();
 		while(iter.hasNext())
-		{
-			System.err.println("offset: " + offset);
-			
+		{			
 			SingleInstruction current = iter.next();
 			byte[] instr = SingleInstruction.serialize(ctx, methodInstructions, current, offset);
 			offset += instr.length;
 			baos.write(instr);
 		}
-		
-		System.out.println();
 		
 		return baos.toByteArray();
 	}

@@ -181,4 +181,13 @@ public class MethodEntry extends AbstractReference
 		
 		return baos.toByteArray();
 	}
+	
+	@Override
+	public String toString()
+	{
+		String name = getNameObject().toString();
+		String desc = getDescriptorObject().toString();
+		
+		return "Method: " + name + ", descriptor -> " + desc;
+	}
 }

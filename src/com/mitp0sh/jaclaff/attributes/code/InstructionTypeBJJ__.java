@@ -4,14 +4,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
+import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class InstructionTypeBJJ__ extends AbstractInstruction
 {
 	private int operand                            = 0;
-	private AbstractInstruction operandInstruction = null;
+	private byte count                             = 0;
+	private AbstractConstantPoolType operandObject = null;
 
 	public InstructionTypeBJJ__(int byteCodeValue, AbstractInstruction previousInstruction, Disassembly disassembly) 
 	{
@@ -61,15 +65,24 @@ public class InstructionTypeBJJ__ extends AbstractInstruction
 		this.operand = operand;
 	}
 	
-	
-	public AbstractInstruction getOperandInstruction() 
+	public AbstractConstantPoolType getOperandObject() 
 	{
-		return operandInstruction;
+		return operandObject;
 	}
 
-	public void setOperandInstruction(AbstractInstruction operandInstruction) 
+	public void setOperandObject(AbstractConstantPoolType operandObject) 
 	{
-		this.operandInstruction = operandInstruction;
+		this.operandObject = operandObject;
+	}
+	
+	public byte getCount() 
+	{
+		return count;
+	}
+
+	public void setCount(byte count) 
+	{
+		this.count = count;
 	}
 	
 	public static InstructionTypeBJJ__ deserialize(DesCtx ctx, int byteCodeValue, AbstractInstruction previousInstruction, Disassembly disassembly) throws IOException
@@ -80,7 +93,8 @@ public class InstructionTypeBJJ__ extends AbstractInstruction
 		
 		int operand = dis.readUnsignedShort();
 		instruction.setOperand(operand);
-		dis.skipBytes(2);
+		instruction.setCount(dis.readByte());
+		dis.skipBytes(1);
 		
 		/* build abstraction */
 		decoupleFromIndices(ctx, instruction);
@@ -90,26 +104,22 @@ public class InstructionTypeBJJ__ extends AbstractInstruction
 	
 	public static void decoupleFromIndices(DesCtx ctx, InstructionTypeBJJ__ instruction)
 	{
-		// TODO - NOT YET IMPLEMENTED !!!
+		ConstantPool cp = ctx.getConstantPool();
 		
-		//ConstantPool cp = ctx.getConstantPool();
-		
-		//int operandIndex = instruction.getOperand();
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = ConstantPool.cpeByIndex(cp, operandIndex);
-		//instruction.setOperandObject(acptOperandObject);
+		int operandIndex = instruction.getOperand();
+		AbstractConstantPoolType acptOperandObject = null;
+		acptOperandObject = ConstantPool.cpeByIndex(cp, operandIndex);
+		instruction.setOperandObject(acptOperandObject);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, InstructionTypeBJJ__ instruction)
 	{
-		// TODO - NOT YET IMPLEMENTED !!!
-		
-		//ConstantPool cp = ctx.getConstantPool();
+		ConstantPool cp = ctx.getConstantPool();
 	
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = instruction.getOperandObject();
-	    //int operandIndex = ConstantPool.indexByCPE(cp, acptOperandObject);
-	    //instruction.setOperand(operandIndex);
+		AbstractConstantPoolType acptOperandObject = null;
+		acptOperandObject = instruction.getOperandObject();
+	    int operandIndex = ConstantPool.indexByCPE(cp, acptOperandObject);
+	    instruction.setOperand(operandIndex);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, InstructionTypeBJJ__ instruction) throws IOException
@@ -119,11 +129,10 @@ public class InstructionTypeBJJ__ extends AbstractInstruction
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		short skippedBytes = 0;
-		
 		baos.write(new byte[]{(byte)instruction.getByteCodeValue()});
 		baos.write(PNC.toByteArray(instruction.getOperand(), Short.class));
-		baos.write(PNC.toByteArray(skippedBytes, Short.class));
+		baos.write(new byte[]{(byte)instruction.getCount()}); // only non 0 value accepted
+		baos.write(new byte[]{(byte)0});                      // must be zero
 		
 		return baos.toByteArray();
 	}
@@ -131,7 +140,13 @@ public class InstructionTypeBJJ__ extends AbstractInstruction
 	@Override
 	public String toString()
 	{
-		return "NOT YET IMPLEMENTED !!!";
+		String text = "";
+		
+		text += super.toString() + "\n";
+		text += "                     operand = " + getOperandObject().toString() + "\n";
+		text += "                     count = " + getCount();
+		
+		return text;
 	}
 
 	@Override

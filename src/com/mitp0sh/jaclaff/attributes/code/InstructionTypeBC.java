@@ -7,6 +7,7 @@ import java.io.IOException;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 
+/* complete */
 public class InstructionTypeBC extends AbstractInstruction
 {
 	private short operand = 0;

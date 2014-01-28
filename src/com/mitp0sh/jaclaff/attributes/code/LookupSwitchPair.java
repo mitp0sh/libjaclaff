@@ -13,6 +13,12 @@ public class LookupSwitchPair
 	private int  match                            = 0;
 	private int offset                            = 0;
 	private AbstractInstruction offsetInstruction = null;
+	private Disassembly disassembly               = null;
+
+	public LookupSwitchPair(Disassembly disassembly)
+	{
+		this.setDisassembly(disassembly);
+	}
 	
 	public int getMatch()
 	{
@@ -44,33 +50,47 @@ public class LookupSwitchPair
 		this.offsetInstruction = offsetInstruction;
 	}
 	
-	public static LookupSwitchPair deserialize(DesCtx ctx) throws IOException
+	public Disassembly getDisassembly() 
 	{
-		LookupSwitchPair pair = new LookupSwitchPair();
+		return disassembly;
+	}
+
+	public void setDisassembly(Disassembly disassembly) 
+	{
+		this.disassembly = disassembly;
+	}
+	
+	public static LookupSwitchPair deserialize(DesCtx ctx, int offset, Disassembly disassembly) throws IOException
+	{
+		LookupSwitchPair pair = new LookupSwitchPair(disassembly);
 		
 		DataInputStream dis = ctx.getDataInputStream();
 		
 		pair.setMatch(dis.readInt());
 		pair.setOffset(dis.readInt());
 		
-		decoupleFromOffsets(ctx, pair);
-		
 		return pair;
 	}
 	
-	public static void decoupleFromOffsets(DesCtx ctx, LookupSwitchPair pair)
-	{
-		// TODO - NOT IMPLEMENTED YET !!!
+	public static void decoupleFromOffsets(DesCtx ctx, LookupSwitchPair pair, int offset, Disassembly disassembly)
+	{		
+		int targetOffset = offset;
+		targetOffset += pair.getOffset();
+		AbstractInstruction offsetInstruction = disassembly.getInstruction(targetOffset);
+		pair.setOffsetInstruction(offsetInstruction);
 	}
 	
-	public static void coupleWithOffsets(SerCtx ctx, LookupSwitchPair pair)
+	public static void coupleWithOffsets(SerCtx ctx, LookupSwitchPair pair, int offset, Disassembly disassembly)
 	{
-		// TODO - NOT IMPLEMENTED YET !!!
+		AbstractInstruction operandInstruction = pair.getOffsetInstruction();
+		int instructionOffset = disassembly.getInstructionOffset(operandInstruction);
+		instructionOffset -= offset;
+		pair.setOffset(instructionOffset);
 	}
 	
-	public static byte[] serialize(SerCtx ctx, LookupSwitchPair pair) throws IOException
+	public static byte[] serialize(SerCtx ctx, LookupSwitchPair pair, int offset, Disassembly disassembly) throws IOException
 	{
-		coupleWithOffsets(ctx, pair);
+		coupleWithOffsets(ctx, pair, offset, disassembly);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	
@@ -83,7 +103,13 @@ public class LookupSwitchPair
 	@Override
 	public String toString()
 	{
-		return super.toString() + "LOOKUPSWITCHPAIR - NOT IMPLEMENTED YET !!!";
+		Disassembly disassembly = getDisassembly();
+		int offset = disassembly.getInstructionOffset(getOffsetInstruction());
+		
+		String text = "";
+		text += "case " + getMatch() + ": jump @ offset " + offset + " -> "  + getOffsetInstruction().getLiteral();
+		
+		return text;
 	}
 	
 	public static int getPhysicalSize() 

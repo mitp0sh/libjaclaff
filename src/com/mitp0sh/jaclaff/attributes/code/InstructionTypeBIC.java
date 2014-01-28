@@ -8,6 +8,7 @@ import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class InstructionTypeBIC extends AbstractInstruction
 {
 	private int operand0                           = 0;
@@ -92,37 +93,11 @@ public class InstructionTypeBIC extends AbstractInstruction
 		instruction.setOperand0(operand0);
 		instruction.setOperand1(operand1);
 		
-		/* build abstraction */
-		decoupleFromIndices(ctx, instruction);
-		
 		return instruction;
 	}
 	
-	public static void decoupleFromIndices(DesCtx ctx, InstructionTypeBIC instruction)
-	{
-		//ConstantPool cp = ctx.getConstantPool();
-		
-		//int operandIndex = instruction.getOperand();
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = ConstantPool.cpeByIndex(cp, operandIndex);
-		//instruction.setOperandObject(acptOperandObject);
-	}
-	
-	public static void coupleToIndices(SerCtx ctx, InstructionTypeBIC instruction)
-	{
-		//ConstantPool cp = ctx.getConstantPool();
-	
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = instruction.getOperandObject();
-	    //int operandIndex = ConstantPool.indexByCPE(cp, acptOperandObject);
-	    //instruction.setOperand(operandIndex);
-	}
-	
 	public static byte[] serialize(SerCtx ctx, InstructionTypeBIC instruction) throws IOException
-	{
-		/* resolve abstraction */
-		coupleToIndices(ctx, instruction);
-		
+	{		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		baos.write(new byte[]{(byte)instruction.getByteCodeValue()});
@@ -144,7 +119,7 @@ public class InstructionTypeBIC extends AbstractInstruction
 	public String toString()
 	{
 		String tail = (isWide() ? " : [wide]" : "");
-		return super.toString() + " " + "NOT YET IMPLEMENTED !!!" + tail;
+		return super.toString() + " loc var index = " + getOperand0()  + ", increase by const = " + getOperand1() + tail;
 	}
 
 	@Override

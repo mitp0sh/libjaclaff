@@ -139,6 +139,14 @@ public class ConstantPoolTypeInterfaceMethodref extends AbstractConstantPoolType
 	@Override
 	public String toString()
 	{	
-		return "TODO - NOT YET IMPELEMENTED !!!";
+		String text = "";
+		
+		String classStr = getClassObject().toString();
+		
+		String nameAndTypeStr = getNameAndTypeObject().toString();
+		
+		text = classStr + "." + nameAndTypeStr;
+		
+		return text;
 	}
 }

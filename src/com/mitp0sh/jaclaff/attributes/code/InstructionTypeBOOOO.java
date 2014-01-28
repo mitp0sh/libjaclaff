@@ -8,6 +8,7 @@ import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class InstructionTypeBOOOO extends AbstractInstruction
 {
 	private int operand                            = 0;
@@ -86,40 +87,33 @@ public class InstructionTypeBOOOO extends AbstractInstruction
 		int operand = dis.readInt();
 		instruction.setOperand(operand);
 		
-		/* build abstraction */
-		decoupleFromIndices(ctx, instruction);
-		
 		return instruction;
 	}
 	
-	public static void decoupleFromIndices(DesCtx ctx, InstructionTypeBOOOO instruction)
+	public static void decoupleFromOffsets(DesCtx ctx, InstructionTypeBOOOO instruction)
 	{
-		// TODO - NOT YET IMPLEMENTED !!!
+		Disassembly disassembly = instruction.getDisassembly();
 		
-		//ConstantPool cp = ctx.getConstantPool();
-		
-		//int operandIndex = instruction.getOperand();
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = ConstantPool.cpeByIndex(cp, operandIndex);
-		//instruction.setOperandObject(acptOperandObject);
+		int instructionOffset = instruction.getOperand();
+		instructionOffset += disassembly.getInstructionOffset(instruction);
+		AbstractInstruction operandInstruction = disassembly.getInstruction(instructionOffset);
+		instruction.setOperandInstruction(operandInstruction);
 	}
 	
-	public static void coupleToIndices(SerCtx ctx, InstructionTypeBOOOO instruction)
+	public static void coupleWithOffsets(SerCtx ctx, InstructionTypeBOOOO instruction)
 	{
-		// TODO - NOT YET IMPLEMENTED !!!
+		Disassembly disassembly = instruction.getDisassembly();
 		
-		//ConstantPool cp = ctx.getConstantPool();
-	
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = instruction.getOperandObject();
-	    //int operandIndex = ConstantPool.indexByCPE(cp, acptOperandObject);
-	    //instruction.setOperand(operandIndex);
+		AbstractInstruction operandInstruction = instruction.getOperandInstruction();
+		int instructionOffset = disassembly.getInstructionOffset(operandInstruction);
+		instructionOffset -= disassembly.getInstructionOffset(instruction);
+		instruction.setOperand((short)instructionOffset);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, InstructionTypeBOOOO instruction) throws IOException
 	{
 		/* resolve abstraction */
-		coupleToIndices(ctx, instruction);
+		coupleWithOffsets(ctx, instruction);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -132,7 +126,16 @@ public class InstructionTypeBOOOO extends AbstractInstruction
 	@Override
 	public String toString()
 	{
-		return "NOT YET IMPLEMENTED !!!";
+		int offset = getDisassembly().getInstructionOffset(this.getOperandInstruction());
+		
+        String text = "";
+		
+		text += super.toString() + "\n";
+		text += "                     target -> ";
+		text += getOperandInstruction().getLiteral();
+		text += " @ offset " + offset;
+		
+		return text;
 	}
 
 	@Override

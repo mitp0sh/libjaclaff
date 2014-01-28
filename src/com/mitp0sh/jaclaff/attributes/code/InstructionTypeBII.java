@@ -10,6 +10,7 @@ import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
 
+/* complete */
 public class InstructionTypeBII extends AbstractInstruction
 {
 	private int operand                            = 0;
@@ -169,7 +170,12 @@ public class InstructionTypeBII extends AbstractInstruction
 	@Override
 	public String toString()
 	{
-		return super.toString() + " " + getOperandObject().toString();
+		String text = "";
+		
+		text += super.toString() + "\n";
+		text += "                     operand = " + getOperandObject().toString();
+		
+		return text;
 	}
 
 	@Override

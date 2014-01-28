@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.mitp0sh.jaclaff.constantpool.AbstractConstantPoolType;
+import com.mitp0sh.jaclaff.constantpool.ConstantPool;
 import com.mitp0sh.jaclaff.deserialization.DesCtx;
 import com.mitp0sh.jaclaff.serialization.SerCtx;
 import com.mitp0sh.jaclaff.util.PNC;
@@ -12,7 +14,8 @@ public class InstructionTypeBIIC extends AbstractInstruction
 {
 	private int operand0                            = 0;
 	private byte operand1                           = 0;
-	
+	private AbstractConstantPoolType operand0Object = null;
+
 	public InstructionTypeBIIC(int byteCodeValue, AbstractInstruction previousInstruction, Disassembly disassembly) 
 	{
 		super(byteCodeValue, previousInstruction, disassembly);
@@ -61,6 +64,16 @@ public class InstructionTypeBIIC extends AbstractInstruction
 		this.operand0 = operand0;
 	}
 	
+	public AbstractConstantPoolType getOperand0Object() 
+	{
+		return operand0Object;
+	}
+
+	public void setOperand0Object(AbstractConstantPoolType operand0Object) 
+	{
+		this.operand0Object = operand0Object;
+	}
+	
 	public byte getOperand1()
 	{
 		return operand1;
@@ -91,26 +104,22 @@ public class InstructionTypeBIIC extends AbstractInstruction
 	
 	public static void decoupleFromIndices(DesCtx ctx, InstructionTypeBIIC instruction)
 	{
-		// TODO - NOT YET IMPLEMENTED !!!
+		ConstantPool cp = ctx.getConstantPool();
 		
-		//ConstantPool cp = ctx.getConstantPool();
-		
-		//int operandIndex = instruction.getOperand();
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = ConstantPool.cpeByIndex(cp, operandIndex);
-		//instruction.setOperandObject(acptOperandObject);
+		int operandIndex = instruction.getOperand0();
+		AbstractConstantPoolType acptOperand0Object = null;
+		acptOperand0Object = ConstantPool.cpeByIndex(cp, operandIndex);
+		instruction.setOperand0Object(acptOperand0Object);
 	}
 	
 	public static void coupleToIndices(SerCtx ctx, InstructionTypeBIIC instruction)
 	{
-		// TODO - NOT YET IMPLEMENTED !!!
-		
-		//ConstantPool cp = ctx.getConstantPool();
+		ConstantPool cp = ctx.getConstantPool();
 	
-		//AbstractConstantPoolType acptOperandObject = null;
-		//acptOperandObject = instruction.getOperandObject();
-	    //int operandIndex = ConstantPool.indexByCPE(cp, acptOperandObject);
-	    //instruction.setOperand(operandIndex);
+		AbstractConstantPoolType acptOperand0Object = null;
+		acptOperand0Object = instruction.getOperand0Object();
+	    int operand0Index = ConstantPool.indexByCPE(cp, acptOperand0Object);
+	    instruction.setOperand0(operand0Index);
 	}
 	
 	public static byte[] serialize(SerCtx ctx, InstructionTypeBIIC instruction) throws IOException

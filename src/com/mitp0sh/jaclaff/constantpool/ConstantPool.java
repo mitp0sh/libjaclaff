@@ -388,7 +388,6 @@ public class ConstantPool
 	
 	public static boolean hasOrphanedConstantPoolEntry(ConstantPool cp)
 	{
-		int i = 0;
 		boolean result = false;
 		Iterator<AbstractConstantPoolType> iter = cp.getConstantPool().iterator();
 		while(iter.hasNext())
@@ -396,12 +395,9 @@ public class ConstantPool
 			AbstractConstantPoolType acpt = iter.next();
 			if(!acpt.isReferenced())
 			{
-				System.out.println("index = " + i);
 				result = true;
-				//break;
+				break;
 			}
-			
-			i++;
 		}
 		
 		return result;

@@ -13,6 +13,12 @@ public class TableSwitchPair
 	private int index                             = 0;
 	private int offset                            = 0;
 	private AbstractInstruction offsetInstruction = null;
+	private Disassembly disassembly               = null;
+
+	private TableSwitchPair(Disassembly disassembly)
+	{
+		setDisassembly(disassembly);
+	}
 	
 	public int getIndex() 
 	{
@@ -44,32 +50,46 @@ public class TableSwitchPair
 		this.offsetInstruction = offsetInstruction;
 	}
 	
-	public static TableSwitchPair deserialize(DesCtx ctx) throws IOException
+	public Disassembly getDisassembly() 
 	{
-		TableSwitchPair pair = new TableSwitchPair();
+		return disassembly;
+	}
+
+	public void setDisassembly(Disassembly disassembly) 
+	{
+		this.disassembly = disassembly;
+	}
+	
+	public static TableSwitchPair deserialize(DesCtx ctx, int offset, Disassembly disassembly) throws IOException
+	{
+		TableSwitchPair pair = new TableSwitchPair(disassembly);
 		
 		DataInputStream dis = ctx.getDataInputStream();
 		
 		pair.setOffset(dis.readInt());
 		
-		decoupleFromOffsets(ctx, pair);
-		
 		return pair;
 	}
 	
-	public static void decoupleFromOffsets(DesCtx ctx, TableSwitchPair pair)
+	public static void decoupleFromOffsets(DesCtx ctx, TableSwitchPair pair, int offset, Disassembly disassembly)
 	{
-		// TODO - NOT IMPLEMENTED YET !!!
+		int targetOffset = offset;
+		targetOffset += pair.getOffset();
+		AbstractInstruction offsetInstruction = disassembly.getInstruction(targetOffset);
+		pair.setOffsetInstruction(offsetInstruction);
 	}
 	
-	public static void coupleWithOffsets(SerCtx ctx, TableSwitchPair pair)
+	public static void coupleWithOffsets(SerCtx ctx, TableSwitchPair pair, int offset, Disassembly disassembly)
 	{
-		// TODO - NOT IMPLEMENTED YET !!!
+		AbstractInstruction operandInstruction = pair.getOffsetInstruction();
+		int instructionOffset = disassembly.getInstructionOffset(operandInstruction);
+		instructionOffset -= offset;
+		pair.setOffset(instructionOffset);
 	}
 	
-	public static byte[] serialize(SerCtx ctx, TableSwitchPair pair) throws IOException
+	public static byte[] serialize(SerCtx ctx, TableSwitchPair pair, int offset, Disassembly disassembly) throws IOException
 	{
-		coupleWithOffsets(ctx, pair);
+		coupleWithOffsets(ctx, pair, offset, disassembly);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	
@@ -81,7 +101,13 @@ public class TableSwitchPair
 	@Override
 	public String toString()
 	{
-		return super.toString() + "TABLESWITCHPAIR - NOT IMPLEMENTED YET !!!";
+		Disassembly disassembly = getDisassembly();
+		int offset = disassembly.getInstructionOffset(getOffsetInstruction());
+		
+		String text = "";
+		text += ": jump @ offset " + offset + " -> "  + getOffsetInstruction().getLiteral();
+		
+		return text;
 	}
 	
 	public static int getPhysicalSize() 
